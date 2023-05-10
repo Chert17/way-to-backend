@@ -41,6 +41,5 @@ export interface ICommentsDb {
 }
 
 export interface IUserRefreshTokenDb {
-  userId: string;
   refreshToken: string[];
 }

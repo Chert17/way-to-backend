@@ -1,18 +1,14 @@
-import { ObjectId, WithId } from "mongodb";
+import { WithId } from "mongodb";
 
 import { userRefreshTokenCollection } from "../../db/db.collections";
 import { IUserRefreshTokenDb } from "../../db/db.types";
 
 export const tokenRepo = {
-  addInvalidRefreshTokenByUser: async (
-    userId: string,
+  addInvalidRefreshToken: async (
     refreshToken: string
   ): Promise<WithId<IUserRefreshTokenDb> | null> => {
     try {
-      if (!ObjectId.isValid(userId)) return null;
-
       const result = await userRefreshTokenCollection.findOneAndUpdate(
-        { userId: userId },
         { $push: { refreshToken } },
         { returnDocument: 'after', upsert: true }
       );
@@ -24,15 +20,11 @@ export const tokenRepo = {
       return null;
     }
   },
-  checkRefreshTokenByUser: async (
-    userId: string,
+  checkRefreshToken: async (
     refreshToken: string
   ): Promise<WithId<IUserRefreshTokenDb> | null> => {
     try {
-      if (!ObjectId.isValid(userId)) return null;
-
       const result = await userRefreshTokenCollection.findOne({
-        userId,
         refreshToken: { $elemMatch: { refreshToken } },
       });
 
