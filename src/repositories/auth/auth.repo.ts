@@ -1,7 +1,7 @@
-import { ObjectId, WithId } from 'mongodb';
+import { ObjectId, WithId } from "mongodb";
 
-import { userConfirmEmailDbCollection } from '../../db/db.collections';
-import { IUserConfirmEmailDb } from '../../db/db.types';
+import { userConfirmEmailDbCollection } from "../../db/db.collections";
+import { IUserConfirmEmailDb } from "../../db/db.types";
 
 export const authRepo = {
   userConfirmEmail: async (

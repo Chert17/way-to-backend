@@ -1,13 +1,14 @@
-import { Request, Response, Router } from 'express';
+import { Request, Response, Router } from "express";
 
 import {
   blogsDbCollection,
   commentsDbCollection,
   postsDbCollection,
   userConfirmEmailDbCollection,
-  usersDbCollection,
-} from '../db/db.collections';
-import { STATUS_CODE } from '../utils/status.code';
+  userRefreshTokenCollection,
+  usersDbCollection
+} from "../db/db.collections";
+import { STATUS_CODE } from "../utils/status.code";
 
 export const testingRouter = Router();
 
@@ -17,5 +18,6 @@ testingRouter.delete('/', (req: Request, res: Response) => {
   usersDbCollection.deleteMany();
   commentsDbCollection.deleteMany();
   userConfirmEmailDbCollection.deleteMany();
+  userRefreshTokenCollection.deleteMany();
   return res.sendStatus(STATUS_CODE.NO_CONTENT);
 });

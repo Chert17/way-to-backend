@@ -1,7 +1,7 @@
-import { NextFunction, Request, Response } from 'express';
+import { NextFunction, Request, Response } from "express";
 
-import { jwtService } from '../application/jwt.service';
-import { STATUS_CODE } from '../utils/status.code';
+import { jwtService } from "../application/jwt.service";
+import { STATUS_CODE } from "../utils/status.code";
 
 export const jwtAuthMiddleware = async (
   req: Request,
@@ -22,7 +22,7 @@ export const jwtAuthMiddleware = async (
     return;
   }
 
-  const userId = await jwtService.getUSerIdByToken(accessToken);
+  const userId = await jwtService.getUserIdByToken(accessToken);
 
   if (!userId) {
     res.sendStatus(STATUS_CODE.UNAUTHORIZED); // invalid accessToken

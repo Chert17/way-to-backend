@@ -1,4 +1,4 @@
-import { CommentatorInfo } from '../models/comments.models';
+import { CommentatorInfo } from "../models/comments.models";
 
 export interface IBlogDb {
   name: string;
@@ -38,4 +38,9 @@ export interface ICommentsDb {
   postId: string;
   commentatorInfo: CommentatorInfo;
   createdAt: string;
+}
+
+export interface IUserRefreshTokenDb {
+  userId: string;
+  refreshToken: string[];
 }
