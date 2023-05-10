@@ -1,4 +1,4 @@
-import { WithId } from "mongodb";
+import { ObjectId, WithId } from "mongodb";
 
 import { userRefreshTokenCollection } from "../../db/db.collections";
 import { IUserRefreshTokenDb } from "../../db/db.types";
@@ -6,16 +6,15 @@ import { IUserRefreshTokenDb } from "../../db/db.types";
 export const tokenRepo = {
   addInvalidRefreshToken: async (
     refreshToken: string
-  ): Promise<WithId<IUserRefreshTokenDb> | null> => {
+  ): Promise<ObjectId | null> => {
     try {
-      const result = await userRefreshTokenCollection.findOneAndUpdate(
-        { $push: { refreshToken } },
-        { returnDocument: 'after', upsert: true }
-      );
+      const result = await userRefreshTokenCollection.insertOne({
+        refreshToken: [refreshToken],
+      });
 
-      if (!result.value) return null;
+      if (!result.acknowledged) return null;
 
-      return result.value;
+      return result.insertedId;
     } catch (error) {
       return null;
     }
