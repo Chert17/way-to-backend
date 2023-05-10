@@ -11,24 +11,15 @@ export const checkRefreshTokenMiddleware = async (
 ) => {
   const { refreshToken } = req.cookies;
 
-  if (!refreshToken) return res.sendStatus(STATUS_CODE.UNAUTHORIZED);
+  if (!refreshToken) return res.sendStatus(STATUS_CODE.UNAUTHORIZED); // empty refreshToken
 
   const userId = await jwtService.getUserIdByToken(refreshToken);
 
-  if (!userId) {
-    res.sendStatus(STATUS_CODE.UNAUTHORIZED); // invalid refreshToken
-    return;
-  }
+  if (!userId) return res.sendStatus(STATUS_CODE.UNAUTHORIZED); // invalid refreshToken
 
-  const isInvalidRefreshToken = await tokenRepo.checkRefreshTokenByUser(
-    userId.toString(),
-    refreshToken
-  );
+  const isInvalidRefreshToken = await tokenRepo.checkRefreshToken(refreshToken);
 
-  if (isInvalidRefreshToken) {
-    res.sendStatus(STATUS_CODE.UNAUTHORIZED); // isInvalidRefreshToken is already in the database of used tokens
-    return;
-  }
+  if (isInvalidRefreshToken) return res.sendStatus(STATUS_CODE.UNAUTHORIZED); // isInvalidRefreshToken is already in the database of used tokens
 
   req.userId = userId.toString();
   return next();

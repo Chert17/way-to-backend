@@ -80,12 +80,13 @@ export const refreshTokenController = async (req: Request, res: Response) => {
 
   if (!newTokens) return res.sendStatus(STATUS_CODE.UNAUTHORIZED); // faild create tokens
 
-  _refreshTokenToCookieResponse(res, newTokens.refreshToken);
-
-  await tokenRepo.addInvalidRefreshTokenByUser(
-    req.userId!.toString(), //because i'm checking in checkRefreshTokenMiddleware
+  const result = await tokenRepo.addInvalidRefreshToken(
     req.cookies.refreshToken
   );
+
+  if (!result) return res.sendStatus(STATUS_CODE.UNAUTHORIZED); // faild add refreshToken to addInvalidRefreshToken
+
+  _refreshTokenToCookieResponse(res, newTokens.refreshToken);
 
   return res
     .status(STATUS_CODE.OK)
@@ -93,12 +94,11 @@ export const refreshTokenController = async (req: Request, res: Response) => {
 };
 
 export const logoutController = async (req: Request, res: Response) => {
-  const result = await tokenRepo.addInvalidRefreshTokenByUser(
-    req.userId!.toString(), //because i'm checking in checkRefreshTokenMiddleware
+  const result = await tokenRepo.addInvalidRefreshToken(
     req.cookies.refreshToken
   );
 
-  if (!result) return res.sendStatus(STATUS_CODE.UNAUTHORIZED); // faild add refreshToken to addInvalidRefreshTokenByUser
+  if (!result) return res.sendStatus(STATUS_CODE.UNAUTHORIZED); // faild add refreshToken to addInvalidRefreshToken
 
   res.clearCookie('refreshToken');
 
