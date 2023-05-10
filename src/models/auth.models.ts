@@ -14,3 +14,8 @@ export type RegisterInputModel = {
   email: string;
   password: string;
 };
+
+export type TokensViewModel = {
+  accessToken: string;
+  refreshToken: string;
+};

@@ -1,11 +1,12 @@
-import { db } from './db';
+import { db } from "./db";
 import {
   IBlogDb,
   ICommentsDb,
   IPostDb,
   IUserConfirmEmailDb,
   IUserDb,
-} from './db.types';
+  IUserRefreshTokenDb
+} from "./db.types";
 
 export const blogsDbCollection = db.collection<IBlogDb>('blogs');
 
@@ -17,3 +18,6 @@ export const userConfirmEmailDbCollection =
   db.collection<IUserConfirmEmailDb>('userConfirmEmail');
 
 export const commentsDbCollection = db.collection<ICommentsDb>('comments');
+
+export const userRefreshTokenCollection =
+  db.collection<IUserRefreshTokenDb>('userRefreshToken');
