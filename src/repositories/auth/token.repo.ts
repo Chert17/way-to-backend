@@ -23,9 +23,7 @@ export const tokenRepo = {
     refreshToken: string
   ): Promise<WithId<IUserRefreshTokenDb> | null> => {
     try {
-      const result = await userRefreshTokenCollection.findOne({
-        refreshToken: { $elemMatch: { refreshToken } },
-      });
+      const result = await userRefreshTokenCollection.findOne({ refreshToken });
 
       if (!result) return null;
 
