@@ -46,5 +46,10 @@ export interface IUserRefreshTokenDb {
   ip: string;
   deviceName: string;
   deviceId: string;
+}
+
+export interface IRateLimitDb {
+  ip: string;
+  url: string;
   date: Date;
 }

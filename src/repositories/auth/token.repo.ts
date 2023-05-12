@@ -64,7 +64,7 @@ export const tokenRepo = {
     userId: string,
     deviceId: string,
     ip: string
-  ) => {
+  ): Promise<WithId<IUserRefreshTokenDb> | null> => {
     try {
       const result = await userRefreshTokenCollection.findOneAndDelete({
         userId,

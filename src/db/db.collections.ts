@@ -3,6 +3,7 @@ import {
   IBlogDb,
   ICommentsDb,
   IPostDb,
+  IRateLimitDb,
   IUserConfirmEmailDb,
   IUserDb,
   IUserRefreshTokenDb
@@ -21,3 +22,5 @@ export const commentsDbCollection = db.collection<ICommentsDb>('comments');
 
 export const userRefreshTokenCollection =
   db.collection<IUserRefreshTokenDb>('userRefreshToken');
+
+export const rateLimitCollection = db.collection<IRateLimitDb>('rateLimit');

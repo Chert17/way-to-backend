@@ -6,4 +6,5 @@ export const enum STATUS_CODE {
   UNAUTHORIZED = 401,
   FORBIDDEN = 403,
   NOT_FOUND = 404,
+  Too_Many_Requests = 429,
 }

@@ -14,15 +14,18 @@ export const loginController = async (
   req: TypeRequestBody<LoginInputModel>,
   res: Response
 ) => {
-  const { ip, originalUrl: url } = req;
+  const { ip } = req;
 
   const deviceName = req.headers['user-agent'] ?? 'client';
 
   const { loginOrEmail, password } = req.body;
 
-  const loginUser = { loginOrEmail, password, ip, url, deviceName };
-
-  const tokens = await authService.loginUser(loginUser);
+  const tokens = await authService.loginUser({
+    loginOrEmail,
+    password,
+    ip,
+    deviceName,
+  });
 
   if (!tokens) return res.sendStatus(STATUS_CODE.UNAUTHORIZED); // faild login user & faild create tokens
 

@@ -33,6 +33,5 @@ export type LoginInputServiceModel = {
   loginOrEmail: string;
   password: string;
   ip: string;
-  url: string;
   deviceName: string;
 };

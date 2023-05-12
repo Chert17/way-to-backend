@@ -42,7 +42,6 @@ export const authService = {
     loginOrEmail,
     password,
     ip,
-    url,
     deviceName,
   }: LoginInputServiceModel): Promise<TokensViewModel | null> => {
     const user = await userService.checkCredentials(loginOrEmail, password);
@@ -63,7 +62,6 @@ export const authService = {
       ip,
       deviceName,
       deviceId,
-      date: new Date(),
     };
 
     const result = await tokenRepo.addRefreshTokenMeta(refreshTokenMeta); // return null if faild add refresh token meto to base
