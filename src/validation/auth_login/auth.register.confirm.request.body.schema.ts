@@ -1,6 +1,6 @@
-import { body } from 'express-validator';
+import { body } from "express-validator";
 
-import { authService } from '../../service/auth.service';
+import { authService } from "../../service/auth.service";
 
 export const authRegisterConfirmRequestBodySchema = [
   body('code')

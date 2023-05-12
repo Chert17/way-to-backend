@@ -6,6 +6,7 @@ import { STATUS_CODE } from "./utils/status.code";
 
 export const app = express();
 
+app.set('trust proxy', true);
 app.use(cookieParser());
 app.use(express.json());
 

@@ -1,13 +1,12 @@
 import { Request, Response } from "express";
-import { ObjectId } from "mongodb";
 
 import { jwtService } from "../application/jwt.service";
+import { getTokenIat } from "../helpers/get.token.iat";
 import { MeViewMOdel, RegisterInputModel } from "../models/auth.models";
 import { LoginInputModel } from "../models/users.models";
 import { tokenRepo } from "../repositories/auth/token.repo";
 import { userQueryRepo } from "../repositories/users/user.query.repo";
 import { authService } from "../service/auth.service";
-import { userService } from "../service/user.service";
 import { TypeRequestBody } from "../types/req-res.types";
 import { STATUS_CODE } from "../utils/status.code";
 
@@ -15,15 +14,17 @@ export const loginController = async (
   req: TypeRequestBody<LoginInputModel>,
   res: Response
 ) => {
+  const { ip, originalUrl: url } = req;
+
+  const deviceName = req.headers['user-agent'] ?? 'client';
+
   const { loginOrEmail, password } = req.body;
 
-  const user = await userService.checkCredentials(loginOrEmail, password);
+  const loginUser = { loginOrEmail, password, ip, url, deviceName };
 
-  if (!user) return res.sendStatus(STATUS_CODE.UNAUTHORIZED); // not found user by loginOrEmail
+  const tokens = await authService.loginUser(loginUser);
 
-  const tokens = await jwtService.createJWT(user._id);
-
-  if (!tokens) return res.sendStatus(STATUS_CODE.BAD_REQUEST); // faild create tokens
+  if (!tokens) return res.sendStatus(STATUS_CODE.UNAUTHORIZED); // faild login user & faild create tokens
 
   _refreshTokenToCookieResponse(res, tokens.refreshToken);
 
@@ -76,17 +77,24 @@ export const emailResendingController = async (
 };
 
 export const refreshTokenController = async (req: Request, res: Response) => {
-  const newTokens = await jwtService.createJWT(new ObjectId(req.userId!)); // because i'm checking in checkRefreshTokenMiddleware
+  const { userId, deviceId, ip } = req;
+
+  const newTokens = await jwtService.createJWT(userId!, deviceId!); // because i'm checking in checkRefreshTokenMiddleware
 
   if (!newTokens) return res.sendStatus(STATUS_CODE.UNAUTHORIZED); // faild create tokens
 
-  _refreshTokenToCookieResponse(res, newTokens.refreshToken);
+  const issuesAt = getTokenIat(newTokens.refreshToken);
 
-  const result = await tokenRepo.addInvalidRefreshToken(
-    req.cookies.refreshToken
+  const result = await tokenRepo.updateRefreshToken(
+    userId!, // because i'm checking in checkRefreshTokenMiddleware
+    deviceId!, // because i'm checking in checkRefreshTokenMiddleware
+    ip,
+    issuesAt
   );
 
   if (!result) return res.sendStatus(STATUS_CODE.UNAUTHORIZED); // faild add refreshToken to addInvalidRefreshToken
+
+  _refreshTokenToCookieResponse(res, newTokens.refreshToken);
 
   return res
     .status(STATUS_CODE.OK)
@@ -94,8 +102,12 @@ export const refreshTokenController = async (req: Request, res: Response) => {
 };
 
 export const logoutController = async (req: Request, res: Response) => {
-  const result = await tokenRepo.addInvalidRefreshToken(
-    req.cookies.refreshToken
+  const { userId, deviceId, ip } = req;
+
+  const result = await tokenRepo.deleteRefreshTokenSessionByDevice(
+    userId!, // because i'm checking in checkRefreshTokenMiddleware
+    deviceId!, // because i'm checking in checkRefreshTokenMiddleware
+    ip
   );
 
   if (!result) return res.sendStatus(STATUS_CODE.UNAUTHORIZED); // faild add refreshToken to addInvalidRefreshToken
@@ -107,6 +119,6 @@ export const logoutController = async (req: Request, res: Response) => {
 
 const _refreshTokenToCookieResponse = (res: Response, refreshToken: string) =>
   res.cookie('refreshToken ', refreshToken, {
-    httpOnly: true,
-    secure: true,
+    // httpOnly: true,
+    // secure: true,
   });

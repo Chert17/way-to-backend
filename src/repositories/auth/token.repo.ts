@@ -4,13 +4,13 @@ import { userRefreshTokenCollection } from "../../db/db.collections";
 import { IUserRefreshTokenDb } from "../../db/db.types";
 
 export const tokenRepo = {
-  addInvalidRefreshToken: async (
-    refreshToken: string
+  addRefreshTokenMeta: async (
+    refreshTokenMeta: IUserRefreshTokenDb
   ): Promise<ObjectId | null> => {
     try {
-      const result = await userRefreshTokenCollection.insertOne({
-        refreshToken: [refreshToken],
-      });
+      const result = await userRefreshTokenCollection.insertOne(
+        refreshTokenMeta
+      );
 
       if (!result.acknowledged) return null;
 
@@ -20,10 +20,16 @@ export const tokenRepo = {
     }
   },
   checkRefreshToken: async (
-    refreshToken: string
+    issuesAt: Date,
+    deviceId: string,
+    ip: string
   ): Promise<WithId<IUserRefreshTokenDb> | null> => {
     try {
-      const result = await userRefreshTokenCollection.findOne({ refreshToken });
+      const result = await userRefreshTokenCollection.findOne({
+        lastActiveDate: issuesAt,
+        deviceId,
+        ip,
+      });
 
       if (!result) return null;
 
@@ -32,4 +38,47 @@ export const tokenRepo = {
       return null;
     }
   },
+
+  updateRefreshToken: async (
+    userId: string,
+    deviceId: string,
+    ip: string,
+    issuesAt: Date
+  ): Promise<WithId<IUserRefreshTokenDb> | null> => {
+    try {
+      const result = await userRefreshTokenCollection.findOneAndUpdate(
+        { userId, deviceId, ip },
+        { $set: { lastActiveDate: issuesAt } },
+        { returnDocument: 'after' }
+      );
+
+      if (!result.value) return null;
+
+      return result.value;
+    } catch (error) {
+      return null;
+    }
+  },
+
+  deleteRefreshTokenSessionByDevice: async (
+    userId: string,
+    deviceId: string,
+    ip: string
+  ) => {
+    try {
+      const result = await userRefreshTokenCollection.findOneAndDelete({
+        userId,
+        deviceId,
+        ip,
+      });
+
+      if (!result.value) return null;
+
+      return result.value;
+    } catch (error) {
+      return null;
+    }
+  },
+
+  checkRequestRateLimit: async () => {},
 };

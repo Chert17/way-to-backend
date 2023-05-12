@@ -41,5 +41,10 @@ export interface ICommentsDb {
 }
 
 export interface IUserRefreshTokenDb {
-  refreshToken: string[];
+  userId: string;
+  lastActiveDate: Date;
+  ip: string;
+  deviceName: string;
+  deviceId: string;
+  date: Date;
 }
