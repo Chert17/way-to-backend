@@ -31,7 +31,7 @@ export const checkRefreshTokenMiddleware = async (
     ip
   );
 
-  if (!isValidRefreshToken) return res.sendStatus(STATUS_CODE.UNAUTHORIZED); // isInvalidRefreshToken is already in the database of used tokens
+  if (!isValidRefreshToken) return res.sendStatus(STATUS_CODE.UNAUTHORIZED); // not found in database
 
   req.userId = userId.toString();
   req.deviceId = deviceId;

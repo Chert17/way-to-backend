@@ -5,6 +5,7 @@ import { getTokenIat } from "../helpers/get.token.iat";
 import { MeViewMOdel, RegisterInputModel } from "../models/auth.models";
 import { LoginInputModel } from "../models/users.models";
 import { tokenRepo } from "../repositories/auth/token.repo";
+import { userSecurityDevicesRepo } from "../repositories/security-devices/security.devices.repo";
 import { userQueryRepo } from "../repositories/users/user.query.repo";
 import { authService } from "../service/auth.service";
 import { TypeRequestBody } from "../types/req-res.types";
@@ -107,7 +108,7 @@ export const refreshTokenController = async (req: Request, res: Response) => {
 export const logoutController = async (req: Request, res: Response) => {
   const { userId, deviceId, ip } = req;
 
-  const result = await tokenRepo.deleteRefreshTokenSessionByDevice(
+  const result = await userSecurityDevicesRepo.deleteOneSessionByUserDevice(
     userId!, // because i'm checking in checkRefreshTokenMiddleware
     deviceId!, // because i'm checking in checkRefreshTokenMiddleware
     ip

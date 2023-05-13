@@ -6,7 +6,7 @@ import {
   IRateLimitDb,
   IUserConfirmEmailDb,
   IUserDb,
-  IUserRefreshTokenDb
+  IUserSecurityDevicesDb
 } from "./db.types";
 
 export const blogsDbCollection = db.collection<IBlogDb>('blogs');
@@ -20,7 +20,7 @@ export const userConfirmEmailDbCollection =
 
 export const commentsDbCollection = db.collection<ICommentsDb>('comments');
 
-export const userRefreshTokenCollection =
-  db.collection<IUserRefreshTokenDb>('userRefreshToken');
+export const userSecurityDevicesCollection =
+  db.collection<IUserSecurityDevicesDb>('userSecurityDevices');
 
 export const rateLimitCollection = db.collection<IRateLimitDb>('rateLimit');

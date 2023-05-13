@@ -40,7 +40,7 @@ export interface ICommentsDb {
   createdAt: string;
 }
 
-export interface IUserRefreshTokenDb {
+export interface IUserSecurityDevicesDb {
   userId: string;
   lastActiveDate: Date;
   ip: string;

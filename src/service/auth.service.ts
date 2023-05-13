@@ -1,10 +1,11 @@
+import { log } from "console";
 import { add } from "date-fns";
 import { WithId } from "mongodb";
 import { SentMessageInfo } from "nodemailer/lib/smtp-transport";
 import { v4 as uuidv4 } from "uuid";
 
 import { jwtService } from "../application/jwt.service";
-import { IUserConfirmEmailDb, IUserRefreshTokenDb } from "../db/db.types";
+import { IUserConfirmEmailDb, IUserSecurityDevicesDb } from "../db/db.types";
 import { getTokenIat } from "../helpers/get.token.iat";
 import { emailManager } from "../managers/email.managers";
 import {
@@ -56,7 +57,7 @@ export const authService = {
 
     const refreshIat = getTokenIat(tokens.refreshToken);
 
-    const refreshTokenMeta: IUserRefreshTokenDb = {
+    const refreshTokenMeta: IUserSecurityDevicesDb = {
       userId: user._id.toString(),
       lastActiveDate: refreshIat,
       ip,
