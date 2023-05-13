@@ -123,6 +123,6 @@ export const logoutController = async (req: Request, res: Response) => {
 
 const _refreshTokenToCookieResponse = (res: Response, refreshToken: string) =>
   res.cookie('refreshToken ', refreshToken, {
-    // httpOnly: true,
-    // secure: true,
+    httpOnly: true,
+    secure: true,
   });
