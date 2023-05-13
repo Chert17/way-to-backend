@@ -10,7 +10,8 @@ export const checkRequestRateLimitMiddleware = async (
 ) => {
   const { ip, originalUrl: url } = req;
 
-  const tenSecondsAgo = new Date(Date.now() - 10000);
+  const dateNow = +new Date();
+  const tenSecondsAgo = new Date(dateNow - 10000);
 
   const totalCount = await rateLimitRepo.getTotalCountRequest({
     ip,
@@ -18,11 +19,11 @@ export const checkRequestRateLimitMiddleware = async (
     date: tenSecondsAgo,
   });
 
-  if (totalCount && totalCount > 5) {
+  if (totalCount && totalCount > 4) {
     return res.sendStatus(STATUS_CODE.Too_Many_Requests); //? >4 || >=5
   }
 
-  await rateLimitRepo.addRequest({ ip, url, date: new Date() });
+  await rateLimitRepo.addRequest({ ip, url, date: new Date(dateNow) });
 
   return next();
 };
