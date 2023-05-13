@@ -4,13 +4,21 @@ import { ObjectId } from "mongodb";
 import { TokensViewModel } from "../models/auth.models";
 import { SETTINGS } from "../utils/settings";
 
-const { JWT_SECRET } = SETTINGS;
+const { JWT_SECRET, EXPIRESIN_ACCESS_TOKEN, EXPIRESIN_REFRESH_TOKEN } =
+  SETTINGS;
 
 export const jwtService = {
-  createJWT: async (userId: ObjectId): Promise<TokensViewModel | null> => {
+  createJWT: async (
+    userId: string,
+    deviceId: string
+  ): Promise<TokensViewModel | null> => {
     try {
-      const accessToken = sign({ userId }, JWT_SECRET, { expiresIn: '10s' });
-      const refreshToken = sign({ userId }, JWT_SECRET, { expiresIn: '20s' });
+      const accessToken = sign({ userId, deviceId }, JWT_SECRET, {
+        expiresIn: EXPIRESIN_ACCESS_TOKEN,
+      });
+      const refreshToken = sign({ userId, deviceId }, JWT_SECRET, {
+        expiresIn: EXPIRESIN_REFRESH_TOKEN,
+      });
 
       return { accessToken, refreshToken };
     } catch (error) {
@@ -23,6 +31,16 @@ export const jwtService = {
       const result = verify(token, JWT_SECRET) as { userId: ObjectId };
 
       return result.userId;
+    } catch (error) {
+      return null;
+    }
+  },
+
+  getDeviceIdByToken: async (token: string): Promise<string | null> => {
+    try {
+      const result = verify(token, JWT_SECRET) as { deviceId: string };
+
+      return result.deviceId;
     } catch (error) {
       return null;
     }

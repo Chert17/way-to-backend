@@ -1,14 +1,22 @@
-import { add } from 'date-fns';
-import { WithId } from 'mongodb';
-import { SentMessageInfo } from 'nodemailer/lib/smtp-transport';
-import { v4 as uuidv4 } from 'uuid';
+import { log } from "console";
+import { add } from "date-fns";
+import { WithId } from "mongodb";
+import { SentMessageInfo } from "nodemailer/lib/smtp-transport";
+import { v4 as uuidv4 } from "uuid";
 
-import { IUserConfirmEmailDb } from '../db/db.types';
-import { emailManager } from '../managers/email.managers';
-import { RegisterInputModel } from '../models/auth.models';
-import { authRepo } from '../repositories/auth/auth.repo';
-import { userQueryRepo } from '../repositories/users/user.query.repo';
-import { userService } from './user.service';
+import { jwtService } from "../application/jwt.service";
+import { IUserConfirmEmailDb, IUserSecurityDevicesDb } from "../db/db.types";
+import { getTokenIat } from "../helpers/get.token.iat";
+import { emailManager } from "../managers/email.managers";
+import {
+  LoginInputServiceModel,
+  RegisterInputModel,
+  TokensViewModel
+} from "../models/auth.models";
+import { authRepo } from "../repositories/auth/auth.repo";
+import { tokenRepo } from "../repositories/auth/token.repo";
+import { userQueryRepo } from "../repositories/users/user.query.repo";
+import { userService } from "./user.service";
 
 export const authService = {
   async registerUser({
@@ -29,6 +37,37 @@ export const authService = {
     if (!message) return null; // faild sent email to user
 
     return message;
+  },
+
+  loginUser: async ({
+    loginOrEmail,
+    password,
+    ip,
+    deviceName,
+  }: LoginInputServiceModel): Promise<TokensViewModel | null> => {
+    const user = await userService.checkCredentials(loginOrEmail, password);
+
+    if (!user) return null; // not found user by loginOrEmail
+
+    const deviceId = uuidv4();
+
+    const tokens = await jwtService.createJWT(user._id.toString(), deviceId);
+
+    if (!tokens) return null; // faild create tokens
+
+    const refreshIat = getTokenIat(tokens.refreshToken);
+
+    const refreshTokenMeta: IUserSecurityDevicesDb = {
+      userId: user._id.toString(),
+      lastActiveDate: refreshIat,
+      ip,
+      deviceName,
+      deviceId,
+    };
+
+    const result = await tokenRepo.addRefreshTokenMeta(refreshTokenMeta); // return null if faild add refresh token meto to base
+
+    return !result ? null : tokens;
   },
 
   checkConfirmEmail: async (

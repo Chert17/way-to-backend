@@ -40,6 +40,16 @@ export interface ICommentsDb {
   createdAt: string;
 }
 
-export interface IUserRefreshTokenDb {
-  refreshToken: string[];
+export interface IUserSecurityDevicesDb {
+  userId: string;
+  lastActiveDate: Date;
+  ip: string;
+  deviceName: string;
+  deviceId: string;
+}
+
+export interface IRateLimitDb {
+  ip: string;
+  url: string;
+  date: Date;
 }

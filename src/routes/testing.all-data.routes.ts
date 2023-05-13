@@ -4,9 +4,10 @@ import {
   blogsDbCollection,
   commentsDbCollection,
   postsDbCollection,
+  rateLimitCollection,
   userConfirmEmailDbCollection,
-  userRefreshTokenCollection,
-  usersDbCollection
+  usersDbCollection,
+  userSecurityDevicesCollection
 } from "../db/db.collections";
 import { STATUS_CODE } from "../utils/status.code";
 
@@ -18,6 +19,7 @@ testingRouter.delete('/', (req: Request, res: Response) => {
   usersDbCollection.deleteMany();
   commentsDbCollection.deleteMany();
   userConfirmEmailDbCollection.deleteMany();
-  userRefreshTokenCollection.deleteMany();
+  userSecurityDevicesCollection.deleteMany();
+  rateLimitCollection.deleteMany();
   return res.sendStatus(STATUS_CODE.NO_CONTENT);
 });

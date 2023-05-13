@@ -10,6 +10,7 @@ import {
   registrationController
 } from "../controllers/auth.controllers";
 import { checkRefreshTokenMiddleware } from "../middlewares/checkRefreshTokenMiddleware";
+import { checkRequestRateLimitMiddleware } from "../middlewares/checkRequestRateLimitMiddleware";
 import { jwtAuthMiddleware } from "../middlewares/jwtAuthMiddleware";
 import { validateRequestMiddleware } from "../middlewares/validateRequestMiddleware";
 import { authLoginRequestBodySchema } from "../validation/auth_login/auth.login.request.body.schema";
@@ -21,6 +22,7 @@ export const authgRouter = Router();
 
 authgRouter.post(
   '/login',
+  checkRequestRateLimitMiddleware,
   authLoginRequestBodySchema,
   validateRequestMiddleware,
   loginController
@@ -30,6 +32,7 @@ authgRouter.get('/me', jwtAuthMiddleware, getMeController);
 
 authgRouter.post(
   '/registration',
+  checkRequestRateLimitMiddleware,
   authRegisterRequestBodySchema,
   validateRequestMiddleware,
   registrationController
@@ -37,6 +40,7 @@ authgRouter.post(
 
 authgRouter.post(
   '/registration-confirmation',
+  checkRequestRateLimitMiddleware,
   authRegisterConfirmRequestBodySchema,
   validateRequestMiddleware,
   confirmRegistrationController
@@ -44,6 +48,7 @@ authgRouter.post(
 
 authgRouter.post(
   '/registration-email-resending',
+  checkRequestRateLimitMiddleware,
   authResendingRequestBodySchema,
   validateRequestMiddleware,
   emailResendingController
