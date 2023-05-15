@@ -1,20 +1,20 @@
-import { ObjectId, WithId } from "mongodb";
+import { ObjectId, WithId } from 'mongodb';
 
-import { userSecurityDevicesCollection } from "../../db/db.collections";
-import { IUserSecurityDevicesDb } from "../../db/db.types";
+import { IUserSecurityDevicesDb } from '../../db/db.types';
+import { UserSecurityDevicesModel } from '../../db/schema-model/user.security.device.schema.model';
 
 export const tokenRepo = {
   addRefreshTokenMeta: async (
     refreshTokenMeta: IUserSecurityDevicesDb
-  ): Promise<ObjectId | null> => {
+  ): Promise<WithId<IUserSecurityDevicesDb> | null> => {
     try {
-      const result = await userSecurityDevicesCollection.insertOne(
-        refreshTokenMeta
-      );
+      const refreshTokenDate = new UserSecurityDevicesModel(refreshTokenMeta);
 
-      if (!result.acknowledged) return null;
+      const result = await refreshTokenDate.save();
 
-      return result.insertedId;
+      if (!result) return null;
+
+      return result;
     } catch (error) {
       return null;
     }
@@ -25,7 +25,7 @@ export const tokenRepo = {
     ip: string
   ): Promise<WithId<IUserSecurityDevicesDb> | null> => {
     try {
-      const result = await userSecurityDevicesCollection.findOne({
+      const result = await UserSecurityDevicesModel.findOne({
         lastActiveDate: issuesAt,
         deviceId,
         ip,
@@ -46,15 +46,15 @@ export const tokenRepo = {
     issuesAt: Date
   ): Promise<WithId<IUserSecurityDevicesDb> | null> => {
     try {
-      const result = await userSecurityDevicesCollection.findOneAndUpdate(
+      const result = await UserSecurityDevicesModel.findOneAndUpdate(
         { userId, deviceId, ip },
         { $set: { lastActiveDate: issuesAt } },
         { returnDocument: 'after' }
       );
 
-      if (!result.value) return null;
+      if (!result) return null;
 
-      return result.value;
+      return result;
     } catch (error) {
       return null;
     }

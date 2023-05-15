@@ -1,20 +1,20 @@
-import { ObjectId, WithId } from "mongodb";
+import { ObjectId, WithId } from 'mongodb';
 
-import { userConfirmEmailDbCollection } from "../../db/db.collections";
-import { IUserConfirmEmailDb } from "../../db/db.types";
+import { IUserConfirmEmailDb } from '../../db/db.types';
+import { UserConfirmEmailModel } from '../../db/schema-model/user.confirm.email.schema.model';
 
 export const authRepo = {
   userConfirmEmail: async (
     emailConfirmation: IUserConfirmEmailDb
-  ): Promise<ObjectId | null> => {
+  ): Promise<WithId<IUserConfirmEmailDb> | null> => {
     try {
-      const result = await userConfirmEmailDbCollection.insertOne(
-        emailConfirmation
-      );
+      const confirmEmail = new UserConfirmEmailModel(emailConfirmation);
 
-      if (!result.acknowledged) return null;
+      const result = await confirmEmail.save();
 
-      return result.insertedId;
+      if (!result) return null;
+
+      return result;
     } catch (error) {
       return null;
     }
@@ -24,7 +24,7 @@ export const authRepo = {
     confirmCode: string
   ): Promise<WithId<IUserConfirmEmailDb> | null> => {
     try {
-      const code = await userConfirmEmailDbCollection.findOne({
+      const code = await UserConfirmEmailModel.findOne({
         confirmationCode: confirmCode,
       });
 
@@ -40,7 +40,7 @@ export const authRepo = {
     userId: string
   ): Promise<WithId<IUserConfirmEmailDb> | null> => {
     try {
-      const result = await userConfirmEmailDbCollection.findOne({ userId });
+      const result = await UserConfirmEmailModel.findOne({ userId });
 
       if (!result) return null;
 
@@ -56,15 +56,15 @@ export const authRepo = {
     try {
       if (!ObjectId.isValid(id)) return null;
 
-      const result = await userConfirmEmailDbCollection.findOneAndUpdate(
+      const result = await UserConfirmEmailModel.findOneAndUpdate(
         { _id: new ObjectId(id) },
         { $set: { isConfirm: true } },
         { returnDocument: 'after' }
       );
 
-      if (!result.value) return null;
+      if (!result) return null;
 
-      return result.value;
+      return result;
     } catch (error) {
       return null;
     }
@@ -77,15 +77,15 @@ export const authRepo = {
     try {
       if (!ObjectId.isValid(userId)) return null;
 
-      const result = await userConfirmEmailDbCollection.findOneAndUpdate(
+      const result = await UserConfirmEmailModel.findOneAndUpdate(
         { userId },
         { $set: { confirmationCode: newCode } },
         { returnDocument: 'after' }
       );
 
-      if (!result.value) return null;
+      if (!result) return null;
 
-      return result.value;
+      return result;
     } catch (error) {
       return null;
     }

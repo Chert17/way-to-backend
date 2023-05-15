@@ -1,17 +1,13 @@
 import { ObjectId, WithId } from 'mongodb';
 
-import { blogsDbCollection } from '../../db/db.collections';
 import { IBlogDb } from '../../db/db.types';
+import { BlogModel } from '../../db/schema-model/blog.schema.model';
 import { BlogInputModelDb } from './blog.repo.types';
 
 export const blogRepo = {
-  createBlog: async (blog: IBlogDb): Promise<ObjectId | null> => {
+  createBlog: async (blog: IBlogDb): Promise<WithId<IBlogDb> | null> => {
     try {
-      const result = await blogsDbCollection.insertOne(blog);
-
-      if (!result.acknowledged) return null;
-
-      return result.insertedId;
+      return await BlogModel.create(blog);
     } catch (error) {
       return null;
     }
@@ -25,15 +21,11 @@ export const blogRepo = {
 
       if (!ObjectId.isValid(id)) return null;
 
-      const result = await blogsDbCollection.findOneAndUpdate(
+      return await BlogModel.findOneAndUpdate(
         { _id: new ObjectId(id) },
         { $set: { name, description, websiteUrl } },
         { returnDocument: 'after' }
       );
-
-      if (!result.value) return null;
-
-      return result.value;
     } catch (error) {
       return null;
     }
@@ -43,13 +35,9 @@ export const blogRepo = {
     try {
       if (!ObjectId.isValid(id)) return null;
 
-      const result = await blogsDbCollection.findOneAndDelete({
+      return await BlogModel.findOneAndDelete({
         _id: new ObjectId(id),
       });
-
-      if (!result.value) return null;
-
-      return result.value;
     } catch (error) {
       return null;
     }

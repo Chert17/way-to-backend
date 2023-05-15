@@ -28,7 +28,7 @@ export const postService = {
 
     const result = await postRepo.createPost(newPost);
 
-    return result ? converterPost({ ...newPost, _id: result }) : null;
+    return result ? converterPost(result) : null;
   },
 
   updatePost: async (

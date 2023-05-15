@@ -1,6 +1,6 @@
 import { ObjectId } from 'mongodb';
 
-import { commentsDbCollection } from '../../db/db.collections';
+import { CommentModel } from '../../db/schema-model/comment.schema.modek';
 import { converterComment } from '../../helpers/converterToValidFormatData/converter.comment';
 import { CommentViewModel } from '../../models/comments.models';
 import { IWithPagination } from '../../types/pagination.interface';
@@ -15,14 +15,13 @@ export const commentQueryRepo = {
 
     const find = { postId: postId };
 
-    const comments = await commentsDbCollection
-      .find(find)
-      .sort(sortBy, sortDirection)
+    const comments = await CommentModel.find(find)
+      .sort({ [sortBy]: sortDirection })
       .skip((page - 1) * pageSize)
       .limit(pageSize)
-      .toArray();
+      .lean();
 
-    const totalCount = await commentsDbCollection.countDocuments(find);
+    const totalCount = await CommentModel.countDocuments(find);
 
     const pageCount = Math.ceil(totalCount / pageSize);
 
@@ -38,9 +37,9 @@ export const commentQueryRepo = {
   getCommentById: async (id: string): Promise<CommentViewModel | null> => {
     if (!ObjectId.isValid(id)) return null;
 
-    const comment = await commentsDbCollection.findOne({
+    const comment = await CommentModel.findOne({
       _id: new ObjectId(id),
-    });
+    }).lean();
 
     if (!comment) return null;
 

@@ -25,7 +25,7 @@ export const commentService = {
 
     const result = await commentRepo.createComment(newComment);
 
-    return result ? converterComment({ ...newComment, _id: result }) : null;
+    return result ? converterComment(result) : null;
   },
 
   updateComment: async (

@@ -1,4 +1,4 @@
-import { CommentatorInfo } from "../models/comments.models";
+import { CommentatorInfo } from '../models/comments.models';
 
 export interface IBlogDb {
   name: string;

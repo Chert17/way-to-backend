@@ -1,14 +1,12 @@
-import { WithId } from "mongodb";
+import { WithId } from 'mongodb';
 
-import { userSecurityDevicesCollection } from "../../db/db.collections";
-import { IUserSecurityDevicesDb } from "../../db/db.types";
-import { converterUserSecurityDevices } from "../../helpers/converterToValidFormatData/converter.user.secutity.devices";
+import { IUserSecurityDevicesDb } from '../../db/db.types';
+import { UserSecurityDevicesModel } from '../../db/schema-model/user.security.device.schema.model';
+import { converterUserSecurityDevices } from '../../helpers/converterToValidFormatData/converter.user.secutity.devices';
 
 export const userSecurityDevicesQueryRepo = {
   getAllDevicesActiveByUser: async (userId: string) => {
-    const result = await userSecurityDevicesCollection
-      .find({ userId })
-      .toArray();
+    const result = await UserSecurityDevicesModel.find({ userId }).lean();
 
     return result.map(converterUserSecurityDevices);
   },
@@ -17,7 +15,9 @@ export const userSecurityDevicesQueryRepo = {
     deviceId: string
   ): Promise<WithId<IUserSecurityDevicesDb> | null> => {
     try {
-      const result = await userSecurityDevicesCollection.findOne({ deviceId });
+      const result = await UserSecurityDevicesModel.findOne({
+        deviceId,
+      }).lean();
 
       if (!result) return null;
 

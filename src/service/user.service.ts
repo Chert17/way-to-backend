@@ -28,7 +28,7 @@ export const userService = {
 
     const result = await userRepo.createUser(newUser);
 
-    return result ? converterUser({ ...newUser, _id: result }) : null;
+    return result ? converterUser(result) : null;
   },
 
   deleteUser: async (id: string): Promise<WithId<IUserDb> | null> => {

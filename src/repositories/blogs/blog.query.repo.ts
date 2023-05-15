@@ -1,6 +1,6 @@
 import { ObjectId } from 'mongodb';
 
-import { blogsDbCollection } from '../../db/db.collections';
+import { BlogModel } from '../../db/schema-model/blog.schema.model';
 import { converterBlog } from '../../helpers/converterToValidFormatData/converter.blog';
 import { BlogViewModel } from '../../models/blogs.models';
 import { IWithPagination } from '../../types/pagination.interface';
@@ -17,14 +17,13 @@ export const blogQueryRepo = {
       ? {}
       : { name: { $regex: condition, $options: 'i' } };
 
-    const blogs = await blogsDbCollection
-      .find(find)
-      .sort(sortBy, sortDirection)
+    const blogs = await BlogModel.find(find)
+      .sort({ [sortBy]: sortDirection })
       .skip((page - 1) * pageSize)
       .limit(pageSize)
-      .toArray();
+      .lean();
 
-    const totalCount = await blogsDbCollection.countDocuments(find);
+    const totalCount = await BlogModel.countDocuments(find);
 
     const pageCount = Math.ceil(totalCount / pageSize);
 
@@ -41,7 +40,7 @@ export const blogQueryRepo = {
     try {
       if (!ObjectId.isValid(id)) return null;
 
-      const blog = await blogsDbCollection.findOne({ _id: new ObjectId(id) });
+      const blog = await BlogModel.findOne({ _id: new ObjectId(id) }).lean();
 
       if (!blog) return null;
 
