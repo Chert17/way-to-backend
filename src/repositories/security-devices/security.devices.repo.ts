@@ -1,7 +1,7 @@
-import { WithId } from "mongodb";
+import { WithId } from 'mongodb';
 
-import { userSecurityDevicesCollection } from "../../db/db.collections";
-import { IUserSecurityDevicesDb } from "../../db/db.types";
+import { IUserSecurityDevicesDb } from '../../db/db.types';
+import { UserSecurityDevicesModel } from '../../db/schema-model/user.security.device.schema.model';
 
 export const userSecurityDevicesRepo = {
   deleteOneSessionByUserDevice: async (
@@ -10,15 +10,15 @@ export const userSecurityDevicesRepo = {
     ip: string
   ): Promise<WithId<IUserSecurityDevicesDb> | null> => {
     try {
-      const result = await userSecurityDevicesCollection.findOneAndDelete({
+      const result = await UserSecurityDevicesModel.findOneAndDelete({
         userId,
         deviceId,
         ip,
       });
 
-      if (!result.value) return null;
+      if (!result) return null;
 
-      return result.value;
+      return result;
     } catch (error) {
       return null;
     }
@@ -29,7 +29,7 @@ export const userSecurityDevicesRepo = {
     deviceId: string
   ) => {
     try {
-      const result = await userSecurityDevicesCollection.deleteMany({
+      const result = await UserSecurityDevicesModel.deleteMany({
         userId,
         deviceId: { $ne: deviceId },
       });

@@ -1,21 +1,18 @@
 import dotenv from 'dotenv';
-import { MongoClient } from 'mongodb';
+import mongoose from 'mongoose';
 
 import { SETTINGS } from '../utils/settings';
 
 dotenv.config();
 
-const mongoUri = SETTINGS.MONGO_URL || 'mongodb://0.0.0.0:27017';
-
-const client = new MongoClient(mongoUri);
-export const db = client.db('hw-03');
+const mongoUri = SETTINGS.MONGO_URL || 'mongodb://0.0.0.0:27017/hw-03';
 
 export const runDB = async () => {
   try {
-    await client.connect();
+    await mongoose.connect(mongoUri);
     console.log('DB Connected successfully');
   } catch {
     console.log('! DB Not connect to server');
-    await client.close();
+    await mongoose.disconnect();
   }
 };

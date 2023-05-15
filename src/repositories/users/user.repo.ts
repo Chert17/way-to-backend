@@ -1,16 +1,12 @@
 import { ObjectId, WithId } from 'mongodb';
 
-import { usersDbCollection } from '../../db/db.collections';
 import { IUserDb } from '../../db/db.types';
+import { UserModel } from '../../db/schema-model/user.schema.model';
 
 export const userRepo = {
-  createUser: async (user: IUserDb): Promise<ObjectId | null> => {
+  createUser: async (user: IUserDb): Promise<WithId<IUserDb> | null> => {
     try {
-      const result = await usersDbCollection.insertOne(user);
-
-      if (!result.acknowledged) return null;
-
-      return result.insertedId;
+      return await UserModel.create(user);
     } catch (error) {
       return null;
     }
@@ -20,13 +16,13 @@ export const userRepo = {
     try {
       if (!ObjectId.isValid(userId)) return null;
 
-      const result = await usersDbCollection.findOneAndDelete({
+      const result = await UserModel.findOneAndDelete({
         _id: new ObjectId(userId),
       });
 
-      if (!result.value) return null;
+      if (!result) return null;
 
-      return result.value;
+      return result;
     } catch (error) {
       return null;
     }

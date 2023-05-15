@@ -1,20 +1,20 @@
-import { ObjectId } from "mongodb";
-
-import { rateLimitCollection } from "../../db/db.collections";
-import { IRateLimitDb } from "../../db/db.types";
+import { IRateLimitDb } from '../../db/db.types';
+import { RateLimitModel } from '../../db/schema-model/rate.limit.schema.model';
 
 export const rateLimitRepo = {
   addRequest: async ({
     ip,
     url,
     date,
-  }: IRateLimitDb): Promise<ObjectId | null> => {
+  }: IRateLimitDb): Promise<IRateLimitDb | null> => {
     try {
-      const result = await rateLimitCollection.insertOne({ ip, url, date });
+      const rateLimit = new RateLimitModel({ ip, url, date });
 
-      if (!result.acknowledged) return null;
+      const result = await rateLimit.save();
 
-      return result.insertedId;
+      if (!result) return null;
+
+      return result;
     } catch (error) {
       return null;
     }
@@ -26,11 +26,11 @@ export const rateLimitRepo = {
     date,
   }: IRateLimitDb): Promise<number | null> => {
     try {
-      const totalCount = await rateLimitCollection.countDocuments({
+      const totalCount = await RateLimitModel.countDocuments({
         ip,
         url,
         date: { $gte: date },
-      });
+      }).lean();
 
       if (!totalCount) return null;
 

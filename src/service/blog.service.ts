@@ -21,7 +21,7 @@ export const blogService = {
 
     const result = await blogRepo.createBlog(newBlog);
 
-    return result ? converterBlog({ ...newBlog, _id: result }) : null;
+    return result ? converterBlog(result) : null;
   },
 
   updateBlog: async (

@@ -1,7 +1,7 @@
 import { ObjectId, WithId } from 'mongodb';
 
-import { usersDbCollection } from '../../db/db.collections';
 import { IUserDb } from '../../db/db.types';
+import { UserModel } from '../../db/schema-model/user.schema.model';
 import { converterUser } from '../../helpers/converterToValidFormatData/converter.user';
 import { UserViewModel } from '../../models/users.models';
 import { IWithPagination } from '../../types/pagination.interface';
@@ -29,14 +29,13 @@ export const userQueryRepo = {
       $or: query.length ? query : [{}],
     };
 
-    const users = await usersDbCollection
-      .find(find)
-      .sort(sortBy, sortDirection)
+    const users = await UserModel.find(find)
+      .sort({ [sortBy]: sortDirection })
       .skip((page - 1) * pageSize)
       .limit(pageSize)
-      .toArray();
+      .lean();
 
-    const totalCount = await usersDbCollection.countDocuments(find);
+    const totalCount = await UserModel.countDocuments(find);
 
     const pageCount = Math.ceil(totalCount / pageSize);
 
@@ -53,7 +52,7 @@ export const userQueryRepo = {
     try {
       if (!ObjectId.isValid(id)) return null;
 
-      const user = await usersDbCollection.findOne({ _id: new ObjectId(id) });
+      const user = await UserModel.findOne({ _id: new ObjectId(id) }).lean();
 
       if (!user) return null;
 
@@ -65,7 +64,7 @@ export const userQueryRepo = {
 
   getUserByEmail: async (email: string): Promise<UserViewModel | null> => {
     try {
-      const user = await usersDbCollection.findOne({ email });
+      const user = await UserModel.findOne({ email }).lean();
 
       if (!user) return null;
 
@@ -79,9 +78,9 @@ export const userQueryRepo = {
     loginOrEmail: string
   ): Promise<WithId<IUserDb> | null> => {
     try {
-      const user = await usersDbCollection.findOne({
+      const user = await UserModel.findOne({
         $or: [{ email: loginOrEmail }, { login: loginOrEmail }],
-      });
+      }).lean();
 
       if (!user) return null;
 

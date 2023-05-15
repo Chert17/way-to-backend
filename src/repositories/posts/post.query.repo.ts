@@ -1,6 +1,6 @@
 import { ObjectId } from 'mongodb';
 
-import { postsDbCollection } from '../../db/db.collections';
+import { PostModel } from '../../db/schema-model/post.schema.model';
 import { converterPost } from '../../helpers/converterToValidFormatData/converter.post';
 import { PostViewModel } from '../../models/posts.models';
 import { IWithPagination } from '../../types/pagination.interface';
@@ -12,14 +12,13 @@ export const postQueryRepo = {
   ): Promise<IWithPagination<PostViewModel>> {
     const { page, pageSize, sortBy, sortDirection } = pagination;
 
-    const posts = await postsDbCollection
-      .find()
-      .sort(sortBy, sortDirection)
+    const posts = await PostModel.find()
+      .sort({ [sortBy]: sortDirection })
       .skip((page - 1) * pageSize)
       .limit(pageSize)
-      .toArray();
+      .lean();
 
-    const totalCount = await postsDbCollection.countDocuments();
+    const totalCount = await PostModel.countDocuments();
 
     const pageCount = Math.ceil(totalCount / pageSize);
 
@@ -36,7 +35,7 @@ export const postQueryRepo = {
     try {
       if (!ObjectId.isValid(id)) return null;
 
-      const post = await postsDbCollection.findOne({ _id: new ObjectId(id) });
+      const post = await PostModel.findOne({ _id: new ObjectId(id) }).lean();
 
       if (!post) return null;
 
@@ -53,14 +52,13 @@ export const postQueryRepo = {
     const { page, pageSize, sortBy, sortDirection } = pagination;
 
     const filter = { blogId };
-    const posts = await postsDbCollection
-      .find(filter)
-      .sort(sortBy, sortDirection)
+    const posts = await PostModel.find(filter)
+      .sort({ [sortBy]: sortDirection })
       .skip((page - 1) * pageSize)
       .limit(pageSize)
-      .toArray();
+      .lean();
 
-    const totalCount = await postsDbCollection.countDocuments(filter);
+    const totalCount = await PostModel.countDocuments(filter);
 
     const pageCount = Math.ceil(totalCount / pageSize);
 
