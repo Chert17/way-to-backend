@@ -130,9 +130,7 @@ export const passwordRecoveryController = async (
   req: TypeRequestBody<{ email: string }>,
   res: Response
 ) => {
-  const result = await authService.recoveryPasswordForUser(req.body.email);
-
-  if (!result) return res.sendStatus(STATUS_CODE.BAD_REQUEST); // faild send email with recovery code for user
+  await authService.recoveryPasswordForUser(req.body.email);
 
   return res.sendStatus(STATUS_CODE.NO_CONTENT);
 };
