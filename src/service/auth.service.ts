@@ -114,7 +114,7 @@ export const authService = {
   ): Promise<SentMessageInfo | null> {
     const user = await userQueryRepo.getUserByEmail(email);
 
-    if (!user) return null; // not found user
+    if (!user) return null; // not found user //?
 
     const message = await this._sendRecoveryPassword(user.email);
 
