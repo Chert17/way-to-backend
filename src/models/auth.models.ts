@@ -1,4 +1,4 @@
-import { type } from "os";
+import { type } from 'os';
 
 export type LoginInputModel = {
   loginOrEmail: string;
@@ -34,4 +34,9 @@ export type LoginInputServiceModel = {
   password: string;
   ip: string;
   deviceName: string;
+};
+
+export type NewPasswordRecoveryInputModel = {
+  newPassword: string;
+  recoveryCode: string;
 };

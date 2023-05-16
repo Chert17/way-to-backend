@@ -21,7 +21,6 @@ export interface IUserDb {
   login: string;
   email: string;
   passwordHash: string;
-  passwordSalt: string;
   createdAt: string;
   isConfirm?: boolean;
 }
@@ -31,6 +30,12 @@ export interface IUserConfirmEmailDb {
   confirmationCode: string;
   expirationDate: Date;
   isConfirm: boolean;
+}
+
+export interface IUserRecoveryPasswordDb {
+  userEmail: string;
+  confirmationCode: string;
+  expirationDate: Date;
 }
 
 export interface ICommentsDb {

@@ -27,4 +27,19 @@ export const userRepo = {
       return null;
     }
   },
+
+  updateUserPassword: async (
+    userEmail: string,
+    newPassword: string
+  ): Promise<WithId<IUserDb> | null> => {
+    try {
+      return await UserModel.findOneAndUpdate(
+        { email: userEmail },
+        { $set: { passwordHash: newPassword } },
+        { returnDocument: 'after' }
+      );
+    } catch (error) {
+      return null;
+    }
+  },
 };
