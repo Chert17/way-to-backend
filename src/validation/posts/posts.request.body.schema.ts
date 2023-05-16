@@ -1,5 +1,6 @@
 import { body } from 'express-validator';
-import { blogQueryRepo } from '../../repositories/blogs/blog.query.repo';
+
+import { blogQueryRepo } from '../../repositories/blogs/blog.composition';
 
 export const postRequestBodySchema = [
   body('title')

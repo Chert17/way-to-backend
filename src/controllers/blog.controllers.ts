@@ -7,9 +7,9 @@ import {
   BlogViewModel,
 } from '../models/blogs.models';
 import { PostViewModel } from '../models/posts.models';
-import { blogQueryRepo } from '../repositories/blogs/blog.query.repo';
+import { BlogQueryRepo } from '../repositories/blogs/blog.query.repo';
 import { postQueryRepo } from '../repositories/posts/post.query.repo';
-import { blogService } from '../service/blog.service';
+import { BlogService } from '../service/blog.service';
 import { postService } from '../service/post.service';
 import { IWithPagination } from '../types/pagination.interface';
 import {
@@ -22,108 +22,119 @@ import {
 } from '../types/req-res.types';
 import { STATUS_CODE } from '../utils/status.code';
 
-export const getAllBlogsController = async (
-  req: TypeRequestQuery<PaginationQueryParams & { searchNameTerm: string }>,
-  res: Response<IWithPagination<BlogViewModel>>
-) => {
-  const { searchNameTerm } = req.query;
+export class BlogController {
+  constructor(
+    protected blogQueryRepo: BlogQueryRepo,
+    protected blogService: BlogService
+  ) {}
 
-  const pagination = paginationQueryParamsValidation(req.query);
+  async getAllBlogs(
+    req: TypeRequestQuery<PaginationQueryParams & { searchNameTerm: string }>,
+    res: Response<IWithPagination<BlogViewModel>>
+  ) {
+    const { searchNameTerm } = req.query;
 
-  const name = !searchNameTerm ? null : searchNameTerm;
+    const pagination = paginationQueryParamsValidation(req.query);
 
-  const blogs = await blogQueryRepo.getAllBlogs(name, pagination);
+    const name = !searchNameTerm ? null : searchNameTerm;
 
-  return res.status(STATUS_CODE.OK).json(blogs);
-};
+    const blogs = await this.blogQueryRepo.getAllBlogs(name, pagination);
 
-export const getBlogByIdController = async (
-  req: TypeRequestParams<{ id: string }>,
-  res: Response<BlogViewModel>
-) => {
-  const blog = await blogQueryRepo.getBlogById(req.params.id);
+    return res.status(STATUS_CODE.OK).json(blogs);
+  }
 
-  if (!blog) return res.sendStatus(STATUS_CODE.NOT_FOUND); // not found blog
+  async getBlogById(
+    req: TypeRequestParams<{ id: string }>,
+    res: Response<BlogViewModel>
+  ) {
+    const blog = await this.blogQueryRepo.getBlogById(req.params.id);
 
-  return res.status(STATUS_CODE.OK).json(blog);
-};
+    if (!blog) return res.sendStatus(STATUS_CODE.NOT_FOUND); // not found blog
 
-export const createBlogController = async (
-  req: TypeRequestBody<BlogInputModel>,
-  res: Response<BlogViewModel>
-) => {
-  const { name, description, websiteUrl } = req.body;
+    return res.status(STATUS_CODE.OK).json(blog);
+  }
 
-  const blog = await blogService.createBlog(name, description, websiteUrl);
+  async getAllPostsByOneBlog(
+    req: TypeRequestParamsAndQuery<{ blogId: string }, PaginationQueryParams>,
+    res: Response<IWithPagination<PostViewModel>>
+  ) {
+    const pagination = paginationQueryParamsValidation(req.query);
 
-  if (!blog) return res.sendStatus(STATUS_CODE.BAD_REQUEST); // failed create blog
+    const blogId = await this.blogQueryRepo.getBlogById(req.params.blogId);
 
-  return res.status(STATUS_CODE.CREATED).json(blog);
-};
+    if (!blogId) return res.sendStatus(STATUS_CODE.NOT_FOUND); // not found blog by this blogId
 
-export const updateBlogController = async (
-  req: TypeRequestParamsAndBody<{ id: string }, BlogInputModel>,
-  res: Response
-) => {
-  const blogId = await blogQueryRepo.getBlogById(req.params.id);
+    const posts = await postQueryRepo.getAllPostsByOneBlog(
+      blogId.id,
+      pagination
+    );
 
-  if (!blogId) return res.sendStatus(STATUS_CODE.NOT_FOUND); // not found blog
+    return res.status(STATUS_CODE.OK).json(posts);
+  }
 
-  const result = await blogService.updateBlog(req.params.id, req.body);
+  async createBlog(
+    req: TypeRequestBody<BlogInputModel>,
+    res: Response<BlogViewModel>
+  ) {
+    const { name, description, websiteUrl } = req.body;
 
-  if (!result) return res.status(STATUS_CODE.BAD_REQUEST); // faild update blog
+    const blog = await this.blogService.createBlog(
+      name,
+      description,
+      websiteUrl
+    );
 
-  return res.sendStatus(STATUS_CODE.NO_CONTENT);
-};
+    if (!blog) return res.sendStatus(STATUS_CODE.BAD_REQUEST); // failed create blog
 
-export const deleteBlogController = async (
-  req: TypeRequestParams<{ id: string }>,
-  res: Response
-) => {
-  const blogId = await blogQueryRepo.getBlogById(req.params.id);
+    return res.status(STATUS_CODE.CREATED).json(blog);
+  }
 
-  if (!blogId) return res.sendStatus(STATUS_CODE.NOT_FOUND); // not found blog
+  async createPostByBlogId(
+    req: TypeRequestParamsAndBody<{ blogId: string }, BlogPostInputModel>,
+    res: Response<PostViewModel>
+  ) {
+    const { content, shortDescription, title } = req.body;
 
-  const result = await blogService.deleteBlog(req.params.id);
+    const blogId = await this.blogQueryRepo.getBlogById(req.params.blogId);
 
-  if (!result) return res.status(STATUS_CODE.BAD_REQUEST); // faild delete blog
+    if (!blogId) return res.sendStatus(STATUS_CODE.NOT_FOUND); // not found blog
 
-  return res.sendStatus(STATUS_CODE.NO_CONTENT);
-};
+    const post = await postService.createPost({
+      blogId: blogId.id,
+      content,
+      shortDescription,
+      title,
+    });
 
-export const getAllPostsByOneBlogController = async (
-  req: TypeRequestParamsAndQuery<{ blogId: string }, PaginationQueryParams>,
-  res: Response<IWithPagination<PostViewModel>>
-) => {
-  const pagination = paginationQueryParamsValidation(req.query);
+    if (!post) return res.sendStatus(STATUS_CODE.BAD_REQUEST); // faild creat post
 
-  const blogId = await blogQueryRepo.getBlogById(req.params.blogId);
+    return res.status(STATUS_CODE.CREATED).json(post);
+  }
 
-  if (!blogId) return res.sendStatus(STATUS_CODE.NOT_FOUND); // not found blog by this blogId
+  async updateBlog(
+    req: TypeRequestParamsAndBody<{ id: string }, BlogInputModel>,
+    res: Response
+  ) {
+    const blogId = await this.blogQueryRepo.getBlogById(req.params.id);
 
-  const posts = await postQueryRepo.getAllPostsByOneBlog(blogId.id, pagination);
+    if (!blogId) return res.sendStatus(STATUS_CODE.NOT_FOUND); // not found blog
 
-  return res.status(STATUS_CODE.OK).json(posts);
-};
+    const result = await this.blogService.updateBlog(req.params.id, req.body);
 
-export const createPostByBlogIdController = async (
-  req: TypeRequestParamsAndBody<{ blogId: string }, BlogPostInputModel>,
-  res: Response<PostViewModel>
-) => {
-  const { content, shortDescription, title } = req.body;
+    if (!result) return res.status(STATUS_CODE.BAD_REQUEST); // faild update blog
 
-  const blogId = await blogQueryRepo.getBlogById(req.params.blogId);
+    return res.sendStatus(STATUS_CODE.NO_CONTENT);
+  }
 
-  if (!blogId) return res.sendStatus(STATUS_CODE.NOT_FOUND); // not found blog
+  async deleteBlog(req: TypeRequestParams<{ id: string }>, res: Response) {
+    const blogId = await this.blogQueryRepo.getBlogById(req.params.id);
 
-  const post = await postService.createPost({
-    blogId: blogId.id,
-    content,
-    shortDescription,
-    title,
-  });
+    if (!blogId) return res.sendStatus(STATUS_CODE.NOT_FOUND); // not found blog
 
-  if (!post) return res.sendStatus(STATUS_CODE.BAD_REQUEST); // faild creat post
+    const result = await this.blogService.deleteBlog(req.params.id);
 
-  return res.status(STATUS_CODE.CREATED).json(post);
-};
+    if (!result) return res.status(STATUS_CODE.BAD_REQUEST); // faild delete blog
+
+    return res.sendStatus(STATUS_CODE.NO_CONTENT);
+  }
+}

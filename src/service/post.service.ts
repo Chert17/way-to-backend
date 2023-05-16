@@ -3,7 +3,7 @@ import { WithId } from 'mongodb';
 import { IPostDb } from '../db/db.types';
 import { converterPost } from '../helpers/converterToValidFormatData/converter.post';
 import { PostInputModel, PostViewModel } from '../models/posts.models';
-import { blogQueryRepo } from '../repositories/blogs/blog.query.repo';
+import { blogQueryRepo } from '../repositories/blogs/blog.composition';
 import { postRepo } from '../repositories/posts/post.repo';
 
 export const postService = {

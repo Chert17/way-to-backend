@@ -1,43 +1,28 @@
 import express from 'express';
 
-import {
-  createBlogController,
-  createPostByBlogIdController,
-  deleteBlogController,
-  getAllBlogsController,
-  getAllPostsByOneBlogController,
-  getBlogByIdController,
-  updateBlogController,
-} from '../controllers/blog.controllers';
 import { authMiddleware } from '../middlewares/authMiddleware';
 import { validateRequestMiddleware } from '../middlewares/validateRequestMiddleware';
+import { blogController } from '../repositories/blogs/blog.composition';
 import { blogRequestBodySchema } from '../validation/blogs/blog.request.body.schema';
 import { requestPostBodyByOneBlogIdSchema } from '../validation/blogs/request.body.by.one.blog.validation';
 
 export const blogRouter = express.Router();
 
-blogRouter.get('/', getAllBlogsController);
+blogRouter.get('/', blogController.getAllBlogs.bind(blogController));
 
-blogRouter.get('/:id', getBlogByIdController);
+blogRouter.get('/:id', blogController.getBlogById.bind(blogController));
 
-blogRouter.get('/:blogId/posts', getAllPostsByOneBlogController);
-
-blogRouter.put(
-  '/:id',
-  authMiddleware,
-  blogRequestBodySchema,
-  validateRequestMiddleware,
-  updateBlogController
+blogRouter.get(
+  '/:blogId/posts',
+  blogController.getAllPostsByOneBlog.bind(blogController)
 );
-
-blogRouter.delete('/:id', authMiddleware, deleteBlogController);
 
 blogRouter.post(
   '/',
   authMiddleware,
   blogRequestBodySchema,
   validateRequestMiddleware,
-  createBlogController
+  blogController.createBlog.bind(blogController)
 );
 
 blogRouter.post(
@@ -45,5 +30,19 @@ blogRouter.post(
   authMiddleware,
   requestPostBodyByOneBlogIdSchema,
   validateRequestMiddleware,
-  createPostByBlogIdController
+  blogController.createPostByBlogId.bind(blogController)
+);
+
+blogRouter.put(
+  '/:id',
+  authMiddleware,
+  blogRequestBodySchema,
+  validateRequestMiddleware,
+  blogController.updateBlog.bind(blogController)
+);
+
+blogRouter.delete(
+  '/:id',
+  authMiddleware,
+  blogController.deleteBlog.bind(blogController)
 );

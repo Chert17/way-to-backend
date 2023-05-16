@@ -3,14 +3,16 @@ import { WithId } from 'mongodb';
 import { IBlogDb } from '../db/db.types';
 import { converterBlog } from '../helpers/converterToValidFormatData/converter.blog';
 import { BlogInputModel, BlogViewModel } from '../models/blogs.models';
-import { blogRepo } from '../repositories/blogs/blog.repo';
+import { BlogRepo } from '../repositories/blogs/blog.repo';
 
-export const blogService = {
-  createBlog: async (
+export class BlogService {
+  constructor(protected blogRepo: BlogRepo) {}
+
+  async createBlog(
     name: string,
     description: string,
     websiteUrl: string
-  ): Promise<BlogViewModel | null> => {
+  ): Promise<BlogViewModel | null> {
     const newBlog: IBlogDb = {
       name,
       description,
@@ -19,26 +21,26 @@ export const blogService = {
       isMembership: false,
     };
 
-    const result = await blogRepo.createBlog(newBlog);
+    const result = await this.blogRepo.createBlog(newBlog);
 
     return result ? converterBlog(result) : null;
-  },
+  }
 
-  updateBlog: async (
+  async updateBlog(
     id: string,
     body: BlogInputModel
-  ): Promise<WithId<IBlogDb> | null> => {
+  ): Promise<WithId<IBlogDb> | null> {
     const { name, description, websiteUrl } = body;
 
-    return await blogRepo.updateBlog({
+    return await this.blogRepo.updateBlog({
       id,
       name,
       description,
       websiteUrl,
     });
-  },
+  }
 
-  deleteBlog: async (id: string): Promise<WithId<IBlogDb> | null> => {
-    return await blogRepo.deleteBlog(id);
-  },
-};
+  async deleteBlog(id: string): Promise<WithId<IBlogDb> | null> {
+    return await this.blogRepo.deleteBlog(id);
+  }
+}
