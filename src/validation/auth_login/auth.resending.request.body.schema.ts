@@ -1,7 +1,7 @@
 import { body } from 'express-validator';
 
 import { authRepo } from '../../repositories/auth/auth.repo';
-import { userQueryRepo } from '../../repositories/users/user.query.repo';
+import { userQueryRepo } from '../../repositories/users/user.composition';
 import { emailSchema } from '../common/email.schema';
 
 export const authResendingRequestBodySchema = [

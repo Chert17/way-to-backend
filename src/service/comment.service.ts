@@ -4,7 +4,7 @@ import { ICommentsDb } from '../db/db.types';
 import { converterComment } from '../helpers/converterToValidFormatData/converter.comment';
 import { CommentViewModel } from '../models/comments.models';
 import { commentRepo } from '../repositories/comments/comment.repo';
-import { userQueryRepo } from '../repositories/users/user.query.repo';
+import { userQueryRepo } from '../repositories/users/user.composition';
 
 export const commentService = {
   createComment: async (

@@ -18,8 +18,10 @@ import {
 } from '../models/auth.models';
 import { authRepo } from '../repositories/auth/auth.repo';
 import { tokenRepo } from '../repositories/auth/token.repo';
-import { userQueryRepo } from '../repositories/users/user.query.repo';
-import { userService } from './user.service';
+import {
+  userQueryRepo,
+  userService,
+} from '../repositories/users/user.composition';
 
 export const authService = {
   async registerUser({

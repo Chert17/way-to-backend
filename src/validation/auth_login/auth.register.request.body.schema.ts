@@ -1,6 +1,6 @@
 import { body } from 'express-validator';
 
-import { userQueryRepo } from '../../repositories/users/user.query.repo';
+import { userQueryRepo } from '../../repositories/users/user.composition';
 import { emailSchema } from '../common/email.schema';
 import { loginSchema } from '../common/login.schema';
 import { passwordSchema } from '../common/password.schema';

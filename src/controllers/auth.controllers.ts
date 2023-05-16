@@ -10,9 +10,11 @@ import {
 import { LoginInputModel } from '../models/users.models';
 import { tokenRepo } from '../repositories/auth/token.repo';
 import { userSecurityDevicesRepo } from '../repositories/security-devices/security.devices.repo';
-import { userQueryRepo } from '../repositories/users/user.query.repo';
+import {
+  userQueryRepo,
+  userService,
+} from '../repositories/users/user.composition';
 import { authService } from '../service/auth.service';
-import { userService } from '../service/user.service';
 import { TypeRequestBody } from '../types/req-res.types';
 import { STATUS_CODE } from '../utils/status.code';
 

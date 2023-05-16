@@ -1,24 +1,24 @@
 import express from 'express';
 
-import {
-  createUserController,
-  deleteUserController,
-  getAllUsersController,
-} from '../controllers/user.controllers';
 import { authMiddleware } from '../middlewares/authMiddleware';
 import { validateRequestMiddleware } from '../middlewares/validateRequestMiddleware';
+import { userController } from '../repositories/users/user.composition';
 import { userRequestBodySchema } from '../validation/users/user.request.body.schema';
 
 export const userRouter = express.Router();
 
-userRouter.get('/', getAllUsersController);
+userRouter.get('/', userController.getAllUsersController.bind(userController));
 
 userRouter.post(
   '/',
   authMiddleware,
   userRequestBodySchema,
   validateRequestMiddleware,
-  createUserController
+  userController.createUserController.bind(userController)
 );
 
-userRouter.delete('/:id', authMiddleware, deleteUserController);
+userRouter.delete(
+  '/:id',
+  authMiddleware,
+  userController.deleteUserController.bind(userController)
+);
