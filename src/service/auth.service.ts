@@ -1,22 +1,25 @@
-import { log } from "console";
-import { add } from "date-fns";
-import { WithId } from "mongodb";
-import { SentMessageInfo } from "nodemailer/lib/smtp-transport";
-import { v4 as uuidv4 } from "uuid";
+import { add } from 'date-fns';
+import { WithId } from 'mongodb';
+import { SentMessageInfo } from 'nodemailer/lib/smtp-transport';
+import { v4 as uuidv4 } from 'uuid';
 
-import { jwtService } from "../application/jwt.service";
-import { IUserConfirmEmailDb, IUserSecurityDevicesDb } from "../db/db.types";
-import { getTokenIat } from "../helpers/get.token.iat";
-import { emailManager } from "../managers/email.managers";
+import { jwtService } from '../application/jwt.service';
+import {
+  IUserConfirmEmailDb,
+  IUserRecoveryPasswordDb,
+  IUserSecurityDevicesDb,
+} from '../db/db.types';
+import { getTokenIat } from '../helpers/get.token.iat';
+import { emailManager } from '../managers/email.managers';
 import {
   LoginInputServiceModel,
   RegisterInputModel,
-  TokensViewModel
-} from "../models/auth.models";
-import { authRepo } from "../repositories/auth/auth.repo";
-import { tokenRepo } from "../repositories/auth/token.repo";
-import { userQueryRepo } from "../repositories/users/user.query.repo";
-import { userService } from "./user.service";
+  TokensViewModel,
+} from '../models/auth.models';
+import { authRepo } from '../repositories/auth/auth.repo';
+import { tokenRepo } from '../repositories/auth/token.repo';
+import { userQueryRepo } from '../repositories/users/user.query.repo';
+import { userService } from './user.service';
 
 export const authService = {
   async registerUser({
@@ -106,6 +109,20 @@ export const authService = {
     return message;
   },
 
+  async recoveryPasswordForUser(
+    email: string
+  ): Promise<SentMessageInfo | null> {
+    const user = await userQueryRepo.getUserByEmail(email);
+
+    if (!user) return null; // not found user
+
+    const message = await this._sendRecoveryPassword(user.email);
+
+    if (!message) return null; // faild sent email to user
+
+    return message;
+  },
+
   _createConfirmEmailByUser: async (userId: string): Promise<string | null> => {
     const emailConfirmation: IUserConfirmEmailDb = {
       userId,
@@ -126,6 +143,30 @@ export const authService = {
     code: string
   ): Promise<SentMessageInfo | null> => {
     const resultMessage = await emailManager.sendEmailMessage(email, code);
+
+    if (!resultMessage) return null; // message not sent
+
+    return resultMessage;
+  },
+
+  _sendRecoveryPassword: async (
+    userEmail: string
+  ): Promise<SentMessageInfo | null> => {
+    const recoveryPasswordDate: IUserRecoveryPasswordDb = {
+      userEmail,
+      confirmationCode: uuidv4(),
+      expirationDate: add(new Date(), { minutes: 2 }),
+    };
+
+    const result = await authRepo.recoveryPassword(recoveryPasswordDate);
+
+    if (!result) return null; // faild add recovery password date for user
+    console.log(recoveryPasswordDate.confirmationCode);
+
+    const resultMessage = await emailManager.sendRecoveryPasswordMessage(
+      userEmail,
+      recoveryPasswordDate.confirmationCode
+    );
 
     if (!resultMessage) return null; // message not sent
 

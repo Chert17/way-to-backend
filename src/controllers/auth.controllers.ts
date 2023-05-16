@@ -1,15 +1,20 @@
-import { Request, Response } from "express";
+import { Request, Response } from 'express';
 
-import { jwtService } from "../application/jwt.service";
-import { getTokenIat } from "../helpers/get.token.iat";
-import { MeViewMOdel, RegisterInputModel } from "../models/auth.models";
-import { LoginInputModel } from "../models/users.models";
-import { tokenRepo } from "../repositories/auth/token.repo";
-import { userSecurityDevicesRepo } from "../repositories/security-devices/security.devices.repo";
-import { userQueryRepo } from "../repositories/users/user.query.repo";
-import { authService } from "../service/auth.service";
-import { TypeRequestBody } from "../types/req-res.types";
-import { STATUS_CODE } from "../utils/status.code";
+import { jwtService } from '../application/jwt.service';
+import { getTokenIat } from '../helpers/get.token.iat';
+import {
+  MeViewMOdel,
+  NewPasswordRecoveryInputModel,
+  RegisterInputModel,
+} from '../models/auth.models';
+import { LoginInputModel } from '../models/users.models';
+import { tokenRepo } from '../repositories/auth/token.repo';
+import { userSecurityDevicesRepo } from '../repositories/security-devices/security.devices.repo';
+import { userQueryRepo } from '../repositories/users/user.query.repo';
+import { authService } from '../service/auth.service';
+import { userService } from '../service/user.service';
+import { TypeRequestBody } from '../types/req-res.types';
+import { STATUS_CODE } from '../utils/status.code';
 
 export const loginController = async (
   req: TypeRequestBody<LoginInputModel>,
@@ -117,6 +122,33 @@ export const logoutController = async (req: Request, res: Response) => {
   if (!result) return res.sendStatus(STATUS_CODE.UNAUTHORIZED); // faild add refreshToken to addInvalidRefreshToken
 
   res.clearCookie('refreshToken');
+
+  return res.sendStatus(STATUS_CODE.NO_CONTENT);
+};
+
+export const passwordRecoveryController = async (
+  req: TypeRequestBody<{ email: string }>,
+  res: Response
+) => {
+  const result = await authService.recoveryPasswordForUser(req.body.email);
+
+  if (!result) return res.sendStatus(STATUS_CODE.BAD_REQUEST); // faild send email with recovery code for user
+
+  return res.sendStatus(STATUS_CODE.NO_CONTENT);
+};
+
+export const newPasswordForUserController = async (
+  req: TypeRequestBody<NewPasswordRecoveryInputModel>,
+  res: Response
+) => {
+  const { newPassword, recoveryCode } = req.body;
+
+  const result = await userService.updateUserPassword(
+    recoveryCode,
+    newPassword
+  );
+
+  if (!result) return res.sendStatus(STATUS_CODE.BAD_REQUEST); // faild update new password for user
 
   return res.sendStatus(STATUS_CODE.NO_CONTENT);
 };

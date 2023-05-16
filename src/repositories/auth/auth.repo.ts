@@ -1,7 +1,12 @@
 import { ObjectId, WithId } from 'mongodb';
 
-import { IUserConfirmEmailDb } from '../../db/db.types';
+import {
+  IUserConfirmEmailDb,
+  IUserRecoveryPasswordDb,
+} from '../../db/db.types';
 import { UserConfirmEmailModel } from '../../db/schema-model/user.confirm.email.schema.model';
+import { UserRecoveryPasswordModel } from '../../db/schema-model/user.recovery.password';
+import { UserModel } from '../../db/schema-model/user.schema.model';
 
 export const authRepo = {
   userConfirmEmail: async (
@@ -86,6 +91,32 @@ export const authRepo = {
       if (!result) return null;
 
       return result;
+    } catch (error) {
+      return null;
+    }
+  },
+
+  recoveryPassword: async (
+    recoveryPasswordDate: IUserRecoveryPasswordDb
+  ): Promise<WithId<IUserRecoveryPasswordDb> | null> => {
+    try {
+      return await UserRecoveryPasswordModel.create(recoveryPasswordDate);
+    } catch (error) {
+      return null;
+    }
+  },
+
+  getRecoveryPasswordDateByCode: async (
+    confirmCode: string
+  ): Promise<WithId<IUserRecoveryPasswordDb> | null> => {
+    try {
+      const code = await UserRecoveryPasswordModel.findOne({
+        confirmationCode: confirmCode,
+      });
+
+      if (!code) return null;
+
+      return code;
     } catch (error) {
       return null;
     }

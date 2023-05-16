@@ -1,10 +1,11 @@
-import { genSalt } from 'bcrypt';
+import { compare } from 'bcrypt';
 import { WithId } from 'mongodb';
 
 import { IUserDb } from '../db/db.types';
 import { converterUser } from '../helpers/converterToValidFormatData/converter.user';
 import { generateHash } from '../helpers/generate.hash';
 import { UserInputModel, UserViewModel } from '../models/users.models';
+import { authRepo } from '../repositories/auth/auth.repo';
 import { userQueryRepo } from '../repositories/users/user.query.repo';
 import { userRepo } from '../repositories/users/user.repo';
 
@@ -14,14 +15,12 @@ export const userService = {
     login,
     password,
   }: UserInputModel): Promise<UserViewModel | null> => {
-    const passwordSalt = await genSalt(10);
-    const passwordHash = await generateHash(password, passwordSalt);
+    const passwordHash = await generateHash(password);
 
     const newUser: IUserDb = {
       login,
       email,
       passwordHash,
-      passwordSalt,
       createdAt: new Date().toISOString(),
       isConfirm: true,
     };
@@ -43,10 +42,29 @@ export const userService = {
 
     if (!user) return null;
 
-    const passwordHash = await generateHash(password, user.passwordSalt);
+    const result = await compare(password, user.passwordHash);
 
-    if (passwordHash !== user.passwordHash) return null; // incorrect password from req.body
+    if (!result) return null; // incorrect password from req.body
 
     return user;
+  },
+
+  updateUserPassword: async (
+    recoveryCode: string,
+    newPassword: string
+  ): Promise<WithId<IUserDb> | null> => {
+    const recoveryPasswordDate = await authRepo.getRecoveryPasswordDateByCode(
+      recoveryCode
+    );
+
+    const { userEmail } = recoveryPasswordDate!; // because I'm check in recoveryPasswordRequestBodySchema
+
+    const passwordHash = await generateHash(newPassword);
+
+    const result = await userRepo.updateUserPassword(userEmail, passwordHash);
+
+    if (!result) return null;
+
+    return result;
   },
 };

@@ -1,4 +1,4 @@
-import { ObjectId, WithId } from 'mongodb';
+import { WithId } from 'mongodb';
 
 import { IUserSecurityDevicesDb } from '../../db/db.types';
 import { UserSecurityDevicesModel } from '../../db/schema-model/user.security.device.schema.model';
