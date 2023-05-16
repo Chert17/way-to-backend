@@ -6,32 +6,16 @@ import { PostViewModel } from '../../models/posts.models';
 import { IWithPagination } from '../../types/pagination.interface';
 import { ValidPaginationQueryParams } from '../../types/req-res.types';
 
-export const postQueryRepo = {
+export class PostQueryRepo {
   async getAllPosts(
     pagination: ValidPaginationQueryParams
   ): Promise<IWithPagination<PostViewModel>> {
-    const { page, pageSize, sortBy, sortDirection } = pagination;
+    const filter = {};
 
-    const posts = await PostModel.find()
-      .sort({ [sortBy]: sortDirection })
-      .skip((page - 1) * pageSize)
-      .limit(pageSize)
-      .lean();
+    return await this._getPosts(filter, pagination);
+  }
 
-    const totalCount = await PostModel.countDocuments();
-
-    const pageCount = Math.ceil(totalCount / pageSize);
-
-    return {
-      pagesCount: pageCount === 0 ? 1 : pageCount,
-      pageSize,
-      page,
-      totalCount,
-      items: posts.map(converterPost),
-    };
-  },
-
-  getPostById: async (id: string): Promise<PostViewModel | null> => {
+  async getPostById(id: string): Promise<PostViewModel | null> {
     try {
       if (!ObjectId.isValid(id)) return null;
 
@@ -43,15 +27,23 @@ export const postQueryRepo = {
     } catch (error) {
       return null;
     }
-  },
+  }
 
   async getAllPostsByOneBlog(
     blogId: string,
     pagination: ValidPaginationQueryParams
   ): Promise<IWithPagination<PostViewModel>> {
+    const filter = { blogId };
+
+    return await this._getPosts(filter, pagination);
+  }
+
+  private async _getPosts(
+    filter: Record<string, unknown>,
+    pagination: ValidPaginationQueryParams
+  ) {
     const { page, pageSize, sortBy, sortDirection } = pagination;
 
-    const filter = { blogId };
     const posts = await PostModel.find(filter)
       .sort({ [sortBy]: sortDirection })
       .skip((page - 1) * pageSize)
@@ -69,5 +61,5 @@ export const postQueryRepo = {
       totalCount,
       items: posts.map(converterPost),
     };
-  },
-};
+  }
+}

@@ -4,9 +4,9 @@ import { paginationQueryParamsValidation } from '../helpers/request.query.params
 import { CommentInputModel, CommentViewModel } from '../models/comments.models';
 import { PostInputModel, PostViewModel } from '../models/posts.models';
 import { commentQueryRepo } from '../repositories/comments/comment.query.repo';
-import { postQueryRepo } from '../repositories/posts/post.query.repo';
+import { PostQueryRepo } from '../repositories/posts/post.query.repo';
 import { commentService } from '../service/comment.service';
-import { postService } from '../service/post.service';
+import { PostService } from '../service/post.service';
 import { IWithPagination } from '../types/pagination.interface';
 import {
   PaginationQueryParams,
@@ -18,110 +18,114 @@ import {
 } from '../types/req-res.types';
 import { STATUS_CODE } from '../utils/status.code';
 
-export const getAllPostsController = async (
-  req: TypeRequestQuery<PaginationQueryParams>,
-  res: Response<IWithPagination<PostViewModel>>
-) => {
-  const pagination = paginationQueryParamsValidation(req.query);
+export class PostController {
+  constructor(
+    protected postQueryRepo: PostQueryRepo,
+    protected postService: PostService
+  ) {}
 
-  const posts = await postQueryRepo.getAllPosts(pagination);
+  async getAllPosts(
+    req: TypeRequestQuery<PaginationQueryParams>,
+    res: Response<IWithPagination<PostViewModel>>
+  ) {
+    const pagination = paginationQueryParamsValidation(req.query);
 
-  return res.status(STATUS_CODE.OK).json(posts);
-};
+    const posts = await this.postQueryRepo.getAllPosts(pagination);
 
-export const getPostByIdController = async (
-  req: TypeRequestParams<{ id: string }>,
-  res: Response<PostViewModel>
-) => {
-  const post = await postQueryRepo.getPostById(req.params.id);
+    return res.status(STATUS_CODE.OK).json(posts);
+  }
 
-  if (!post) return res.sendStatus(STATUS_CODE.NOT_FOUND); // not fount post
+  async getPostById(
+    req: TypeRequestParams<{ id: string }>,
+    res: Response<PostViewModel>
+  ) {
+    const post = await this.postQueryRepo.getPostById(req.params.id);
 
-  return res.status(STATUS_CODE.OK).json(post);
-};
+    if (!post) return res.sendStatus(STATUS_CODE.NOT_FOUND); // not fount post
 
-export const createPostController = async (
-  req: TypeRequestBody<PostInputModel>,
-  res: Response<PostViewModel>
-) => {
-  const { blogId, content, shortDescription, title } = req.body;
+    return res.status(STATUS_CODE.OK).json(post);
+  }
 
-  const post = await postService.createPost({
-    blogId,
-    content,
-    shortDescription,
-    title,
-  });
+  async getAllCommentsByOnePost(
+    req: TypeRequestParamsAndQuery<{ postId: string }, PaginationQueryParams>,
+    res: Response<IWithPagination<CommentViewModel>>
+  ) {
+    const { postId } = req.params;
 
-  if (!post) return res.sendStatus(STATUS_CODE.BAD_REQUEST); // faild create post
+    const post = await this.postQueryRepo.getPostById(postId);
 
-  return res.status(STATUS_CODE.CREATED).json(post);
-};
+    if (!post) return res.sendStatus(STATUS_CODE.NOT_FOUND); // not found post by postId from req.params
 
-export const updatePostController = async (
-  req: TypeRequestParamsAndBody<{ id: string }, PostInputModel>,
-  res: Response
-) => {
-  const postId = await postQueryRepo.getPostById(req.params.id);
+    const pagination = paginationQueryParamsValidation(req.query);
 
-  if (!postId) return res.sendStatus(STATUS_CODE.NOT_FOUND); // not found post
+    const comments = await commentQueryRepo.getAllComments(post.id, pagination);
 
-  const result = await postService.updatePost(postId.id, req.body);
+    return res.status(STATUS_CODE.OK).json(comments);
+  }
 
-  if (!result) return res.status(STATUS_CODE.BAD_REQUEST); // faild update post
+  async createPost(
+    req: TypeRequestBody<PostInputModel>,
+    res: Response<PostViewModel>
+  ) {
+    const { blogId, content, shortDescription, title } = req.body;
 
-  return res.sendStatus(STATUS_CODE.NO_CONTENT);
-};
+    const post = await this.postService.createPost({
+      blogId,
+      content,
+      shortDescription,
+      title,
+    });
 
-export const deletePostController = async (
-  req: TypeRequestParams<{ id: string }>,
-  res: Response
-) => {
-  const postId = await postQueryRepo.getPostById(req.params.id);
+    if (!post) return res.sendStatus(STATUS_CODE.BAD_REQUEST); // faild create post
 
-  if (!postId) return res.sendStatus(STATUS_CODE.NOT_FOUND); // not found post
+    return res.status(STATUS_CODE.CREATED).json(post);
+  }
 
-  const result = await postService.deletePost(postId.id);
+  async createCommentByPostId(
+    req: TypeRequestParamsAndBody<{ postId: string }, CommentInputModel>,
+    res: Response<CommentViewModel>
+  ) {
+    const { content } = req.body;
 
-  if (!result) return res.status(STATUS_CODE.BAD_REQUEST); // faild delete post
+    const post = await this.postQueryRepo.getPostById(req.params.postId);
 
-  return res.sendStatus(STATUS_CODE.NO_CONTENT);
-};
+    if (!post) return res.sendStatus(STATUS_CODE.NOT_FOUND); // not found post by postId from req.params.postId
 
-export const getAllCommentsByOnePostController = async (
-  req: TypeRequestParamsAndQuery<{ postId: string }, PaginationQueryParams>,
-  res: Response<IWithPagination<CommentViewModel>>
-) => {
-  const { postId } = req.params;
+    const comment = await commentService.createComment(
+      content,
+      post.id,
+      req.userId!
+    );
 
-  const post = await postQueryRepo.getPostById(postId);
+    if (!comment) return res.sendStatus(STATUS_CODE.BAD_REQUEST); // faild create comment
 
-  if (!post) return res.sendStatus(STATUS_CODE.NOT_FOUND); // not found post by postId from req.params
+    return res.status(STATUS_CODE.CREATED).json(comment);
+  }
 
-  const pagination = paginationQueryParamsValidation(req.query);
+  async updatePost(
+    req: TypeRequestParamsAndBody<{ id: string }, PostInputModel>,
+    res: Response
+  ) {
+    const postId = await this.postQueryRepo.getPostById(req.params.id);
 
-  const comments = await commentQueryRepo.getAllComments(post.id, pagination);
+    if (!postId) return res.sendStatus(STATUS_CODE.NOT_FOUND); // not found post
 
-  return res.status(STATUS_CODE.OK).json(comments);
-};
+    const result = await this.postService.updatePost(postId.id, req.body);
 
-export const createCommentByPostIdController = async (
-  req: TypeRequestParamsAndBody<{ postId: string }, CommentInputModel>,
-  res: Response<CommentViewModel>
-) => {
-  const { content } = req.body;
+    if (!result) return res.status(STATUS_CODE.BAD_REQUEST); // faild update post
 
-  const post = await postQueryRepo.getPostById(req.params.postId);
+    return res.sendStatus(STATUS_CODE.NO_CONTENT);
+  }
 
-  if (!post) return res.sendStatus(STATUS_CODE.NOT_FOUND); // not found post by postId from req.params.postId
+  async deletePost(req: TypeRequestParams<{ id: string }>, res: Response) {
+    const postId = await this.postQueryRepo.getPostById(req.params.id);
 
-  const comment = await commentService.createComment(
-    content,
-    post.id,
-    req.userId!
-  );
+    if (!postId) return res.sendStatus(STATUS_CODE.NOT_FOUND); // not found post
 
-  if (!comment) return res.sendStatus(STATUS_CODE.BAD_REQUEST); // faild create comment
+    const result = await this.postService.deletePost(postId.id);
 
-  return res.status(STATUS_CODE.CREATED).json(comment);
-};
+    if (!result) return res.status(STATUS_CODE.BAD_REQUEST); // faild delete post
+
+    return res.sendStatus(STATUS_CODE.NO_CONTENT);
+  }
+}

@@ -8,9 +8,9 @@ import {
 } from '../models/blogs.models';
 import { PostViewModel } from '../models/posts.models';
 import { BlogQueryRepo } from '../repositories/blogs/blog.query.repo';
-import { postQueryRepo } from '../repositories/posts/post.query.repo';
+import { PostQueryRepo } from '../repositories/posts/post.query.repo';
 import { BlogService } from '../service/blog.service';
-import { postService } from '../service/post.service';
+import { PostService } from '../service/post.service';
 import { IWithPagination } from '../types/pagination.interface';
 import {
   PaginationQueryParams,
@@ -25,7 +25,9 @@ import { STATUS_CODE } from '../utils/status.code';
 export class BlogController {
   constructor(
     protected blogQueryRepo: BlogQueryRepo,
-    protected blogService: BlogService
+    protected blogService: BlogService,
+    protected postQueryRepo: PostQueryRepo,
+    protected postService: PostService
   ) {}
 
   async getAllBlogs(
@@ -64,7 +66,7 @@ export class BlogController {
 
     if (!blogId) return res.sendStatus(STATUS_CODE.NOT_FOUND); // not found blog by this blogId
 
-    const posts = await postQueryRepo.getAllPostsByOneBlog(
+    const posts = await this.postQueryRepo.getAllPostsByOneBlog(
       blogId.id,
       pagination
     );
@@ -99,7 +101,7 @@ export class BlogController {
 
     if (!blogId) return res.sendStatus(STATUS_CODE.NOT_FOUND); // not found blog
 
-    const post = await postService.createPost({
+    const post = await this.postService.createPost({
       blogId: blogId.id,
       content,
       shortDescription,
