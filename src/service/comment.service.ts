@@ -1,17 +1,23 @@
-import { ObjectId, WithId } from 'mongodb';
+import { WithId } from 'mongodb';
 
 import { ICommentsDb } from '../db/db.types';
 import { converterComment } from '../helpers/converterToValidFormatData/converter.comment';
 import { CommentViewModel } from '../models/comments.models';
-import { commentRepo } from '../repositories/comments/comment.repo';
+import { CommentRepo } from '../repositories/comments/comment.repo';
 import { userQueryRepo } from '../repositories/users/user.composition';
+import { UserQueryRepo } from '../repositories/users/user.query.repo';
 
-export const commentService = {
-  createComment: async (
+export class CommentService {
+  constructor(
+    protected userQueryRepo: UserQueryRepo,
+    protected commentRepo: CommentRepo
+  ) {}
+
+  async createComment(
     content: string,
     postId: string,
     userId: string
-  ): Promise<CommentViewModel | null> => {
+  ): Promise<CommentViewModel | null> {
     const user = await userQueryRepo.getUserById(userId);
 
     if (!user) return null;
@@ -23,21 +29,19 @@ export const commentService = {
       createdAt: new Date().toISOString(),
     };
 
-    const result = await commentRepo.createComment(newComment);
+    const result = await this.commentRepo.createComment(newComment);
 
     return result ? converterComment(result) : null;
-  },
+  }
 
-  updateComment: async (
+  async updateComment(
     commentId: string,
     content: string
-  ): Promise<WithId<ICommentsDb> | null> => {
-    return await commentRepo.updateComment(commentId, content);
-  },
+  ): Promise<WithId<ICommentsDb> | null> {
+    return await this.commentRepo.updateComment(commentId, content);
+  }
 
-  deleteComment: async (
-    commentId: string
-  ): Promise<WithId<ICommentsDb> | null> => {
-    return await commentRepo.deleteComment(commentId);
-  },
-};
+  async deleteComment(commentId: string): Promise<WithId<ICommentsDb> | null> {
+    return await this.commentRepo.deleteComment(commentId);
+  }
+}

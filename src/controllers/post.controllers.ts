@@ -3,9 +3,9 @@ import { Response } from 'express';
 import { paginationQueryParamsValidation } from '../helpers/request.query.params.validation';
 import { CommentInputModel, CommentViewModel } from '../models/comments.models';
 import { PostInputModel, PostViewModel } from '../models/posts.models';
-import { commentQueryRepo } from '../repositories/comments/comment.query.repo';
+import { CommentQueryRepo } from '../repositories/comments/comment.query.repo';
 import { PostQueryRepo } from '../repositories/posts/post.query.repo';
-import { commentService } from '../service/comment.service';
+import { CommentService } from '../service/comment.service';
 import { PostService } from '../service/post.service';
 import { IWithPagination } from '../types/pagination.interface';
 import {
@@ -21,7 +21,9 @@ import { STATUS_CODE } from '../utils/status.code';
 export class PostController {
   constructor(
     protected postQueryRepo: PostQueryRepo,
-    protected postService: PostService
+    protected postService: PostService,
+    protected commentQueryRepo: CommentQueryRepo,
+    protected commentService: CommentService
   ) {}
 
   async getAllPosts(
@@ -58,7 +60,10 @@ export class PostController {
 
     const pagination = paginationQueryParamsValidation(req.query);
 
-    const comments = await commentQueryRepo.getAllComments(post.id, pagination);
+    const comments = await this.commentQueryRepo.getAllComments(
+      post.id,
+      pagination
+    );
 
     return res.status(STATUS_CODE.OK).json(comments);
   }
@@ -91,7 +96,7 @@ export class PostController {
 
     if (!post) return res.sendStatus(STATUS_CODE.NOT_FOUND); // not found post by postId from req.params.postId
 
-    const comment = await commentService.createComment(
+    const comment = await this.commentService.createComment(
       content,
       post.id,
       req.userId!

@@ -1,5 +1,6 @@
-import { Response, NextFunction } from 'express';
-import { commentQueryRepo } from '../repositories/comments/comment.query.repo';
+import { NextFunction, Response } from 'express';
+
+import { commentQueryRepo } from '../repositories/comments/comment.composition';
 import { TypeRequestParams } from '../types/req-res.types';
 import { STATUS_CODE } from '../utils/status.code';
 
