@@ -3,6 +3,7 @@ import { AuthController } from '../../controllers/auth.controllers';
 import { emailManager } from '../../managers/email.managers';
 import { AuthService } from '../../service/auth.service';
 import { userSecurityDevicesRepo } from '../security-devices/secutity.devices.composition';
+import { userQueryRepo, userService } from '../users/user.composition';
 import { AuthRepo } from './auth.repo';
 import { TokenRepo } from './token.repo';
 
@@ -20,5 +21,7 @@ export const authController = new AuthController(
   tokenRepo,
   authService,
   jwtService,
+  userQueryRepo,
+  userService,
   userSecurityDevicesRepo
 );
