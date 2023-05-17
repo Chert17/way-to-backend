@@ -69,7 +69,7 @@ authgRouter.post(
   checkRequestRateLimitMiddleware,
   emailSchema,
   validateRequestMiddleware,
-  authController.passwordRecovery.bind(authController)
+  authController.recoveryPassword.bind(authController)
 );
 
 authgRouter.post(
