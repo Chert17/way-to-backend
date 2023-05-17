@@ -1,4 +1,5 @@
 import { CommentatorInfo } from '../models/comments.models';
+import { LikeStatus } from '../models/likes.models';
 
 export interface IBlogDb {
   name: string;
@@ -38,11 +39,17 @@ export interface IUserRecoveryPasswordDb {
   expirationDate: Date;
 }
 
+export interface ICommentsLikesInfoDb {
+  userId: string;
+  status: LikeStatus;
+}
+
 export interface ICommentsDb {
   content: string;
   postId: string;
   commentatorInfo: CommentatorInfo;
   createdAt: string;
+  likesInfo: ICommentsLikesInfoDb[];
 }
 
 export interface IUserSecurityDevicesDb {

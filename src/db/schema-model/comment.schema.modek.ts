@@ -1,6 +1,15 @@
 import mongoose from 'mongoose';
 
-import { ICommentsDb } from '../db.types';
+import { LikeStatus } from '../../models/likes.models';
+import { ICommentsDb, ICommentsLikesInfoDb } from '../db.types';
+
+const CommentLikeInfoSchema = new mongoose.Schema<ICommentsLikesInfoDb>(
+  {
+    userId: { type: String, require: true },
+    status: { type: String, enum: LikeStatus, require: true },
+  },
+  { timestamps: true }
+);
 
 const CommentSchema = new mongoose.Schema<ICommentsDb>({
   content: { type: String, require: true, length: { max: 300 } },
@@ -11,8 +20,9 @@ const CommentSchema = new mongoose.Schema<ICommentsDb>({
       required: true,
       userLogin: { type: String, required: true },
     },
-    createdAt: { type: String, require: true, default: Date.now() },
   },
+  createdAt: { type: String, require: true, default: Date.now().toString() },
+  likesInfo: [CommentLikeInfoSchema],
 });
 
 export const CommentModel = mongoose.model<ICommentsDb>(
