@@ -1,12 +1,12 @@
 import { IRateLimitDb } from '../../db/db.types';
 import { RateLimitModel } from '../../db/schema-model/rate.limit.schema.model';
 
-export const rateLimitRepo = {
-  addRequest: async ({
+export class RateLimitRepo {
+  async addRequest({
     ip,
     url,
     date,
-  }: IRateLimitDb): Promise<IRateLimitDb | null> => {
+  }: IRateLimitDb): Promise<IRateLimitDb | null> {
     try {
       const rateLimit = new RateLimitModel({ ip, url, date });
 
@@ -18,13 +18,13 @@ export const rateLimitRepo = {
     } catch (error) {
       return null;
     }
-  },
+  }
 
-  getTotalCountRequest: async ({
+  async getTotalCountRequest({
     ip,
     url,
     date,
-  }: IRateLimitDb): Promise<number | null> => {
+  }: IRateLimitDb): Promise<number | null> {
     try {
       const totalCount = await RateLimitModel.countDocuments({
         ip,
@@ -38,5 +38,5 @@ export const rateLimitRepo = {
     } catch (error) {
       return null;
     }
-  },
-};
+  }
+}
