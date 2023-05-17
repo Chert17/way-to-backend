@@ -6,12 +6,11 @@ import {
 } from '../../db/db.types';
 import { UserConfirmEmailModel } from '../../db/schema-model/user.confirm.email.schema.model';
 import { UserRecoveryPasswordModel } from '../../db/schema-model/user.recovery.password';
-import { UserModel } from '../../db/schema-model/user.schema.model';
 
-export const authRepo = {
-  userConfirmEmail: async (
+export class AuthRepo {
+  async userConfirmEmail(
     emailConfirmation: IUserConfirmEmailDb
-  ): Promise<WithId<IUserConfirmEmailDb> | null> => {
+  ): Promise<WithId<IUserConfirmEmailDb> | null> {
     try {
       const confirmEmail = new UserConfirmEmailModel(emailConfirmation);
 
@@ -23,11 +22,11 @@ export const authRepo = {
     } catch (error) {
       return null;
     }
-  },
+  }
 
-  getConfirmEmailByCode: async (
+  async getConfirmEmailByCode(
     confirmCode: string
-  ): Promise<WithId<IUserConfirmEmailDb> | null> => {
+  ): Promise<WithId<IUserConfirmEmailDb> | null> {
     try {
       const code = await UserConfirmEmailModel.findOne({
         confirmationCode: confirmCode,
@@ -39,11 +38,11 @@ export const authRepo = {
     } catch (error) {
       return null;
     }
-  },
+  }
 
-  getConfirmEmailByUserId: async (
+  async getConfirmEmailByUserId(
     userId: string
-  ): Promise<WithId<IUserConfirmEmailDb> | null> => {
+  ): Promise<WithId<IUserConfirmEmailDb> | null> {
     try {
       const result = await UserConfirmEmailModel.findOne({ userId });
 
@@ -53,11 +52,11 @@ export const authRepo = {
     } catch (error) {
       return null;
     }
-  },
+  }
 
-  updateConfirmEmailStatus: async (
+  async updateConfirmEmailStatus(
     id: string
-  ): Promise<WithId<IUserConfirmEmailDb> | null> => {
+  ): Promise<WithId<IUserConfirmEmailDb> | null> {
     try {
       if (!ObjectId.isValid(id)) return null;
 
@@ -73,12 +72,12 @@ export const authRepo = {
     } catch (error) {
       return null;
     }
-  },
+  }
 
-  updateConfirmCodeByUserId: async (
+  async updateConfirmCodeByUserId(
     userId: string,
     newCode: string
-  ): Promise<WithId<IUserConfirmEmailDb> | null> => {
+  ): Promise<WithId<IUserConfirmEmailDb> | null> {
     try {
       if (!ObjectId.isValid(userId)) return null;
 
@@ -94,21 +93,21 @@ export const authRepo = {
     } catch (error) {
       return null;
     }
-  },
+  }
 
-  recoveryPassword: async (
+  async recoveryPassword(
     recoveryPasswordDate: IUserRecoveryPasswordDb
-  ): Promise<WithId<IUserRecoveryPasswordDb> | null> => {
+  ): Promise<WithId<IUserRecoveryPasswordDb> | null> {
     try {
       return await UserRecoveryPasswordModel.create(recoveryPasswordDate);
     } catch (error) {
       return null;
     }
-  },
+  }
 
-  getRecoveryPasswordDateByCode: async (
+  async getRecoveryPasswordDateByCode(
     confirmCode: string
-  ): Promise<WithId<IUserRecoveryPasswordDb> | null> => {
+  ): Promise<WithId<IUserRecoveryPasswordDb> | null> {
     try {
       const code = await UserRecoveryPasswordModel.findOne({
         confirmationCode: confirmCode,
@@ -120,5 +119,5 @@ export const authRepo = {
     } catch (error) {
       return null;
     }
-  },
-};
+  }
+}

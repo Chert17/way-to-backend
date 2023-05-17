@@ -1,9 +1,8 @@
-import { NextFunction, Request, Response } from "express";
+import { NextFunction, Request, Response } from 'express';
 
-import { jwtService } from "../application/jwt.service";
-import { getTokenIat } from "../helpers/get.token.iat";
-import { tokenRepo } from "../repositories/auth/token.repo";
-import { STATUS_CODE } from "../utils/status.code";
+import { getTokenIat } from '../helpers/get.token.iat';
+import { jwtService, tokenRepo } from '../repositories/auth/auth.composition';
+import { STATUS_CODE } from '../utils/status.code';
 
 export const checkRefreshTokenMiddleware = async (
   req: Request,

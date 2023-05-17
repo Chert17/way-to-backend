@@ -5,14 +5,15 @@ import { IUserDb } from '../db/db.types';
 import { converterUser } from '../helpers/converterToValidFormatData/converter.user';
 import { generateHash } from '../helpers/generate.hash';
 import { UserInputModel, UserViewModel } from '../models/users.models';
-import { authRepo } from '../repositories/auth/auth.repo';
+import { AuthRepo } from '../repositories/auth/auth.repo';
 import { UserQueryRepo } from '../repositories/users/user.query.repo';
 import { UserRepo } from '../repositories/users/user.repo';
 
 export class UserService {
   constructor(
     protected userQueryRepo: UserQueryRepo,
-    protected userRepo: UserRepo
+    protected userRepo: UserRepo,
+    protected authRepo: AuthRepo
   ) {}
 
   async createUser({
@@ -43,9 +44,8 @@ export class UserService {
     recoveryCode: string,
     newPassword: string
   ): Promise<WithId<IUserDb> | null> {
-    const recoveryPasswordDate = await authRepo.getRecoveryPasswordDateByCode(
-      recoveryCode
-    );
+    const recoveryPasswordDate =
+      await this.authRepo.getRecoveryPasswordDateByCode(recoveryCode);
 
     const { userEmail } = recoveryPasswordDate!; // because I'm check in recoveryPasswordRequestBodySchema
 

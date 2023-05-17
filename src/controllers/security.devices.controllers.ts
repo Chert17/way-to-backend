@@ -1,10 +1,9 @@
-import { Request, Response } from "express";
+import { Request, Response } from 'express';
 
-import { jwtService } from "../application/jwt.service";
-import { userSecurityDevicesQueryRepo } from "../repositories/security-devices/security.devices.query.repo";
-import { userSecurityDevicesRepo } from "../repositories/security-devices/security.devices.repo";
-import { TypeRequestParams } from "../types/req-res.types";
-import { STATUS_CODE } from "../utils/status.code";
+import { userSecurityDevicesQueryRepo } from '../repositories/security-devices/security.devices.query.repo';
+import { userSecurityDevicesRepo } from '../repositories/security-devices/security.devices.repo';
+import { TypeRequestParams } from '../types/req-res.types';
+import { STATUS_CODE } from '../utils/status.code';
 
 export const getAllDevicesActiveByUser = async (
   req: Request,

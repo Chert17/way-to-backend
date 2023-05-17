@@ -1,7 +1,7 @@
-import { NextFunction, Request, Response } from "express";
+import { NextFunction, Request, Response } from 'express';
 
-import { jwtService } from "../application/jwt.service";
-import { STATUS_CODE } from "../utils/status.code";
+import { jwtService } from '../repositories/auth/auth.composition';
+import { STATUS_CODE } from '../utils/status.code';
 
 export const jwtAuthMiddleware = async (
   req: Request,
