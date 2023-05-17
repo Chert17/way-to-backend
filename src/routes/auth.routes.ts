@@ -1,46 +1,39 @@
 import { Router } from 'express';
 
-import {
-  confirmRegistrationController,
-  emailResendingController,
-  getMeController,
-  loginController,
-  logoutController,
-  newPasswordForUserController,
-  passwordRecoveryController,
-  refreshTokenController,
-  registrationController,
-} from '../controllers/auth.controllers';
 import { checkRefreshTokenMiddleware } from '../middlewares/checkRefreshTokenMiddleware';
 import { checkRequestRateLimitMiddleware } from '../middlewares/checkRequestRateLimitMiddleware';
 import { jwtAuthMiddleware } from '../middlewares/jwtAuthMiddleware';
 import { validateRequestMiddleware } from '../middlewares/validateRequestMiddleware';
+import { authController } from '../repositories/auth/auth.composition';
 import { authLoginRequestBodySchema } from '../validation/auth_login/auth.login.request.body.schema';
 import { authRegisterConfirmRequestBodySchema } from '../validation/auth_login/auth.register.confirm.request.body.schema';
 import { authRegisterRequestBodySchema } from '../validation/auth_login/auth.register.request.body.schema';
 import { authResendingRequestBodySchema } from '../validation/auth_login/auth.resending.request.body.schema';
 import { recoveryPasswordRequestBodySchema } from '../validation/auth_login/recovery.password.request.body.schema';
 import { emailSchema } from '../validation/common/email.schema';
-import { passwordSchema } from '../validation/common/password.schema';
 
 export const authgRouter = Router();
+
+authgRouter.get(
+  '/me',
+  jwtAuthMiddleware,
+  authController.getMe.bind(authController)
+);
 
 authgRouter.post(
   '/login',
   checkRequestRateLimitMiddleware,
   authLoginRequestBodySchema,
   validateRequestMiddleware,
-  loginController
+  authController.login.bind(authController)
 );
-
-authgRouter.get('/me', jwtAuthMiddleware, getMeController);
 
 authgRouter.post(
   '/registration',
   checkRequestRateLimitMiddleware,
   authRegisterRequestBodySchema,
   validateRequestMiddleware,
-  registrationController
+  authController.registration.bind(authController)
 );
 
 authgRouter.post(
@@ -48,7 +41,7 @@ authgRouter.post(
   checkRequestRateLimitMiddleware,
   authRegisterConfirmRequestBodySchema,
   validateRequestMiddleware,
-  confirmRegistrationController
+  authController.confirmRegistration.bind(authController)
 );
 
 authgRouter.post(
@@ -56,23 +49,27 @@ authgRouter.post(
   checkRequestRateLimitMiddleware,
   authResendingRequestBodySchema,
   validateRequestMiddleware,
-  emailResendingController
+  authController.emailResending.bind(authController)
 );
 
 authgRouter.post(
   '/refresh-token',
   checkRefreshTokenMiddleware,
-  refreshTokenController
+  authController.refreshToken.bind(authController)
 );
 
-authgRouter.post('/logout', checkRefreshTokenMiddleware, logoutController);
+authgRouter.post(
+  '/logout',
+  checkRefreshTokenMiddleware,
+  authController.logout.bind(authController)
+);
 
 authgRouter.post(
   '/password-recovery',
   checkRequestRateLimitMiddleware,
   emailSchema,
   validateRequestMiddleware,
-  passwordRecoveryController
+  authController.passwordRecovery.bind(authController)
 );
 
 authgRouter.post(
@@ -80,5 +77,5 @@ authgRouter.post(
   checkRequestRateLimitMiddleware,
   recoveryPasswordRequestBodySchema,
   validateRequestMiddleware,
-  newPasswordForUserController
+  authController.newPasswordForUser.bind(authController)
 );

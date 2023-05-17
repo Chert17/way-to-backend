@@ -1,17 +1,17 @@
-import { sign, verify } from "jsonwebtoken";
-import { ObjectId } from "mongodb";
+import { sign, verify } from 'jsonwebtoken';
+import { ObjectId } from 'mongodb';
 
-import { TokensViewModel } from "../models/auth.models";
-import { SETTINGS } from "../utils/settings";
+import { TokensViewModel } from '../models/auth.models';
+import { SETTINGS } from '../utils/settings';
 
 const { JWT_SECRET, EXPIRESIN_ACCESS_TOKEN, EXPIRESIN_REFRESH_TOKEN } =
   SETTINGS;
 
-export const jwtService = {
-  createJWT: async (
+export class JwtService {
+  async createJWT(
     userId: string,
     deviceId: string
-  ): Promise<TokensViewModel | null> => {
+  ): Promise<TokensViewModel | null> {
     try {
       const accessToken = sign({ userId, deviceId }, JWT_SECRET, {
         expiresIn: EXPIRESIN_ACCESS_TOKEN,
@@ -24,9 +24,9 @@ export const jwtService = {
     } catch (error) {
       return null;
     }
-  },
+  }
 
-  getUserIdByToken: async (token: string): Promise<ObjectId | null> => {
+  async getUserIdByToken(token: string): Promise<ObjectId | null> {
     try {
       const result = verify(token, JWT_SECRET) as { userId: ObjectId };
 
@@ -34,9 +34,9 @@ export const jwtService = {
     } catch (error) {
       return null;
     }
-  },
+  }
 
-  getDeviceIdByToken: async (token: string): Promise<string | null> => {
+  async getDeviceIdByToken(token: string): Promise<string | null> {
     try {
       const result = verify(token, JWT_SECRET) as { deviceId: string };
 
@@ -44,5 +44,5 @@ export const jwtService = {
     } catch (error) {
       return null;
     }
-  },
-};
+  }
+}

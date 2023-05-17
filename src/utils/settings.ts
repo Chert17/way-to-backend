@@ -7,4 +7,6 @@ export const SETTINGS = {
   TEST_PASS: process.env.TEST_PASS || 'uykiowyjospmpmqr',
   EXPIRESIN_ACCESS_TOKEN: process.env.EXPIRESIN_ACCESS_TOKEN || '30m',
   EXPIRESIN_REFRESH_TOKEN: process.env.EXPIRESIN_REFRESH_TOKEN || '60m',
+  COOKIE_HTTP_ONLY: process.env.COOKIE_HTTP_ONLY || false,
+  COOKIE_SECURE: process.env.COOKIE_SECURE || false,
 };

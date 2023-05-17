@@ -1,28 +1,30 @@
-import { Router } from "express";
+import { Router } from 'express';
 
-import {
-  deleteAllDevicesExpectCurrentSessionController,
-  deleteOneSessionByUserDevice,
-  getAllDevicesActiveByUser
-} from "../controllers/security.devices.controllers";
-import { checkRefreshTokenMiddleware } from "../middlewares/checkRefreshTokenMiddleware";
+import { checkRefreshTokenMiddleware } from '../middlewares/checkRefreshTokenMiddleware';
+import { userSecurityDevicesController } from '../repositories/security-devices/secutity.devices.composition';
 
 export const secutityDeviceRouter = Router();
 
 secutityDeviceRouter.get(
   '/devices',
   checkRefreshTokenMiddleware,
-  getAllDevicesActiveByUser
+  userSecurityDevicesController.getAllDevicesActiveByUser.bind(
+    userSecurityDevicesController
+  )
 );
 
 secutityDeviceRouter.delete(
   '/devices',
   checkRefreshTokenMiddleware,
-  deleteAllDevicesExpectCurrentSessionController
+  userSecurityDevicesController.deleteAllDevicesExpectCurrentSession.bind(
+    userSecurityDevicesController
+  )
 );
 
 secutityDeviceRouter.delete(
   '/devices/:deviceId',
   checkRefreshTokenMiddleware,
-  deleteOneSessionByUserDevice
+  userSecurityDevicesController.deleteOneSessionByUserDevice.bind(
+    userSecurityDevicesController
+  )
 );

@@ -7,7 +7,7 @@ import { UserViewModel } from '../../models/users.models';
 import { IWithPagination } from '../../types/pagination.interface';
 import { ValidPaginationQueryParams } from '../../types/req-res.types';
 
-export const userQueryRepo = {
+export class UserQueryRepo {
   async getAllUsers(
     login: string | null,
     email: string | null,
@@ -46,9 +46,9 @@ export const userQueryRepo = {
       totalCount,
       items: users.map(converterUser),
     };
-  },
+  }
 
-  getUserById: async (id: string): Promise<UserViewModel | null> => {
+  async getUserById(id: string): Promise<UserViewModel | null> {
     try {
       if (!ObjectId.isValid(id)) return null;
 
@@ -60,9 +60,9 @@ export const userQueryRepo = {
     } catch (error) {
       return null;
     }
-  },
+  }
 
-  getUserByEmail: async (email: string): Promise<UserViewModel | null> => {
+  async getUserByEmail(email: string): Promise<UserViewModel | null> {
     try {
       const user = await UserModel.findOne({ email }).lean();
 
@@ -72,11 +72,11 @@ export const userQueryRepo = {
     } catch (error) {
       return null;
     }
-  },
+  }
 
-  checkUserCredentials: async (
+  async checkUserCredentials(
     loginOrEmail: string
-  ): Promise<WithId<IUserDb> | null> => {
+  ): Promise<WithId<IUserDb> | null> {
     try {
       const user = await UserModel.findOne({
         $or: [{ email: loginOrEmail }, { login: loginOrEmail }],
@@ -88,5 +88,5 @@ export const userQueryRepo = {
     } catch (error) {
       return null;
     }
-  },
-};
+  }
+}

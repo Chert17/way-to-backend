@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 
-import { jwtService } from '../application/jwt.service';
+import { JwtService } from '../application/jwt.service';
 import { getTokenIat } from '../helpers/get.token.iat';
 import {
   MeViewMOdel,
@@ -8,151 +8,159 @@ import {
   RegisterInputModel,
 } from '../models/auth.models';
 import { LoginInputModel } from '../models/users.models';
-import { tokenRepo } from '../repositories/auth/token.repo';
-import { userSecurityDevicesRepo } from '../repositories/security-devices/security.devices.repo';
-import { userQueryRepo } from '../repositories/users/user.query.repo';
-import { authService } from '../service/auth.service';
-import { userService } from '../service/user.service';
+import { TokenRepo } from '../repositories/auth/token.repo';
+import { UserSecurityDevicesRepo } from '../repositories/security-devices/security.devices.repo';
+import {
+  userQueryRepo,
+  userService,
+} from '../repositories/users/user.composition';
+import { AuthService } from '../service/auth.service';
 import { TypeRequestBody } from '../types/req-res.types';
+import { SETTINGS } from '../utils/settings';
 import { STATUS_CODE } from '../utils/status.code';
 
-export const loginController = async (
-  req: TypeRequestBody<LoginInputModel>,
-  res: Response
-) => {
-  const { ip } = req;
+const { COOKIE_HTTP_ONLY, COOKIE_SECURE } = SETTINGS;
 
-  const deviceName = req.headers['user-agent'] ?? 'client';
+export class AuthController {
+  constructor(
+    protected tokenRepo: TokenRepo,
+    protected authService: AuthService,
+    protected jwtService: JwtService,
+    protected userSecurityDevicesRepo: UserSecurityDevicesRepo
+  ) {}
 
-  const { loginOrEmail, password } = req.body;
+  async login(req: TypeRequestBody<LoginInputModel>, res: Response) {
+    const { ip } = req;
 
-  const tokens = await authService.loginUser({
-    loginOrEmail,
-    password,
-    ip,
-    deviceName,
-  });
+    const deviceName = req.headers['user-agent'] ?? 'client';
 
-  if (!tokens) return res.sendStatus(STATUS_CODE.UNAUTHORIZED); // faild login user & faild create tokens
+    const { loginOrEmail, password } = req.body;
 
-  _refreshTokenToCookieResponse(res, tokens.refreshToken);
+    const tokens = await this.authService.loginUser({
+      loginOrEmail,
+      password,
+      ip,
+      deviceName,
+    });
 
-  return res.status(STATUS_CODE.OK).json({ accessToken: tokens.accessToken });
-};
+    if (!tokens) return res.sendStatus(STATUS_CODE.UNAUTHORIZED); // faild login user & faild create tokens
 
-export const getMeController = async (req: Request, res: Response) => {
-  const user = await userQueryRepo.getUserById(req.userId!); // because i'm checking in jwtAuthMiddleware
+    this._refreshTokenToCookieResponse(res, tokens.refreshToken);
 
-  if (!user) return res.sendStatus(STATUS_CODE.BAD_REQUEST); // not found user by req.userId
+    return res.status(STATUS_CODE.OK).json({ accessToken: tokens.accessToken });
+  }
 
-  const viewUser: MeViewMOdel = {
-    userId: user.id,
-    login: user.login,
-    email: user.email,
-  };
+  async getMe(req: Request, res: Response) {
+    const user = await userQueryRepo.getUserById(req.userId!); // because i'm checking in jwtAuthMiddleware
 
-  return res.status(STATUS_CODE.OK).json(viewUser);
-};
+    if (!user) return res.sendStatus(STATUS_CODE.BAD_REQUEST); // not found user by req.userId
 
-export const registrationController = async (
-  req: TypeRequestBody<RegisterInputModel>,
-  res: Response
-) => {
-  const { email, login, password } = req.body; // check in authRegisterRequestBodySchema
+    const viewUser: MeViewMOdel = {
+      userId: user.id,
+      login: user.login,
+      email: user.email,
+    };
 
-  const result = await authService.registerUser({ email, login, password });
+    return res.status(STATUS_CODE.OK).json(viewUser);
+  }
 
-  if (!result) return res.sendStatus(STATUS_CODE.BAD_REQUEST); // faild register user
+  async registration(req: TypeRequestBody<RegisterInputModel>, res: Response) {
+    const { email, login, password } = req.body; // check in authRegisterRequestBodySchema
 
-  return res.sendStatus(STATUS_CODE.NO_CONTENT);
-};
+    const result = await this.authService.registerUser({
+      email,
+      login,
+      password,
+    });
 
-export const confirmRegistrationController = async (
-  req: Request,
-  res: Response
-) => {
-  return res.sendStatus(STATUS_CODE.NO_CONTENT); // all checks are carried out in authRegisterConfirmRequestBodySchema
-};
+    if (!result) return res.sendStatus(STATUS_CODE.BAD_REQUEST); // faild register user
 
-export const emailResendingController = async (
-  req: TypeRequestBody<{ email: string }>,
-  res: Response
-) => {
-  const result = await authService.updateUserConfirmCode(req.body.email);
+    return res.sendStatus(STATUS_CODE.NO_CONTENT);
+  }
 
-  if (!result) return res.sendStatus(STATUS_CODE.BAD_REQUEST); // faild update confirm code for user
+  async confirmRegistration(req: Request, res: Response) {
+    return res.sendStatus(STATUS_CODE.NO_CONTENT); // all checks are carried out in authRegisterConfirmRequestBodySchema
+  }
 
-  return res.sendStatus(STATUS_CODE.NO_CONTENT);
-};
+  async emailResending(req: TypeRequestBody<{ email: string }>, res: Response) {
+    const result = await this.authService.updateUserConfirmCode(req.body.email);
 
-export const refreshTokenController = async (req: Request, res: Response) => {
-  const { userId, deviceId, ip } = req;
+    if (!result) return res.sendStatus(STATUS_CODE.BAD_REQUEST); // faild update confirm code for user
 
-  const newTokens = await jwtService.createJWT(userId!, deviceId!); // because i'm checking in checkRefreshTokenMiddleware
+    return res.sendStatus(STATUS_CODE.NO_CONTENT);
+  }
 
-  if (!newTokens) return res.sendStatus(STATUS_CODE.UNAUTHORIZED); // faild create tokens
+  async refreshToken(req: Request, res: Response) {
+    const { userId, deviceId, ip } = req;
 
-  const issuesAt = getTokenIat(newTokens.refreshToken);
+    const newTokens = await this.jwtService.createJWT(userId!, deviceId!); // because i'm checking in checkRefreshTokenMiddleware
 
-  const result = await tokenRepo.updateRefreshToken(
-    userId!, // because i'm checking in checkRefreshTokenMiddleware
-    deviceId!, // because i'm checking in checkRefreshTokenMiddleware
-    ip,
-    issuesAt
-  );
+    if (!newTokens) return res.sendStatus(STATUS_CODE.UNAUTHORIZED); // faild create tokens
 
-  if (!result) return res.sendStatus(STATUS_CODE.UNAUTHORIZED); // faild add refreshToken to addInvalidRefreshToken
+    const issuesAt = getTokenIat(newTokens.refreshToken);
 
-  _refreshTokenToCookieResponse(res, newTokens.refreshToken);
+    const result = await this.tokenRepo.updateRefreshToken(
+      userId!, // because i'm checking in checkRefreshTokenMiddleware
+      deviceId!, // because i'm checking in checkRefreshTokenMiddleware
+      ip,
+      issuesAt
+    );
 
-  return res
-    .status(STATUS_CODE.OK)
-    .json({ accessToken: newTokens.accessToken });
-};
+    if (!result) return res.sendStatus(STATUS_CODE.UNAUTHORIZED); // faild add refreshToken to addInvalidRefreshToken
 
-export const logoutController = async (req: Request, res: Response) => {
-  const { userId, deviceId, ip } = req;
+    this._refreshTokenToCookieResponse(res, newTokens.refreshToken);
 
-  const result = await userSecurityDevicesRepo.deleteOneSessionByUserDevice(
-    userId!, // because i'm checking in checkRefreshTokenMiddleware
-    deviceId!, // because i'm checking in checkRefreshTokenMiddleware
-    ip
-  );
+    return res
+      .status(STATUS_CODE.OK)
+      .json({ accessToken: newTokens.accessToken });
+  }
 
-  if (!result) return res.sendStatus(STATUS_CODE.UNAUTHORIZED); // faild add refreshToken to addInvalidRefreshToken
+  async logout(req: Request, res: Response) {
+    const { userId, deviceId, ip } = req;
 
-  res.clearCookie('refreshToken');
+    const result =
+      await this.userSecurityDevicesRepo.deleteOneSessionByUserDevice(
+        userId!, // because i'm checking in checkRefreshTokenMiddleware
+        deviceId!, // because i'm checking in checkRefreshTokenMiddleware
+        ip
+      );
 
-  return res.sendStatus(STATUS_CODE.NO_CONTENT);
-};
+    if (!result) return res.sendStatus(STATUS_CODE.UNAUTHORIZED); // faild add refreshToken to addInvalidRefreshToken
 
-export const passwordRecoveryController = async (
-  req: TypeRequestBody<{ email: string }>,
-  res: Response
-) => {
-  await authService.recoveryPasswordForUser(req.body.email);
+    res.clearCookie('refreshToken');
 
-  return res.sendStatus(STATUS_CODE.NO_CONTENT);
-};
+    return res.sendStatus(STATUS_CODE.NO_CONTENT);
+  }
 
-export const newPasswordForUserController = async (
-  req: TypeRequestBody<NewPasswordRecoveryInputModel>,
-  res: Response
-) => {
-  const { newPassword, recoveryCode } = req.body;
+  async passwordRecovery(
+    req: TypeRequestBody<{ email: string }>,
+    res: Response
+  ) {
+    await this.authService.recoveryPasswordForUser(req.body.email);
 
-  const result = await userService.updateUserPassword(
-    recoveryCode,
-    newPassword
-  );
+    return res.sendStatus(STATUS_CODE.NO_CONTENT);
+  }
 
-  if (!result) return res.sendStatus(STATUS_CODE.BAD_REQUEST); // faild update new password for user
+  async newPasswordForUser(
+    req: TypeRequestBody<NewPasswordRecoveryInputModel>,
+    res: Response
+  ) {
+    const { newPassword, recoveryCode } = req.body;
 
-  return res.sendStatus(STATUS_CODE.NO_CONTENT);
-};
+    const result = await userService.updateUserPassword(
+      recoveryCode,
+      newPassword
+    );
 
-const _refreshTokenToCookieResponse = (res: Response, refreshToken: string) =>
-  res.cookie('refreshToken ', refreshToken, {
-    httpOnly: true,
-    secure: true,
-  });
+    if (!result) return res.sendStatus(STATUS_CODE.BAD_REQUEST); // faild update new password for user
+
+    return res.sendStatus(STATUS_CODE.NO_CONTENT);
+  }
+
+  private _refreshTokenToCookieResponse(res: Response, refreshToken: string) {
+    return res.cookie('refreshToken ', refreshToken, {
+      httpOnly: Boolean(COOKIE_HTTP_ONLY),
+      secure: Boolean(COOKIE_SECURE),
+    });
+  }
+}

@@ -3,16 +3,22 @@ import { WithId } from 'mongodb';
 import { IPostDb } from '../db/db.types';
 import { converterPost } from '../helpers/converterToValidFormatData/converter.post';
 import { PostInputModel, PostViewModel } from '../models/posts.models';
-import { blogQueryRepo } from '../repositories/blogs/blog.query.repo';
-import { postRepo } from '../repositories/posts/post.repo';
+import { blogQueryRepo } from '../repositories/blogs/blog.composition';
+import { BlogQueryRepo } from '../repositories/blogs/blog.query.repo';
+import { PostRepo } from '../repositories/posts/post.repo';
 
-export const postService = {
-  createPost: async ({
+export class PostService {
+  constructor(
+    protected blogQueryRepo: BlogQueryRepo,
+    protected postRepo: PostRepo
+  ) {}
+
+  async createPost({
     blogId,
     content,
     shortDescription,
     title,
-  }: PostInputModel): Promise<PostViewModel | null> => {
+  }: PostInputModel): Promise<PostViewModel | null> {
     const blog = await blogQueryRepo.getBlogById(blogId);
 
     if (!blog) return null; // not found blog
@@ -26,27 +32,27 @@ export const postService = {
       createdAt: new Date().toISOString(),
     };
 
-    const result = await postRepo.createPost(newPost);
+    const result = await this.postRepo.createPost(newPost);
 
     return result ? converterPost(result) : null;
-  },
+  }
 
-  updatePost: async (
+  async updatePost(
     id: string,
     body: PostInputModel
-  ): Promise<WithId<IPostDb> | null> => {
+  ): Promise<WithId<IPostDb> | null> {
     const { blogId, content, shortDescription, title } = body;
 
-    return await postRepo.updatePost({
+    return await this.postRepo.updatePost({
       id,
       blogId,
       content,
       shortDescription,
       title,
     });
-  },
+  }
 
-  deletePost: async (id: string): Promise<WithId<IPostDb> | null> => {
-    return await postRepo.deletePost(id);
-  },
-};
+  async deletePost(id: string): Promise<WithId<IPostDb> | null> {
+    return await this.postRepo.deletePost(id);
+  }
+}

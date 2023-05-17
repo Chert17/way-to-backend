@@ -6,11 +6,11 @@ import { CommentViewModel } from '../../models/comments.models';
 import { IWithPagination } from '../../types/pagination.interface';
 import { ValidPaginationQueryParams } from '../../types/req-res.types';
 
-export const commentQueryRepo = {
-  getAllComments: async (
+export class CommentQueryRepo {
+  async getAllComments(
     postId: string,
     pagination: ValidPaginationQueryParams
-  ): Promise<IWithPagination<CommentViewModel>> => {
+  ): Promise<IWithPagination<CommentViewModel>> {
     const { page, pageSize, sortBy, sortDirection } = pagination;
 
     const find = { postId: postId };
@@ -32,9 +32,9 @@ export const commentQueryRepo = {
       totalCount,
       items: comments.map(converterComment),
     };
-  },
+  }
 
-  getCommentById: async (id: string): Promise<CommentViewModel | null> => {
+  async getCommentById(id: string): Promise<CommentViewModel | null> {
     if (!ObjectId.isValid(id)) return null;
 
     const comment = await CommentModel.findOne({
@@ -44,5 +44,5 @@ export const commentQueryRepo = {
     if (!comment) return null;
 
     return converterComment(comment);
-  },
-};
+  }
+}

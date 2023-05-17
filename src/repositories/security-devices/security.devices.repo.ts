@@ -3,12 +3,12 @@ import { WithId } from 'mongodb';
 import { IUserSecurityDevicesDb } from '../../db/db.types';
 import { UserSecurityDevicesModel } from '../../db/schema-model/user.security.device.schema.model';
 
-export const userSecurityDevicesRepo = {
-  deleteOneSessionByUserDevice: async (
+export class UserSecurityDevicesRepo {
+  async deleteOneSessionByUserDevice(
     userId: string,
     deviceId: string,
     ip: string
-  ): Promise<WithId<IUserSecurityDevicesDb> | null> => {
+  ): Promise<WithId<IUserSecurityDevicesDb> | null> {
     try {
       const result = await UserSecurityDevicesModel.findOneAndDelete({
         userId,
@@ -22,12 +22,9 @@ export const userSecurityDevicesRepo = {
     } catch (error) {
       return null;
     }
-  },
+  }
 
-  deleteAllDevicesExpectCurrentSession: async (
-    userId: string,
-    deviceId: string
-  ) => {
+  async deleteAllDevicesExpectCurrentSession(userId: string, deviceId: string) {
     try {
       const result = await UserSecurityDevicesModel.deleteMany({
         userId,
@@ -40,5 +37,5 @@ export const userSecurityDevicesRepo = {
     } catch (error) {
       return null;
     }
-  },
-};
+  }
+}

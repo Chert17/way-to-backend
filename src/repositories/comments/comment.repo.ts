@@ -3,21 +3,21 @@ import { ObjectId, WithId } from 'mongodb';
 import { ICommentsDb } from '../../db/db.types';
 import { CommentModel } from '../../db/schema-model/comment.schema.modek';
 
-export const commentRepo = {
-  createComment: async (
+export class CommentRepo {
+  async createComment(
     comment: ICommentsDb
-  ): Promise<WithId<ICommentsDb> | null> => {
+  ): Promise<WithId<ICommentsDb> | null> {
     try {
       return await CommentModel.create(comment);
     } catch (error) {
       return null;
     }
-  },
+  }
 
-  updateComment: async (
+  async updateComment(
     commentId: string,
     content: string
-  ): Promise<WithId<ICommentsDb> | null> => {
+  ): Promise<WithId<ICommentsDb> | null> {
     if (!ObjectId.isValid(commentId)) return null;
 
     const result = await CommentModel.findOneAndUpdate(
@@ -29,11 +29,9 @@ export const commentRepo = {
     if (!result) return null;
 
     return result;
-  },
+  }
 
-  deleteComment: async (
-    commentId: string
-  ): Promise<WithId<ICommentsDb> | null> => {
+  async deleteComment(commentId: string): Promise<WithId<ICommentsDb> | null> {
     if (!ObjectId.isValid(commentId)) return null;
 
     const result = await CommentModel.findOneAndDelete({
@@ -43,5 +41,5 @@ export const commentRepo = {
     if (!result) return null;
 
     return result;
-  },
-};
+  }
+}

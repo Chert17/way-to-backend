@@ -3,25 +3,34 @@ import { WithId } from 'mongodb';
 import { SentMessageInfo } from 'nodemailer/lib/smtp-transport';
 import { v4 as uuidv4 } from 'uuid';
 
-import { jwtService } from '../application/jwt.service';
+import { JwtService } from '../application/jwt.service';
 import {
   IUserConfirmEmailDb,
   IUserRecoveryPasswordDb,
   IUserSecurityDevicesDb,
 } from '../db/db.types';
 import { getTokenIat } from '../helpers/get.token.iat';
-import { emailManager } from '../managers/email.managers';
+import { EmailManager } from '../managers/email.managers';
 import {
   LoginInputServiceModel,
   RegisterInputModel,
   TokensViewModel,
 } from '../models/auth.models';
-import { authRepo } from '../repositories/auth/auth.repo';
-import { tokenRepo } from '../repositories/auth/token.repo';
-import { userQueryRepo } from '../repositories/users/user.query.repo';
-import { userService } from './user.service';
+import { AuthRepo } from '../repositories/auth/auth.repo';
+import { TokenRepo } from '../repositories/auth/token.repo';
+import {
+  userQueryRepo,
+  userService,
+} from '../repositories/users/user.composition';
 
-export const authService = {
+export class AuthService {
+  constructor(
+    protected authRepo: AuthRepo,
+    protected tokenRepo: TokenRepo,
+    protected jwtService: JwtService,
+    protected emailManager: EmailManager
+  ) {}
+
   async registerUser({
     email,
     login,
@@ -40,21 +49,24 @@ export const authService = {
     if (!message) return null; // faild sent email to user
 
     return message;
-  },
+  }
 
-  loginUser: async ({
+  async loginUser({
     loginOrEmail,
     password,
     ip,
     deviceName,
-  }: LoginInputServiceModel): Promise<TokensViewModel | null> => {
+  }: LoginInputServiceModel): Promise<TokensViewModel | null> {
     const user = await userService.checkCredentials(loginOrEmail, password);
 
     if (!user) return null; // not found user by loginOrEmail
 
     const deviceId = uuidv4();
 
-    const tokens = await jwtService.createJWT(user._id.toString(), deviceId);
+    const tokens = await this.jwtService.createJWT(
+      user._id.toString(),
+      deviceId
+    );
 
     if (!tokens) return null; // faild create tokens
 
@@ -68,15 +80,15 @@ export const authService = {
       deviceId,
     };
 
-    const result = await tokenRepo.addRefreshTokenMeta(refreshTokenMeta); // return null if faild add refresh token meto to base
+    const result = await this.tokenRepo.addRefreshTokenMeta(refreshTokenMeta); // return null if faild add refresh token meto to base
 
     return !result ? null : tokens;
-  },
+  }
 
-  checkConfirmEmail: async (
+  async checkConfirmEmail(
     confirmCode: string
-  ): Promise<WithId<IUserConfirmEmailDb> | null> => {
-    const confirmEmail = await authRepo.getConfirmEmailByCode(confirmCode);
+  ): Promise<WithId<IUserConfirmEmailDb> | null> {
+    const confirmEmail = await this.authRepo.getConfirmEmailByCode(confirmCode);
 
     if (!confirmEmail) return null; //codes not match
 
@@ -84,21 +96,23 @@ export const authService = {
 
     if (confirmEmail.expirationDate < new Date()) return null; // expirationDate limit exhausted  //? maybe delete confirm email data & user
 
-    const result = await authRepo.updateConfirmEmailStatus(
+    const result = await this.authRepo.updateConfirmEmailStatus(
       confirmEmail._id.toString()
     );
 
     if (!result) return null; //faild update confirm email status for user
 
     return result;
-  },
-
+  }
   async updateUserConfirmCode(email: string): Promise<SentMessageInfo | null> {
     const user = await userQueryRepo.getUserByEmail(email);
 
     const newCode = uuidv4();
 
-    const result = await authRepo.updateConfirmCodeByUserId(user!.id, newCode); // because i check in authResendingRequestBodySchema
+    const result = await this.authRepo.updateConfirmCodeByUserId(
+      user!.id,
+      newCode
+    ); // because i check in authResendingRequestBodySchema
 
     if (!result) return null; // faild update confirm code for user
 
@@ -107,8 +121,7 @@ export const authService = {
     if (!message) return null; // faild sent email to user
 
     return message;
-  },
-
+  }
   async recoveryPasswordForUser(
     email: string
   ): Promise<SentMessageInfo | null> {
@@ -121,9 +134,11 @@ export const authService = {
     if (!message) return null; // faild sent email to user
 
     return message;
-  },
+  }
 
-  _createConfirmEmailByUser: async (userId: string): Promise<string | null> => {
+  private async _createConfirmEmailByUser(
+    userId: string
+  ): Promise<string | null> {
     const emailConfirmation: IUserConfirmEmailDb = {
       userId,
       confirmationCode: uuidv4(),
@@ -131,39 +146,39 @@ export const authService = {
       isConfirm: false,
     };
 
-    const result = await authRepo.userConfirmEmail(emailConfirmation);
+    const result = await this.authRepo.userConfirmEmail(emailConfirmation);
 
     if (!result) return null; // faild add confirm email for user
 
     return emailConfirmation.confirmationCode;
-  },
+  }
 
-  _sendEmail: async (
+  private async _sendEmail(
     email: string,
     code: string
-  ): Promise<SentMessageInfo | null> => {
-    const resultMessage = await emailManager.sendEmailMessage(email, code);
+  ): Promise<SentMessageInfo | null> {
+    const resultMessage = await this.emailManager.sendEmailMessage(email, code);
 
     if (!resultMessage) return null; // message not sent
 
     return resultMessage;
-  },
+  }
 
-  _sendRecoveryPassword: async (
+  private async _sendRecoveryPassword(
     userEmail: string
-  ): Promise<SentMessageInfo | null> => {
+  ): Promise<SentMessageInfo | null> {
     const recoveryPasswordDate: IUserRecoveryPasswordDb = {
       userEmail,
       confirmationCode: uuidv4(),
       expirationDate: add(new Date(), { minutes: 2 }),
     };
 
-    const result = await authRepo.recoveryPassword(recoveryPasswordDate);
+    const result = await this.authRepo.recoveryPassword(recoveryPasswordDate);
 
     if (!result) return null; // faild add recovery password date for user
     console.log(recoveryPasswordDate.confirmationCode);
 
-    const resultMessage = await emailManager.sendRecoveryPasswordMessage(
+    const resultMessage = await this.emailManager.sendRecoveryPasswordMessage(
       userEmail,
       recoveryPasswordDate.confirmationCode
     );
@@ -171,5 +186,5 @@ export const authService = {
     if (!resultMessage) return null; // message not sent
 
     return resultMessage;
-  },
-};
+  }
+}

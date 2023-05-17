@@ -1,32 +1,37 @@
 import express from 'express';
 
-import {
-  createCommentByPostIdController,
-  createPostController,
-  deletePostController,
-  getAllCommentsByOnePostController,
-  getAllPostsController,
-  getPostByIdController,
-  updatePostController,
-} from '../controllers/post.controllers';
 import { authMiddleware } from '../middlewares/authMiddleware';
 import { jwtAuthMiddleware } from '../middlewares/jwtAuthMiddleware';
 import { validateRequestMiddleware } from '../middlewares/validateRequestMiddleware';
+import { postController } from '../repositories/posts/post.composition';
 import { commentRequestBodySchema } from '../validation/comments/comment.request.body.schema';
 import { postRequestBodySchema } from '../validation/posts/posts.request.body.schema';
 
 export const postRouter = express.Router();
 
-postRouter.get('/', getAllPostsController);
+postRouter.get('/', postController.getAllPosts.bind(postController));
 
-postRouter.get('/:id', getPostByIdController);
+postRouter.get('/:id', postController.getPostById.bind(postController));
+
+postRouter.get(
+  '/:postId/comments',
+  postController.getAllCommentsByOnePost.bind(postController)
+);
 
 postRouter.post(
   '/',
   authMiddleware,
   postRequestBodySchema,
   validateRequestMiddleware,
-  createPostController
+  postController.createPost.bind(postController)
+);
+
+postRouter.post(
+  '/:postId/comments',
+  jwtAuthMiddleware,
+  commentRequestBodySchema,
+  validateRequestMiddleware,
+  postController.createCommentByPostId.bind(postController)
 );
 
 postRouter.put(
@@ -34,17 +39,11 @@ postRouter.put(
   authMiddleware,
   postRequestBodySchema,
   validateRequestMiddleware,
-  updatePostController
+  postController.updatePost.bind(postController)
 );
 
-postRouter.delete('/:id', authMiddleware, deletePostController);
-
-postRouter.get('/:postId/comments', getAllCommentsByOnePostController);
-
-postRouter.post(
-  '/:postId/comments',
-  jwtAuthMiddleware,
-  commentRequestBodySchema,
-  validateRequestMiddleware,
-  createCommentByPostIdController
+postRouter.delete(
+  '/:id',
+  authMiddleware,
+  postController.deletePost.bind(postController)
 );

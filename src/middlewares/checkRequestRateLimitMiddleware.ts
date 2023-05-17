@@ -1,7 +1,7 @@
-import { NextFunction, Request, Response } from "express";
+import { NextFunction, Request, Response } from 'express';
 
-import { rateLimitRepo } from "../repositories/rate-limit/rate.limit.repo";
-import { STATUS_CODE } from "../utils/status.code";
+import { rateLimitRepo } from '../repositories/rate-limit/rate.limit.composition';
+import { STATUS_CODE } from '../utils/status.code';
 
 export const checkRequestRateLimitMiddleware = async (
   req: Request,

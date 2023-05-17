@@ -1,18 +1,17 @@
 import { Router } from 'express';
 
-import {
-  deleteCommentController,
-  getCommentByIdController,
-  updateCommentController,
-} from '../controllers/comment.controllers';
 import { checkUserCanWorkWithCommentMiddleware } from '../middlewares/checkUserCanWorkWithCommentMiddleware';
 import { jwtAuthMiddleware } from '../middlewares/jwtAuthMiddleware';
 import { validateRequestMiddleware } from '../middlewares/validateRequestMiddleware';
+import { commentController } from '../repositories/comments/comment.composition';
 import { commentRequestBodySchema } from '../validation/comments/comment.request.body.schema';
 
 export const commentRouter = Router();
 
-commentRouter.get('/:id', getCommentByIdController);
+commentRouter.get(
+  '/:id',
+  commentController.getCommentById.bind(commentController)
+);
 
 commentRouter.put(
   '/:commentId',
@@ -20,12 +19,12 @@ commentRouter.put(
   checkUserCanWorkWithCommentMiddleware,
   commentRequestBodySchema,
   validateRequestMiddleware,
-  updateCommentController
+  commentController.updateComment.bind(commentController)
 );
 
 commentRouter.delete(
   '/:commentId',
   jwtAuthMiddleware,
   checkUserCanWorkWithCommentMiddleware,
-  deleteCommentController
+  commentController.deleteComment.bind(commentController)
 );

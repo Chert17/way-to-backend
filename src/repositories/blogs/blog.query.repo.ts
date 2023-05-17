@@ -6,11 +6,11 @@ import { BlogViewModel } from '../../models/blogs.models';
 import { IWithPagination } from '../../types/pagination.interface';
 import { ValidPaginationQueryParams } from '../../types/req-res.types';
 
-export const blogQueryRepo = {
-  getAllBlogs: async (
+export class BlogQueryRepo {
+  async getAllBlogs(
     condition: string | null,
     pagination: ValidPaginationQueryParams
-  ): Promise<IWithPagination<BlogViewModel>> => {
+  ): Promise<IWithPagination<BlogViewModel>> {
     const { page, pageSize, sortBy, sortDirection } = pagination;
 
     const find = !condition
@@ -34,9 +34,9 @@ export const blogQueryRepo = {
       totalCount,
       items: blogs.map(converterBlog),
     };
-  },
+  }
 
-  getBlogById: async (id: string): Promise<BlogViewModel | null> => {
+  async getBlogById(id: string): Promise<BlogViewModel | null> {
     try {
       if (!ObjectId.isValid(id)) return null;
 
@@ -48,5 +48,5 @@ export const blogQueryRepo = {
     } catch (error) {
       return null;
     }
-  },
-};
+  }
+}
