@@ -1,3 +1,5 @@
+import { LikeInfoViewModel } from './likes.models';
+
 export type CommentInputModel = {
   content: string;
 };
@@ -12,4 +14,5 @@ export type CommentViewModel = {
   content: string;
   commentatorInfo: CommentatorInfo;
   createdAt: string;
+  likesInfo: LikeInfoViewModel;
 };

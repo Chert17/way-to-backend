@@ -6,7 +6,11 @@ import { CommentRepo } from './comment.repo';
 
 export const commentQueryRepo = new CommentQueryRepo();
 const commentRepo = new CommentRepo();
-export const commentService = new CommentService(userQueryRepo, commentRepo);
+export const commentService = new CommentService(
+  userQueryRepo,
+  commentRepo,
+  commentQueryRepo
+);
 
 export const commentController = new CommentController(
   commentQueryRepo,

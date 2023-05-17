@@ -1,6 +1,7 @@
 import { Response } from 'express';
 
 import { CommentInputModel, CommentViewModel } from '../models/comments.models';
+import { LikesInputModel } from '../models/likes.models';
 import { CommentQueryRepo } from '../repositories/comments/comment.query.repo';
 import { CommentService } from '../service/comment.service';
 import {
@@ -36,6 +37,26 @@ export class CommentController {
     const result = await this.commentService.updateComment(commentId, content);
 
     if (!result) return res.status(STATUS_CODE.BAD_REQUEST); // faild update comment
+
+    return res.sendStatus(STATUS_CODE.NO_CONTENT);
+  }
+
+  async updateCommentLikeStatus(
+    req: TypeRequestParamsAndBody<{ commentId: string }, LikesInputModel>,
+    res: Response
+  ) {
+    const { commentId } = req.params;
+    const { likeStatus } = req.body;
+
+    const comment = await this.commentQueryRepo.getCommentById(commentId);
+
+    if (!comment) return res.sendStatus(STATUS_CODE.BAD_REQUEST); // not found comment by req commentId
+
+    await this.commentService.updateCommentLikeStatus(
+      comment.id,
+      likeStatus,
+      req.userId! // because I'm check in jwtAuthMiddleware
+    );
 
     return res.sendStatus(STATUS_CODE.NO_CONTENT);
   }
