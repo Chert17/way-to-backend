@@ -132,7 +132,7 @@ export class AuthController {
     return res.sendStatus(STATUS_CODE.NO_CONTENT);
   }
 
-  async passwordRecovery(
+  async recoveryPassword(
     req: TypeRequestBody<{ email: string }>,
     res: Response
   ) {

@@ -1,4 +1,4 @@
-import { Router } from 'express'; //
+import { Router } from 'express';
 
 import { checkRefreshTokenMiddleware } from '../middlewares/checkRefreshTokenMiddleware';
 import { checkRequestRateLimitMiddleware } from '../middlewares/checkRequestRateLimitMiddleware';
@@ -69,7 +69,7 @@ authgRouter.post(
   checkRequestRateLimitMiddleware,
   emailSchema,
   validateRequestMiddleware,
-  authController.passwordRecovery.bind(authController)
+  authController.recoveryPassword.bind(authController)
 );
 
 authgRouter.post(
