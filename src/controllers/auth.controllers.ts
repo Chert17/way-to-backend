@@ -9,7 +9,7 @@ import {
 } from '../models/auth.models';
 import { LoginInputModel } from '../models/users.models';
 import { TokenRepo } from '../repositories/auth/token.repo';
-import { userSecurityDevicesRepo } from '../repositories/security-devices/security.devices.repo';
+import { UserSecurityDevicesRepo } from '../repositories/security-devices/security.devices.repo';
 import {
   userQueryRepo,
   userService,
@@ -25,7 +25,8 @@ export class AuthController {
   constructor(
     protected tokenRepo: TokenRepo,
     protected authService: AuthService,
-    protected jwtService: JwtService
+    protected jwtService: JwtService,
+    protected userSecurityDevicesRepo: UserSecurityDevicesRepo
   ) {}
 
   async login(req: TypeRequestBody<LoginInputModel>, res: Response) {
@@ -117,11 +118,12 @@ export class AuthController {
   async logout(req: Request, res: Response) {
     const { userId, deviceId, ip } = req;
 
-    const result = await userSecurityDevicesRepo.deleteOneSessionByUserDevice(
-      userId!, // because i'm checking in checkRefreshTokenMiddleware
-      deviceId!, // because i'm checking in checkRefreshTokenMiddleware
-      ip
-    );
+    const result =
+      await this.userSecurityDevicesRepo.deleteOneSessionByUserDevice(
+        userId!, // because i'm checking in checkRefreshTokenMiddleware
+        deviceId!, // because i'm checking in checkRefreshTokenMiddleware
+        ip
+      );
 
     if (!result) return res.sendStatus(STATUS_CODE.UNAUTHORIZED); // faild add refreshToken to addInvalidRefreshToken
 

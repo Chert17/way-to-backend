@@ -10,7 +10,7 @@ import {
   IUserSecurityDevicesDb,
 } from '../db/db.types';
 import { getTokenIat } from '../helpers/get.token.iat';
-import { emailManager } from '../managers/email.managers';
+import { EmailManager } from '../managers/email.managers';
 import {
   LoginInputServiceModel,
   RegisterInputModel,
@@ -27,7 +27,8 @@ export class AuthService {
   constructor(
     protected authRepo: AuthRepo,
     protected tokenRepo: TokenRepo,
-    protected jwtService: JwtService
+    protected jwtService: JwtService,
+    protected emailManager: EmailManager
   ) {}
 
   async registerUser({
@@ -156,7 +157,7 @@ export class AuthService {
     email: string,
     code: string
   ): Promise<SentMessageInfo | null> {
-    const resultMessage = await emailManager.sendEmailMessage(email, code);
+    const resultMessage = await this.emailManager.sendEmailMessage(email, code);
 
     if (!resultMessage) return null; // message not sent
 
@@ -177,7 +178,7 @@ export class AuthService {
     if (!result) return null; // faild add recovery password date for user
     console.log(recoveryPasswordDate.confirmationCode);
 
-    const resultMessage = await emailManager.sendRecoveryPasswordMessage(
+    const resultMessage = await this.emailManager.sendRecoveryPasswordMessage(
       userEmail,
       recoveryPasswordDate.confirmationCode
     );

@@ -1,55 +1,58 @@
 import { Request, Response } from 'express';
 
-import { userSecurityDevicesQueryRepo } from '../repositories/security-devices/security.devices.query.repo';
-import { userSecurityDevicesRepo } from '../repositories/security-devices/security.devices.repo';
+import { UserSecurityDevicesQueryRepo } from '../repositories/security-devices/security.devices.query.repo';
+import { UserSecurityDevicesRepo } from '../repositories/security-devices/security.devices.repo';
 import { TypeRequestParams } from '../types/req-res.types';
 import { STATUS_CODE } from '../utils/status.code';
 
-export const getAllDevicesActiveByUser = async (
-  req: Request,
-  res: Response
-) => {
-  const result = await userSecurityDevicesQueryRepo.getAllDevicesActiveByUser(
-    req.userId! // because i'm checking in jwtAuthMiddleware
-  );
+export class UserSecurityDevicesController {
+  constructor(
+    protected userSecurityDevicesQueryRepo: UserSecurityDevicesQueryRepo,
+    protected userSecurityDevicesRepo: UserSecurityDevicesRepo
+  ) {}
 
-  return res.status(STATUS_CODE.OK).json(result);
-};
+  async getAllDevicesActiveByUser(req: Request, res: Response) {
+    const result =
+      await this.userSecurityDevicesQueryRepo.getAllDevicesActiveByUser(
+        req.userId! // because i'm checking in jwtAuthMiddleware
+      );
 
-export const deleteAllDevicesExpectCurrentSessionController = async (
-  req: Request,
-  res: Response
-) => {
-  const { userId, ip, deviceId } = req;
-  const deviceName = req.headers['user-agent'] ?? 'client';
+    return res.status(STATUS_CODE.OK).json(result);
+  }
 
-  await userSecurityDevicesRepo.deleteAllDevicesExpectCurrentSession(
-    userId!, // because i'm checking in jwtAuthMiddleware
-    deviceId!
-  );
+  async deleteAllDevicesExpectCurrentSession(req: Request, res: Response) {
+    const { userId, ip, deviceId } = req;
+    const deviceName = req.headers['user-agent'] ?? 'client';
 
-  return res.sendStatus(STATUS_CODE.NO_CONTENT);
-};
+    await this.userSecurityDevicesRepo.deleteAllDevicesExpectCurrentSession(
+      userId!, // because i'm checking in jwtAuthMiddleware
+      deviceId!
+    );
 
-export const deleteOneSessionByUserDevice = async (
-  req: TypeRequestParams<{ deviceId: string }>,
-  res: Response
-) => {
-  const { userId, ip } = req;
+    return res.sendStatus(STATUS_CODE.NO_CONTENT);
+  }
 
-  const device = await userSecurityDevicesQueryRepo.getOneDeviceByDeviceId(
-    req.params.deviceId
-  );
+  async deleteOneSessionByUserDevice(
+    req: TypeRequestParams<{ deviceId: string }>,
+    res: Response
+  ) {
+    const { userId, ip } = req;
 
-  if (!device) return res.sendStatus(STATUS_CODE.NOT_FOUND); // not found device by deviceId
+    const device =
+      await this.userSecurityDevicesQueryRepo.getOneDeviceByDeviceId(
+        req.params.deviceId
+      );
 
-  if (device.userId !== userId) return res.sendStatus(STATUS_CODE.FORBIDDEN); // it's another user's device
+    if (!device) return res.sendStatus(STATUS_CODE.NOT_FOUND); // not found device by deviceId
 
-  await userSecurityDevicesRepo.deleteOneSessionByUserDevice(
-    userId,
-    device.deviceId,
-    ip
-  );
+    if (device.userId !== userId) return res.sendStatus(STATUS_CODE.FORBIDDEN); // it's another user's device
 
-  return res.sendStatus(STATUS_CODE.NO_CONTENT);
-};
+    await this.userSecurityDevicesRepo.deleteOneSessionByUserDevice(
+      userId,
+      device.deviceId,
+      ip
+    );
+
+    return res.sendStatus(STATUS_CODE.NO_CONTENT);
+  }
+}
