@@ -10,11 +10,9 @@ import {
 import { LoginInputModel } from '../models/users.models';
 import { TokenRepo } from '../repositories/auth/token.repo';
 import { UserSecurityDevicesRepo } from '../repositories/security-devices/security.devices.repo';
-import {
-  userQueryRepo,
-  userService,
-} from '../repositories/users/user.composition';
+import { UserQueryRepo } from '../repositories/users/user.query.repo';
 import { AuthService } from '../service/auth.service';
+import { UserService } from '../service/user.service';
 import { TypeRequestBody } from '../types/req-res.types';
 import { SETTINGS } from '../utils/settings';
 import { STATUS_CODE } from '../utils/status.code';
@@ -26,6 +24,8 @@ export class AuthController {
     protected tokenRepo: TokenRepo,
     protected authService: AuthService,
     protected jwtService: JwtService,
+    protected userQueryRepo: UserQueryRepo,
+    protected userService: UserService,
     protected userSecurityDevicesRepo: UserSecurityDevicesRepo
   ) {}
 
@@ -51,7 +51,7 @@ export class AuthController {
   }
 
   async getMe(req: Request, res: Response) {
-    const user = await userQueryRepo.getUserById(req.userId!); // because i'm checking in jwtAuthMiddleware
+    const user = await this.userQueryRepo.getUserById(req.userId!); // because i'm checking in jwtAuthMiddleware
 
     if (!user) return res.sendStatus(STATUS_CODE.BAD_REQUEST); // not found user by req.userId
 
@@ -147,7 +147,7 @@ export class AuthController {
   ) {
     const { newPassword, recoveryCode } = req.body;
 
-    const result = await userService.updateUserPassword(
+    const result = await this.userService.updateUserPassword(
       recoveryCode,
       newPassword
     );
