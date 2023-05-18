@@ -24,7 +24,6 @@ export class CommentService {
     const user = await userQueryRepo.getUserById(userId);
 
     if (!user) return null;
-    console.log('QWEQWEQWEQW', user.login);
 
     const newComment: ICommentsDb = {
       content,

@@ -68,6 +68,16 @@ export class CommentRepo {
         });
       }
 
+      if (likeStatus === LikeStatus.None) {
+        commentInstance.likesInfo.map(i => {
+          if (i.userId === userId && i.status === LikeStatus.None) return;
+
+          if (i.userId === userId) {
+            i.status = likeStatus;
+          }
+        });
+      }
+
       if (!commentInstance.likesInfo.find(i => i.userId === userId)) {
         commentInstance.likesInfo.push({ userId, status: likeStatus });
       }
