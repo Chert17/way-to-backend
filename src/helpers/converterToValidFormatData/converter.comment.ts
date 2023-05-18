@@ -10,6 +10,7 @@ export const converterComment = (
   const { _id, commentatorInfo, content, createdAt, likesInfo } = comment;
 
   const { userId, userLogin } = commentatorInfo;
+  console.log(comment);
 
   let likesCount = 0;
   let dislikesCount = 0;

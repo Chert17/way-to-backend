@@ -38,7 +38,7 @@ export class CommentRepo {
     commentId: string,
     likeStatus: LikeStatus,
     userId: string
-  ): Promise<WithId<ICommentsDb> | null> {
+  ): Promise<void | null> {
     try {
       if (!ObjectId.isValid(commentId)) return null;
 
@@ -72,7 +72,7 @@ export class CommentRepo {
         commentInstance.likesInfo.push({ userId, status: likeStatus });
       }
 
-      return await commentInstance.save();
+      await commentInstance.save();
     } catch (error) {
       return null;
     }
