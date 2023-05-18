@@ -34,5 +34,3 @@ export class EmailManager {
     );
   }
 }
-
-export const emailManager = new EmailManager();

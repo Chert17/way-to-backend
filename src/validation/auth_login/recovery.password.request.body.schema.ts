@@ -1,6 +1,8 @@
 import { body } from 'express-validator';
 
-import { authRepo } from '../../repositories/auth/auth.composition';
+import { AuthRepo } from '../../repositories/auth/auth.repo';
+
+const authRepo = new AuthRepo();
 
 export const recoveryPasswordRequestBodySchema = [
   body('newPassword')

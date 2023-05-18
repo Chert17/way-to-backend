@@ -37,7 +37,7 @@ export class CommentQueryRepo {
   async getCommentById(id: string): Promise<CommentViewModel | null> {
     if (!ObjectId.isValid(id)) return null;
 
-    const comment = await CommentModel.findOne({
+    const comment = await CommentModel.findById({
       _id: new ObjectId(id),
     }).lean();
 

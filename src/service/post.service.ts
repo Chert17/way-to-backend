@@ -3,7 +3,6 @@ import { WithId } from 'mongodb';
 import { IPostDb } from '../db/db.types';
 import { converterPost } from '../helpers/converterToValidFormatData/converter.post';
 import { PostInputModel, PostViewModel } from '../models/posts.models';
-import { blogQueryRepo } from '../repositories/blogs/blog.composition';
 import { BlogQueryRepo } from '../repositories/blogs/blog.query.repo';
 import { PostRepo } from '../repositories/posts/post.repo';
 
@@ -19,7 +18,7 @@ export class PostService {
     shortDescription,
     title,
   }: PostInputModel): Promise<PostViewModel | null> {
-    const blog = await blogQueryRepo.getBlogById(blogId);
+    const blog = await this.blogQueryRepo.getBlogById(blogId);
 
     if (!blog) return null; // not found blog
 

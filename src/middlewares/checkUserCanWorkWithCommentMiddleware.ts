@@ -1,8 +1,10 @@
 import { NextFunction, Response } from 'express';
 
-import { commentQueryRepo } from '../repositories/comments/comment.composition';
+import { CommentQueryRepo } from '../repositories/comments/comment.query.repo';
 import { TypeRequestParams } from '../types/req-res.types';
 import { STATUS_CODE } from '../utils/status.code';
+
+const commentQueryRepo = new CommentQueryRepo();
 
 export const checkUserCanWorkWithCommentMiddleware = async (
   req: TypeRequestParams<{ commentId: string }>,
