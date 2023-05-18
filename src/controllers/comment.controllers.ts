@@ -50,7 +50,7 @@ export class CommentController {
 
     const comment = await this.commentQueryRepo.getCommentById(commentId);
 
-    if (!comment) return res.sendStatus(STATUS_CODE.BAD_REQUEST); // not found comment by req commentId
+    if (!comment) return res.sendStatus(STATUS_CODE.NOT_FOUND); // not found comment by req commentId
 
     await this.commentService.updateCommentLikeStatus(
       comment.id,

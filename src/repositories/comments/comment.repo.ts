@@ -44,9 +44,33 @@ export class CommentRepo {
 
       const comment = await CommentModel.findById(commentId);
 
+      if (!comment) return null;
+
       const commentInstance = new CommentModel(comment);
 
-      commentInstance.likesInfo.push({ userId, status: likeStatus });
+      if (likeStatus === LikeStatus.Dislike) {
+        commentInstance.likesInfo.map(i => {
+          if (i.userId === userId && i.status === LikeStatus.Dislike) return;
+
+          if (i.userId === userId) {
+            i.status = likeStatus;
+          }
+        });
+      }
+
+      if (likeStatus === LikeStatus.Like) {
+        commentInstance.likesInfo.map(i => {
+          if (i.userId === userId && i.status === LikeStatus.Like) return;
+
+          if (i.userId === userId) {
+            i.status = likeStatus;
+          }
+        });
+      }
+
+      if (!commentInstance.likesInfo.find(i => i.userId === userId)) {
+        commentInstance.likesInfo.push({ userId, status: likeStatus });
+      }
 
       return await commentInstance.save();
     } catch (error) {

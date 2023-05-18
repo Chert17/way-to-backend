@@ -1,8 +1,12 @@
 import { NextFunction, Request, Response } from 'express';
 
+import { JwtService } from '../application/jwt.service';
 import { getTokenIat } from '../helpers/get.token.iat';
-import { jwtService, tokenRepo } from '../repositories/auth/auth.composition';
+import { TokenRepo } from '../repositories/auth/token.repo';
 import { STATUS_CODE } from '../utils/status.code';
+
+const jwtService = new JwtService();
+const tokenRepo = new TokenRepo();
 
 export const checkRefreshTokenMiddleware = async (
   req: Request,
