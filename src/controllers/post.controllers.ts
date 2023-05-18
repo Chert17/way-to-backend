@@ -62,7 +62,8 @@ export class PostController {
 
     const comments = await this.commentQueryRepo.getAllComments(
       post.id,
-      pagination
+      pagination,
+      req.userId ?? undefined // if no userId then tranfer to undefind
     );
 
     return res.status(STATUS_CODE.OK).json(comments);

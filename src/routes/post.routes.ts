@@ -1,6 +1,7 @@
 import express from 'express';
 
 import { authMiddleware } from '../middlewares/authMiddleware';
+import { checkAuthUserForLikeStatusUserMiddleware } from '../middlewares/checkAuthUserForLikeStatusUserMiddleware';
 import { jwtAuthMiddleware } from '../middlewares/jwtAuthMiddleware';
 import { validateRequestMiddleware } from '../middlewares/validateRequestMiddleware';
 import { postController } from '../repositories/posts/post.composition';
@@ -15,6 +16,7 @@ postRouter.get('/:id', postController.getPostById.bind(postController));
 
 postRouter.get(
   '/:postId/comments',
+  checkAuthUserForLikeStatusUserMiddleware,
   postController.getAllCommentsByOnePost.bind(postController)
 );
 
