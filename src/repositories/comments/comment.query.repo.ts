@@ -30,11 +30,14 @@ export class CommentQueryRepo {
       pageSize,
       page,
       totalCount,
-      items: comments.map(converterComment),
+      items: comments.map(item => converterComment(item)),
     };
   }
 
-  async getCommentById(id: string): Promise<CommentViewModel | null> {
+  async getCommentById(
+    id: string,
+    userId?: string
+  ): Promise<CommentViewModel | null> {
     if (!ObjectId.isValid(id)) return null;
 
     const comment = await CommentModel.findById({
@@ -43,6 +46,6 @@ export class CommentQueryRepo {
 
     if (!comment) return null;
 
-    return converterComment(comment);
+    return converterComment(comment, userId);
   }
 }

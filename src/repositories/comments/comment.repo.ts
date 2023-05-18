@@ -49,30 +49,7 @@ export class CommentRepo {
       const commentInstance = new CommentModel(comment);
       const { likesInfo } = commentInstance;
 
-      this._checkAndChangeLikeStatus(
-        likesInfo,
-        likeStatus,
-        userId,
-        LikeStatus.Dislike
-      );
-
-      this._checkAndChangeLikeStatus(
-        likesInfo,
-        likeStatus,
-        userId,
-        LikeStatus.Like
-      );
-
-      this._checkAndChangeLikeStatus(
-        likesInfo,
-        likeStatus,
-        userId,
-        LikeStatus.None
-      );
-
-      if (!commentInstance.likesInfo.find(i => i.userId === userId)) {
-        commentInstance.likesInfo.push({ userId, status: likeStatus });
-      }
+      this._checkAndChangeLikeStatus(likesInfo, likeStatus, userId);
 
       await commentInstance.save();
     } catch (error) {
@@ -95,17 +72,14 @@ export class CommentRepo {
   private _checkAndChangeLikeStatus(
     likesInfo: ICommentsLikesInfoDb[],
     inputStatus: LikeStatus,
-    userId: string,
-    checkStatus: LikeStatus
+    userId: string
   ) {
-    if (inputStatus === checkStatus) {
-      likesInfo.map(i => {
-        if (i.userId === userId && i.status === checkStatus) return;
+    const existingLike = likesInfo.find(like => like.userId === userId);
 
-        if (i.userId === userId) {
-          i.status = inputStatus;
-        }
-      });
-    }
+    if (!existingLike) return likesInfo.push({ userId, status: inputStatus });
+
+    if ((existingLike.status = inputStatus)) return;
+
+    return (existingLike.status = inputStatus);
   }
 }

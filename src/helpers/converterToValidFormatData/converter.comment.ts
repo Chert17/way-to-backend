@@ -5,11 +5,10 @@ import { CommentViewModel } from '../../models/comments.models';
 import { LikeStatus } from '../../models/likes.models';
 
 export const converterComment = (
-  comment: WithId<ICommentsDb>
+  comment: WithId<ICommentsDb>,
+  userId?: string
 ): CommentViewModel => {
   const { _id, commentatorInfo, content, createdAt, likesInfo } = comment;
-
-  const { userId, userLogin } = commentatorInfo;
 
   let likesCount = 0;
   let dislikesCount = 0;
@@ -27,8 +26,8 @@ export const converterComment = (
     id: _id.toString(),
     content: content,
     commentatorInfo: {
-      userId: userId,
-      userLogin: userLogin,
+      userId: commentatorInfo.userId,
+      userLogin: commentatorInfo.userLogin,
     },
     createdAt: createdAt,
     likesInfo: {
