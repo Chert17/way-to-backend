@@ -9,7 +9,8 @@ import { ValidPaginationQueryParams } from '../../types/req-res.types';
 export class CommentQueryRepo {
   async getAllComments(
     postId: string,
-    pagination: ValidPaginationQueryParams
+    pagination: ValidPaginationQueryParams,
+    userId?: string
   ): Promise<IWithPagination<CommentViewModel>> {
     const { page, pageSize, sortBy, sortDirection } = pagination;
 
@@ -30,7 +31,7 @@ export class CommentQueryRepo {
       pageSize,
       page,
       totalCount,
-      items: comments.map(item => converterComment(item)),
+      items: comments.map(item => converterComment(item, userId)),
     };
   }
 
