@@ -6,11 +6,14 @@ export const checkAuthUserForLikeStatusUserMiddleware = (
   res: Response,
   next: NextFunction
 ) => {
-  const { refreshToken } = req.cookies;
+  const reqAuth = req.headers.authorization;
+  if (!reqAuth) return next();
 
-  if (!refreshToken) return next();
+  const accessToken = reqAuth.split(' ')[1];
 
-  const decodeToken = decode(refreshToken) as any;
+  const decodeToken = decode(accessToken) as any;
+
   req.userId = decodeToken.userId.toString();
+
   return next();
 };
