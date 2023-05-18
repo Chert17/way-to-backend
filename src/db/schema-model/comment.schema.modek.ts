@@ -18,8 +18,8 @@ const CommentSchema = new mongoose.Schema<ICommentsDb>({
     userId: {
       type: String,
       required: true,
-      userLogin: { type: String, required: true },
     },
+    userLogin: { type: String, required: true },
   },
   createdAt: { type: String, require: true, default: Date.now().toString() },
   likesInfo: [CommentLikeInfoSchema],
