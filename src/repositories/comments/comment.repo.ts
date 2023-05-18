@@ -74,11 +74,11 @@ export class CommentRepo {
     inputStatus: LikeStatus,
     userId: string
   ) {
-    const existingLike = likesInfo.find(like => like.userId === userId);
+    const existingLike = likesInfo.find(i => i.userId === userId);
 
     if (!existingLike) return likesInfo.push({ userId, status: inputStatus });
 
-    if ((existingLike.status = inputStatus)) return;
+    if (existingLike.status === inputStatus) return;
 
     return (existingLike.status = inputStatus);
   }
