@@ -1,5 +1,6 @@
 import { Router } from 'express';
 
+import { checkAuthUserForLikeStatusUserMiddleware } from '../middlewares/checkAuthUserForLikeStatusUserMiddleware';
 import { checkUserCanWorkWithCommentMiddleware } from '../middlewares/checkUserCanWorkWithCommentMiddleware';
 import { jwtAuthMiddleware } from '../middlewares/jwtAuthMiddleware';
 import { validateRequestMiddleware } from '../middlewares/validateRequestMiddleware';
@@ -11,6 +12,7 @@ export const commentRouter = Router();
 
 commentRouter.get(
   '/:id',
+  checkAuthUserForLikeStatusUserMiddleware,
   commentController.getCommentById.bind(commentController)
 );
 

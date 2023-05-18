@@ -20,13 +20,16 @@ export class CommentController {
     req: TypeRequestParams<{ id: string }>,
     res: Response<CommentViewModel>
   ) {
-    const { authorization } = req.headers;
+    const { userId } = req; // because I'm check in checkAuthUserForLikeStatusUserMiddleware
 
-    const comment = await this.commentQueryRepo.getCommentById(req.params.id);
+    const comment = await this.commentQueryRepo.getCommentById(
+      req.params.id,
+      userId ?? undefined // if no userId then tranfer to undefind
+    );
 
     if (!comment) return res.sendStatus(STATUS_CODE.NOT_FOUND); // not found comment by id from req.params.id
 
-    if (!authorization) {
+    if (!userId) {
       return res.status(STATUS_CODE.OK).json({
         ...comment,
         likesInfo: { ...comment.likesInfo, myStatus: LikeStatus.None },
