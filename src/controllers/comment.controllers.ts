@@ -20,13 +20,13 @@ export class CommentController {
     req: TypeRequestParams<{ id: string }>,
     res: Response<CommentViewModel>
   ) {
-    const { refreshToken } = req.cookies;
+    const { authorization } = req.headers;
 
     const comment = await this.commentQueryRepo.getCommentById(req.params.id);
 
     if (!comment) return res.sendStatus(STATUS_CODE.NOT_FOUND); // not found comment by id from req.params.id
 
-    if (!refreshToken) {
+    if (!authorization) {
       return res.status(STATUS_CODE.OK).json({
         ...comment,
         likesInfo: { ...comment.likesInfo, myStatus: LikeStatus.None },
