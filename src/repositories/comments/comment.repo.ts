@@ -1,6 +1,6 @@
 import { ObjectId, WithId } from 'mongodb';
 
-import { ICommentsDb } from '../../db/db.types';
+import { ICommentsDb, ICommentsLikesInfoDb } from '../../db/db.types';
 import { CommentModel } from '../../db/schema-model/comment.schema.modek';
 import { LikeStatus } from '../../models/likes.models';
 
@@ -47,36 +47,28 @@ export class CommentRepo {
       if (!comment) return null;
 
       const commentInstance = new CommentModel(comment);
+      const { likesInfo } = commentInstance;
 
-      if (likeStatus === LikeStatus.Dislike) {
-        commentInstance.likesInfo.map(i => {
-          if (i.userId === userId && i.status === LikeStatus.Dislike) return;
+      this._checkAndChangeLikeStatus(
+        likesInfo,
+        likeStatus,
+        userId,
+        LikeStatus.Dislike
+      );
 
-          if (i.userId === userId) {
-            i.status = likeStatus;
-          }
-        });
-      }
+      this._checkAndChangeLikeStatus(
+        likesInfo,
+        likeStatus,
+        userId,
+        LikeStatus.Like
+      );
 
-      if (likeStatus === LikeStatus.Like) {
-        commentInstance.likesInfo.map(i => {
-          if (i.userId === userId && i.status === LikeStatus.Like) return;
-
-          if (i.userId === userId) {
-            i.status = likeStatus;
-          }
-        });
-      }
-
-      if (likeStatus === LikeStatus.None) {
-        commentInstance.likesInfo.map(i => {
-          if (i.userId === userId && i.status === LikeStatus.None) return;
-
-          if (i.userId === userId) {
-            i.status = likeStatus;
-          }
-        });
-      }
+      this._checkAndChangeLikeStatus(
+        likesInfo,
+        likeStatus,
+        userId,
+        LikeStatus.None
+      );
 
       if (!commentInstance.likesInfo.find(i => i.userId === userId)) {
         commentInstance.likesInfo.push({ userId, status: likeStatus });
@@ -98,5 +90,22 @@ export class CommentRepo {
     if (!result) return null;
 
     return result;
+  }
+
+  private _checkAndChangeLikeStatus(
+    likesInfo: ICommentsLikesInfoDb[],
+    inputStatus: LikeStatus,
+    userId: string,
+    checkStatus: LikeStatus
+  ) {
+    if (inputStatus === checkStatus) {
+      likesInfo.map(i => {
+        if (i.userId === userId && i.status === checkStatus) return;
+
+        if (i.userId === userId) {
+          i.status = inputStatus;
+        }
+      });
+    }
   }
 }

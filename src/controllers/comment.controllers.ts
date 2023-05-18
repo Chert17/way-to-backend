@@ -1,7 +1,7 @@
 import { Response } from 'express';
 
 import { CommentInputModel, CommentViewModel } from '../models/comments.models';
-import { LikesInputModel } from '../models/likes.models';
+import { LikesInputModel, LikeStatus } from '../models/likes.models';
 import { CommentQueryRepo } from '../repositories/comments/comment.query.repo';
 import { CommentService } from '../service/comment.service';
 import {
@@ -20,9 +20,18 @@ export class CommentController {
     req: TypeRequestParams<{ id: string }>,
     res: Response<CommentViewModel>
   ) {
+    const { refreshToken } = req.cookies;
+
     const comment = await this.commentQueryRepo.getCommentById(req.params.id);
 
     if (!comment) return res.sendStatus(STATUS_CODE.NOT_FOUND); // not found comment by id from req.params.id
+
+    if (!refreshToken) {
+      return res.status(STATUS_CODE.OK).json({
+        ...comment,
+        likesInfo: { ...comment.likesInfo, myStatus: LikeStatus.None },
+      });
+    }
 
     return res.status(STATUS_CODE.OK).json(comment);
   }
