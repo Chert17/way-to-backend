@@ -1,7 +1,8 @@
 import { ObjectId, WithId } from 'mongodb';
 
-import { IPostDb } from '../../db/db.types';
+import { IPostDb, IPostsLikesInfoDb } from '../../db/db.types';
 import { PostModel } from '../../db/schema-model/post.schema.model';
+import { LikeStatus } from '../../models/likes.models';
 import { PostInputModelDb } from './post.repo.types';
 
 export class PostRepo {
@@ -33,6 +34,35 @@ export class PostRepo {
     }
   }
 
+  async updatePostLikeInfo(
+    postId: string,
+    likeStatus: LikeStatus,
+    userId: string,
+    login: string
+  ): Promise<void | null> {
+    try {
+      if (!ObjectId.isValid(postId)) return null;
+
+      const post = await PostModel.findById(postId);
+
+      if (!post) return null;
+
+      const postInstance = new PostModel(post);
+      const { extendedLikesInfo } = postInstance;
+
+      this._checkAndChangeLikeStatus(
+        extendedLikesInfo,
+        likeStatus,
+        userId,
+        login
+      );
+
+      await postInstance.save();
+    } catch (error) {
+      return null;
+    }
+  }
+
   async deletePost(id: string): Promise<WithId<IPostDb> | null> {
     try {
       if (!ObjectId.isValid(id)) return null;
@@ -47,5 +77,22 @@ export class PostRepo {
     } catch (error) {
       return null;
     }
+  }
+
+  private _checkAndChangeLikeStatus(
+    likesInfo: IPostsLikesInfoDb[],
+    inputStatus: LikeStatus,
+    userId: string,
+    login: string
+  ) {
+    const existingLike = likesInfo.find(i => i.userId === userId);
+
+    if (!existingLike) {
+      return likesInfo.unshift({ userId, login, status: inputStatus });
+    }
+
+    if (existingLike.status === inputStatus) return;
+
+    return (existingLike.status = inputStatus);
   }
 }

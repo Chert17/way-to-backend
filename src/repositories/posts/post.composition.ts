@@ -11,11 +11,11 @@ import { PostRepo } from './post.repo';
 const postQueryRepo = new PostQueryRepo();
 const postRepo = new PostRepo();
 const blogQueryRepo = new BlogQueryRepo();
+const userQueryRepo = new UserQueryRepo();
 
-const postService = new PostService(blogQueryRepo, postRepo);
+const postService = new PostService(blogQueryRepo, postRepo, userQueryRepo);
 
 const commentQueryRepo = new CommentQueryRepo();
-const userQueryRepo = new UserQueryRepo();
 const commentRepo = new CommentRepo();
 const commentService = new CommentService(
   userQueryRepo,

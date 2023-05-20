@@ -24,7 +24,7 @@ export class CommentController {
 
     const comment = await this.commentQueryRepo.getCommentById(
       req.params.id,
-      userId ?? undefined // if no userId then tranfer to undefind
+      userId ?? undefined // if no userId then tranfer to undefind because getCommentById expects userId?
     );
 
     if (!comment) return res.sendStatus(STATUS_CODE.NOT_FOUND); // not found comment by id from req.params.id

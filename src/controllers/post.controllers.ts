@@ -2,6 +2,7 @@ import { Response } from 'express';
 
 import { paginationQueryParamsValidation } from '../helpers/request.query.params.validation';
 import { CommentInputModel, CommentViewModel } from '../models/comments.models';
+import { LikesInputModel, LikeStatus } from '../models/likes.models';
 import { PostInputModel, PostViewModel } from '../models/posts.models';
 import { CommentQueryRepo } from '../repositories/comments/comment.query.repo';
 import { PostQueryRepo } from '../repositories/posts/post.query.repo';
@@ -30,9 +31,14 @@ export class PostController {
     req: TypeRequestQuery<PaginationQueryParams>,
     res: Response<IWithPagination<PostViewModel>>
   ) {
+    const { userId } = req; // because I'm check in checkAuthUserForLikeStatusUserMiddleware
+
     const pagination = paginationQueryParamsValidation(req.query);
 
-    const posts = await this.postQueryRepo.getAllPosts(pagination);
+    const posts = await this.postQueryRepo.getAllPosts(
+      pagination,
+      userId ?? undefined // if no userId then tranfer to undefind because getAllPosts expects userId?
+    );
 
     return res.status(STATUS_CODE.OK).json(posts);
   }
@@ -41,7 +47,12 @@ export class PostController {
     req: TypeRequestParams<{ id: string }>,
     res: Response<PostViewModel>
   ) {
-    const post = await this.postQueryRepo.getPostById(req.params.id);
+    const { userId } = req; // because I'm check in checkAuthUserForLikeStatusUserMiddleware
+
+    const post = await this.postQueryRepo.getPostById(
+      req.params.id,
+      userId ?? undefined // if no userId then tranfer to undefind because getPostById expects userId?
+    );
 
     if (!post) return res.sendStatus(STATUS_CODE.NOT_FOUND); // not fount post
 
@@ -119,6 +130,23 @@ export class PostController {
     const result = await this.postService.updatePost(postId.id, req.body);
 
     if (!result) return res.status(STATUS_CODE.BAD_REQUEST); // faild update post
+
+    return res.sendStatus(STATUS_CODE.NO_CONTENT);
+  }
+
+  async updatePostLikeStatus(
+    req: TypeRequestParamsAndBody<{ postId: string }, LikesInputModel>,
+    res: Response
+  ) {
+    const post = await this.postQueryRepo.getPostById(req.params.postId);
+
+    if (!post) return res.sendStatus(STATUS_CODE.NOT_FOUND); // post not found by req postId
+
+    await this.postService.updatePostLikeStatus(
+      post.id,
+      req.body.likeStatus,
+      req.userId! // because I'm check in jwtAuthMiddleware
+    );
 
     return res.sendStatus(STATUS_CODE.NO_CONTENT);
   }
