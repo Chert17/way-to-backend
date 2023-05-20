@@ -1,6 +1,7 @@
 import express from 'express';
 
 import { authMiddleware } from '../middlewares/authMiddleware';
+import { checkAuthUserForLikeStatusUserMiddleware } from '../middlewares/checkAuthUserForLikeStatusUserMiddleware';
 import { validateRequestMiddleware } from '../middlewares/validateRequestMiddleware';
 import { blogController } from '../repositories/blogs/blog.composition';
 import { blogRequestBodySchema } from '../validation/blogs/blog.request.body.schema';
@@ -14,6 +15,7 @@ blogRouter.get('/:id', blogController.getBlogById.bind(blogController));
 
 blogRouter.get(
   '/:blogId/posts',
+  checkAuthUserForLikeStatusUserMiddleware,
   blogController.getAllPostsByOneBlog.bind(blogController)
 );
 

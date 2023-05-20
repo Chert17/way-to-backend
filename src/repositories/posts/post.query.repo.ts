@@ -35,11 +35,12 @@ export class PostQueryRepo {
 
   async getAllPostsByOneBlog(
     blogId: string,
-    pagination: ValidPaginationQueryParams
+    pagination: ValidPaginationQueryParams,
+    userId?: string
   ): Promise<IWithPagination<PostViewModel>> {
     const filter = { blogId };
 
-    return await this._getPosts(filter, pagination);
+    return await this._getPosts(filter, pagination, userId);
   }
 
   private async _getPosts(

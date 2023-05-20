@@ -68,7 +68,8 @@ export class BlogController {
 
     const posts = await this.postQueryRepo.getAllPostsByOneBlog(
       blogId.id,
-      pagination
+      pagination,
+      req.userId ?? undefined // because I'm check in checkAuthUserForLikeStatusUserMiddleware
     );
 
     return res.status(STATUS_CODE.OK).json(posts);
