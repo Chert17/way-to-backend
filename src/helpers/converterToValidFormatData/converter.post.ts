@@ -33,8 +33,11 @@ export const converterPost = (
 
   const newestLikes = extendedLikesInfo
     .filter(i => i.status === LikeStatus.Like)
-    // @ts-ignore
-    .sort((a, b) => +b.updatedAt - +a.updatedAt)
+    .sort(
+      (a, b) =>
+        // @ts-ignore
+        new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
+    )
     .splice(0, 3)
     // @ts-ignore
     .map(i => ({ addedAt: i.createdAt, userId: i.userId, login: i.login }));
