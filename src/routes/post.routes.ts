@@ -6,13 +6,22 @@ import { jwtAuthMiddleware } from '../middlewares/jwtAuthMiddleware';
 import { validateRequestMiddleware } from '../middlewares/validateRequestMiddleware';
 import { postController } from '../repositories/posts/post.composition';
 import { commentRequestBodySchema } from '../validation/comments/comment.request.body.schema';
+import { likeRequestBodySchema } from '../validation/common/like.request.body.schema';
 import { postRequestBodySchema } from '../validation/posts/posts.request.body.schema';
 
 export const postRouter = express.Router();
 
-postRouter.get('/', postController.getAllPosts.bind(postController));
+postRouter.get(
+  '/',
+  checkAuthUserForLikeStatusUserMiddleware,
+  postController.getAllPosts.bind(postController)
+);
 
-postRouter.get('/:id', postController.getPostById.bind(postController));
+postRouter.get(
+  '/:id',
+  checkAuthUserForLikeStatusUserMiddleware,
+  postController.getPostById.bind(postController)
+);
 
 postRouter.get(
   '/:postId/comments',
@@ -42,6 +51,14 @@ postRouter.put(
   postRequestBodySchema,
   validateRequestMiddleware,
   postController.updatePost.bind(postController)
+);
+
+postRouter.put(
+  '/:postId/like-status',
+  jwtAuthMiddleware,
+  likeRequestBodySchema,
+  validateRequestMiddleware,
+  postController.updatePostLikeStatus.bind(postController)
 );
 
 postRouter.delete(

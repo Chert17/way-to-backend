@@ -8,14 +8,18 @@ import { ValidPaginationQueryParams } from '../../types/req-res.types';
 
 export class PostQueryRepo {
   async getAllPosts(
-    pagination: ValidPaginationQueryParams
+    pagination: ValidPaginationQueryParams,
+    userId?: string
   ): Promise<IWithPagination<PostViewModel>> {
     const filter = {};
 
-    return await this._getPosts(filter, pagination);
+    return await this._getPosts(filter, pagination, userId);
   }
 
-  async getPostById(id: string): Promise<PostViewModel | null> {
+  async getPostById(
+    id: string,
+    userId?: string
+  ): Promise<PostViewModel | null> {
     try {
       if (!ObjectId.isValid(id)) return null;
 
@@ -23,7 +27,7 @@ export class PostQueryRepo {
 
       if (!post) return null;
 
-      return converterPost(post);
+      return converterPost(post, userId);
     } catch (error) {
       return null;
     }
@@ -40,7 +44,8 @@ export class PostQueryRepo {
 
   private async _getPosts(
     filter: Record<string, unknown>,
-    pagination: ValidPaginationQueryParams
+    pagination: ValidPaginationQueryParams,
+    userId?: string
   ) {
     const { page, pageSize, sortBy, sortDirection } = pagination;
 
@@ -59,7 +64,7 @@ export class PostQueryRepo {
       pageSize,
       page,
       totalCount,
-      items: posts.map(converterPost),
+      items: posts.map(post => converterPost(post, userId)),
     };
   }
 }

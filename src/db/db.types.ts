@@ -9,6 +9,12 @@ export interface IBlogDb {
   isMembership: boolean;
 }
 
+export interface IPostsLikesInfoDb {
+  userId: string;
+  login: string;
+  status: LikeStatus;
+}
+
 export interface IPostDb {
   title: string;
   shortDescription: string;
@@ -16,6 +22,7 @@ export interface IPostDb {
   blogId: string;
   blogName: string;
   createdAt: string;
+  extendedLikesInfo: IPostsLikesInfoDb[];
 }
 
 export interface IUserDb {
