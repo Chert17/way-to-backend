@@ -63,7 +63,9 @@ export class UsersQueryRepo {
 
     if (!convertId) return false;
 
-    return await this.userModel.findById(convertId);
+    const user = await this.userModel.findById(convertId);
+
+    return this._userMapping(user);
   }
 
   private _userMapping(user: DbType<User>): UserViewDto {
