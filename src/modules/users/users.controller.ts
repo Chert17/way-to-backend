@@ -1,5 +1,3 @@
-import { UserQueryPagination } from 'src/utils/pagination/pagination';
-
 import {
   Body,
   Controller,
@@ -13,6 +11,7 @@ import {
   Query,
 } from '@nestjs/common';
 
+import { UserQueryPagination } from '../../utils/pagination/pagination';
 import { CreateUserDto } from './dto/input/create.user.dto';
 import { UsersQueryRepo } from './repositories/users.query.repo';
 import { UsersService } from './users.service';

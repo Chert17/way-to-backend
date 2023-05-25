@@ -1,9 +1,4 @@
 import {
-  CommentQueryPagination,
-  PostQueryPagination,
-} from 'src/utils/pagination/pagination';
-
-import {
   Body,
   Controller,
   Delete,
@@ -17,6 +12,10 @@ import {
   Query,
 } from '@nestjs/common';
 
+import {
+  CommentQueryPagination,
+  PostQueryPagination,
+} from '../../utils/pagination/pagination';
 import { CreateCommentDto } from '../comments/dto/input/create.comment.dto';
 import { CommentsQueryRepo } from '../comments/repositories/comments.query.repo';
 import { createPostDto } from './dto/input/create.post.dto';

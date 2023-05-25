@@ -1,9 +1,4 @@
 import {
-  BlogQueryPagination,
-  PostQueryPagination,
-} from 'src/utils/pagination/pagination';
-
-import {
   Body,
   Controller,
   Delete,
@@ -17,6 +12,10 @@ import {
   Query,
 } from '@nestjs/common';
 
+import {
+  BlogQueryPagination,
+  PostQueryPagination,
+} from '../../utils/pagination/pagination';
 import { createPostDto } from '../posts/dto/input/create.post.dto';
 import { PostsQueryRepo } from '../posts/repositories/posts.query.repo';
 import { BlogsService } from './blogs.service';
