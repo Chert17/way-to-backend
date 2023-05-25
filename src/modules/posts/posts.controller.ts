@@ -1,0 +1,112 @@
+import {
+  CommentQueryPagination,
+  PostQueryPagination,
+} from 'src/utils/pagination/pagination';
+
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  HttpCode,
+  Inject,
+  NotFoundException,
+  Param,
+  Post,
+  Put,
+  Query,
+} from '@nestjs/common';
+
+import { CreateCommentDto } from '../comments/dto/input/create.comment.dto';
+import { CommentsQueryRepo } from '../comments/repositories/comments.query.repo';
+import { createPostDto } from './dto/input/create.post.dto';
+import { updatePostDto } from './dto/input/update.post.dto';
+import { PostsService } from './posts.service';
+import { PostsQueryRepo } from './repositories/posts.query.repo';
+
+@Controller('posts')
+export class PostsController {
+  constructor(
+    @Inject(PostsQueryRepo) private postsQueryRepo: PostsQueryRepo,
+    @Inject(PostsService) private postsService: PostsService,
+    @Inject(CommentsQueryRepo) private commentsQueryRepo: CommentsQueryRepo,
+  ) {}
+
+  @Get()
+  async getAll(@Query() pagination: PostQueryPagination) {
+    return await this.postsQueryRepo.getAllPosts(pagination);
+  }
+
+  @Get('/:id')
+  async getPostById(@Param() postId: string) {
+    const result = await this.postsQueryRepo.getPostById(postId);
+
+    if (!result) throw new NotFoundException();
+
+    return result;
+  }
+
+  @Get('/:postId/comments')
+  async getCommnetsByPost(
+    @Param('postId') postId: string,
+    @Query() pagination: CommentQueryPagination,
+  ) {
+    const post = await this.postsQueryRepo.getPostById(postId);
+
+    if (!post) throw new NotFoundException();
+
+    return await this.commentsQueryRepo.getAllCommentsByPostId(
+      postId,
+      pagination,
+    );
+  }
+
+  @Post()
+  async createPost(@Body() postDto: createPostDto) {
+    const result = await this.postsService.createPost(postDto);
+
+    if (!result) throw new NotFoundException();
+
+    const post = await this.postsQueryRepo.getPostById(result._id.toString());
+
+    return post;
+  }
+
+  @Post('/:postId/comments')
+  async createCommentByPost(
+    @Param('postId') postId: string,
+    @Body() dto: Omit<CreateCommentDto, 'postId'>,
+  ) {
+    const result = await this.postsService.createCommentByPost({
+      ...dto,
+      postId,
+    });
+
+    if (!result) throw new NotFoundException();
+
+    return await this.commentsQueryRepo.getCommentById(result._id.toString());
+  }
+
+  @Put('/:id')
+  @HttpCode(204)
+  async updatePost(
+    @Param() postId: string,
+    @Body() postDto: Omit<updatePostDto, 'postId'>,
+  ) {
+    const result = await this.postsService.updatePost({ ...postDto, postId });
+
+    if (!result) throw new NotFoundException();
+
+    return;
+  }
+
+  @Delete('/:id')
+  @HttpCode(204)
+  async deleteBlog(@Param() postId: string) {
+    const result = await this.postsService.deletePost(postId);
+
+    if (!result) throw new NotFoundException();
+
+    return;
+  }
+}
