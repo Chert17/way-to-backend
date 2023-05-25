@@ -19,11 +19,11 @@ export class PostsService {
   ) {}
 
   async createPost(dto: createPostDto): Promise<false | DbType<Post>> {
-    const blogId = await this.blogsRepo.checkBlogById(dto.blogId);
+    const blog = await this.blogsRepo.getAndCheckBlogName(dto.blogId);
 
-    if (!blogId) return false;
+    if (!blog) return false;
 
-    return await this.postsRepo.createPost(dto);
+    return await this.postsRepo.createPost({ ...dto, blogName: blog.name });
   }
 
   async createCommentByPost(

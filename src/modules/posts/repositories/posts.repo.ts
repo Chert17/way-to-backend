@@ -13,7 +13,9 @@ import { Post } from '../posts.schema';
 export class PostsRepo {
   constructor(@InjectModel(Post.name) private postModel: Model<Post>) {}
 
-  async createPost(dto: createPostDto): Promise<DbType<Post>> {
+  async createPost(
+    dto: createPostDto & { blogName: string },
+  ): Promise<DbType<Post>> {
     return await this.postModel.create(dto);
   }
 

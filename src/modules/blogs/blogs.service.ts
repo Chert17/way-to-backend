@@ -3,6 +3,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import { DbType } from '../../types/db.interface';
 import { createPostDto } from '../posts/dto/input/create.post.dto';
 import { PostViewDto } from '../posts/dto/view/post.view.dto';
+import { Post } from '../posts/posts.schema';
 import { PostsQueryRepo } from '../posts/repositories/posts.query.repo';
 import { PostsRepo } from '../posts/repositories/posts.repo';
 import { Blog } from './blogs.schema';
@@ -15,21 +16,18 @@ export class BlogsService {
   constructor(
     @Inject(BlogsRepo) private blogsRepo: BlogsRepo,
     @Inject(PostsRepo) private postsRepo: PostsRepo,
-    @Inject(PostsQueryRepo) private postsQueryRepo: PostsQueryRepo,
   ) {}
 
   async createBlog(dto: CreateBlogDto): Promise<DbType<Blog>> {
     return await this.blogsRepo.createBlog(dto);
   }
 
-  async createPostByBlog(dto: createPostDto): Promise<false | PostViewDto> {
-    const blog = await this.blogsRepo.checkBlogById(dto.blogId);
+  async createPostByBlog(dto: createPostDto): Promise<false | DbType<Post>> {
+    const blog = await this.blogsRepo.getAndCheckBlogName(dto.blogId);
 
     if (!blog) return false; // not found blog by blog id
 
-    const result = await this.postsRepo.createPost(dto);
-
-    return await this.postsQueryRepo.getPostById(result._id.toString());
+    return await this.postsRepo.createPost({ ...dto, blogName: blog.name });
   }
 
   async updateBlog(dto: UpdateBlogDto): Promise<boolean> {

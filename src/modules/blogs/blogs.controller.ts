@@ -73,7 +73,7 @@ export class BlogsController {
 
     if (!result) throw new NotFoundException(); // If specified blog doesn't exists
 
-    return result;
+    return await this.postsQueryRepo.getPostById(result._id.toString());
   }
 
   @Put('/:id')
