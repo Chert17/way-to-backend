@@ -1,7 +1,6 @@
-import { DbType } from 'src/types/db.interface';
-
 import { Inject, Injectable } from '@nestjs/common';
 
+import { DbType } from '../../types/db.interface';
 import { BlogsRepo } from '../blogs/repositories/blogs.repo';
 import { Comment } from '../comments/comments.schema';
 import { CommentsService } from '../comments/comments.service';

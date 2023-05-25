@@ -1,7 +1,6 @@
-import { DbType } from 'src/types/db.interface';
-
 import { Inject, Injectable } from '@nestjs/common';
 
+import { DbType } from '../../types/db.interface';
 import { createPostDto } from '../posts/dto/input/create.post.dto';
 import { PostViewDto } from '../posts/dto/view/post.view.dto';
 import { PostsQueryRepo } from '../posts/repositories/posts.query.repo';

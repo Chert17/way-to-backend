@@ -1,10 +1,10 @@
 import { Model } from 'mongoose';
-import { DbType } from 'src/types/db.interface';
-import { tryConvertToObjectId } from 'src/utils/converter.object.id';
 
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 
+import { DbType } from '../../../types/db.interface';
+import { tryConvertToObjectId } from '../../../utils/converter.object.id';
 import { Blog } from '../blogs.schema';
 import { CreateBlogDto } from '../dto/input/create.blog.dto';
 import { UpdateBlogDto } from '../dto/input/update.blog.dto';

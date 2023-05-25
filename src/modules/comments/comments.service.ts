@@ -1,7 +1,6 @@
-import { LikeStatus } from 'src/utils/like.status';
-
 import { Inject, Injectable } from '@nestjs/common';
 
+import { LikeStatus } from '../../utils/like.status';
 import { Comment } from './comments.schema';
 import { CreateCommentDto } from './dto/input/create.comment.dto';
 import { CommentsRepo } from './repositories/comments.repo';

@@ -1,8 +1,7 @@
-import { generateHash } from 'src/helpers/generate.hash';
-import { DbType } from 'src/types/db.interface';
-
 import { Inject, Injectable } from '@nestjs/common';
 
+import { generateHash } from '../../helpers/generate.hash';
+import { DbType } from '../../types/db.interface';
 import { CreateUserDto } from './dto/input/create.user.dto';
 import { UsersRepo } from './repositories/users.repo';
 import { User } from './users.schema';

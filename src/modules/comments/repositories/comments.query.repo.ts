@@ -1,12 +1,12 @@
 import { Model } from 'mongoose';
-import { DbType } from 'src/types/db.interface';
-import { tryConvertToObjectId } from 'src/utils/converter.object.id';
-import { LikeStatus } from 'src/utils/like.status';
-import { CommentQueryPagination } from 'src/utils/pagination/pagination';
 
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 
+import { DbType } from '../../../types/db.interface';
+import { tryConvertToObjectId } from '../../../utils/converter.object.id';
+import { LikeStatus } from '../../../utils/like.status';
+import { CommentQueryPagination } from '../../../utils/pagination/pagination';
 import { Comment } from '../comments.schema';
 import { CommentViewDto } from '../dto/view/comment.view.dto';
 
