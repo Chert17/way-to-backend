@@ -35,7 +35,7 @@ export class Post {
   @Prop({ type: String, require: true })
   blogName: string;
 
-  @Prop({ type: Date, require: true, default: new Date() })
+  @Prop({ type: Date, require: true, default: Date.now })
   createdAt: Date;
 
   @Prop({ type: Array, require: true, default: [] })

@@ -32,7 +32,7 @@ export class Comment {
   @Prop({ type: String, require: true, length: { max: 300 } })
   content: string;
 
-  @Prop({ type: Date, require: true, default: new Date() })
+  @Prop({ type: Date, require: true, default: Date.now })
   createdAt: string;
 
   @Prop({ type: Object, required: true })

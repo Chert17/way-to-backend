@@ -17,7 +17,7 @@ export class Blog {
   @Prop({ type: String, require: true, length: { max: 100 } })
   websiteUrl: string;
 
-  @Prop({ type: Date, require: true, default: new Date() })
+  @Prop({ type: Date, require: true, default: Date.now })
   createdAt: Date;
 
   @Prop({ type: Boolean, require: true, default: false })

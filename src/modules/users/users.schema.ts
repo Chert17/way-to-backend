@@ -15,7 +15,7 @@ export class User {
   @Prop({ type: String, require: true })
   passwordHash: string;
 
-  @Prop({ type: Date, require: true, default: new Date() })
+  @Prop({ type: Date, require: true, default: Date.now })
   createdAt: string;
 
   @Prop({ type: Boolean, require: true, default: false })

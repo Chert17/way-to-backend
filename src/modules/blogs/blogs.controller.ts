@@ -60,6 +60,8 @@ export class BlogsController {
   @Post()
   async createBlog(@Body() dto: CreateBlogDto) {
     const result = await this.blogsService.createBlog(dto);
+    console.log(result);
+    console.log(new Date());
 
     return await this.blogsQueryRepo.getBlogById(result._id.toString());
   }
