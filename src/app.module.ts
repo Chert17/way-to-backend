@@ -57,7 +57,7 @@ const mongooseModels = [
   imports: [
     ConfigModule.forRoot(),
     MongooseModule.forRoot(SETTINGS.MONGO_URL, {
-      dbName: 'hw-03',
+      dbName: SETTINGS.DB_NAME,
     }),
     MongooseModule.forFeature(mongooseModels),
   ],
