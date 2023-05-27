@@ -2,6 +2,10 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
 
+import { EmailModule } from './adapters/email/email.module';
+import { EmailService } from './adapters/email/email.service';
+import { EmailManagerModule } from './managers/email.manager/email.manager.module';
+import { EmailManagerService } from './managers/email.manager/email.manager.service';
 import { AuthController } from './modules/auth/auth.controller';
 import { AuthModule } from './modules/auth/auth.module';
 import { AuthService } from './modules/auth/auth.service';
@@ -43,6 +47,8 @@ const services = [
   CommentsService,
   UsersService,
   AuthService,
+  EmailService,
+  EmailManagerService,
 ];
 
 const queryRepo = [
@@ -61,7 +67,7 @@ const mongooseModels = [
   { name: User.name, schema: UserSchema },
 ];
 
-const modules = [AuthModule];
+const modules = [AuthModule, EmailModule, EmailManagerModule];
 
 @Module({
   controllers: [...controllers],
