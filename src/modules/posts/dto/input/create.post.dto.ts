@@ -1,15 +1,22 @@
-import { IsString } from 'class-validator';
+import { Transform } from 'class-transformer';
+import { IsString, Length } from 'class-validator';
 
 export class createPostDto {
   @IsString()
   readonly blogId: string;
 
   @IsString()
-  readonly content: string;
+  @Length(1, 30)
+  @Transform(({ value }) => value.trim())
+  readonly title: string;
 
   @IsString()
+  @Length(1, 100)
+  @Transform(({ value }) => value.trim())
   readonly shortDescription: string;
 
   @IsString()
-  readonly title: string;
+  @Length(1, 1000)
+  @Transform(({ value }) => value.trim())
+  readonly content: string;
 }
