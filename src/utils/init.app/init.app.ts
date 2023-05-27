@@ -1,13 +1,12 @@
-import { INestApplication, ValidationPipe } from '@nestjs/common';
+import { INestApplication } from '@nestjs/common';
+
+import { HttpExceptionFilter } from '../../infra/exception-filters/http.exception.filter';
+import { GlobalValidationPipe } from '../../infra/pipe/global.validation.pipe';
 
 export const initApp = (app: INestApplication) => {
   app.enableCors();
 
-  app.useGlobalPipes(
-    new ValidationPipe({
-      transform: true,
-      stopAtFirstError: true,
-      whitelist: true,
-    }),
-  );
+  app.useGlobalPipes(GlobalValidationPipe);
+
+  app.useGlobalFilters(new HttpExceptionFilter());
 };
