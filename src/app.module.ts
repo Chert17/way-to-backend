@@ -73,7 +73,7 @@ const modules = [AuthModule, EmailModule, EmailManagerModule];
   controllers: [...controllers],
   providers: [...services, ...repo],
   imports: [
-    ConfigModule.forRoot(),
+    ConfigModule.forRoot({ envFilePath: '.env' }),
     MongooseModule.forRoot(SETTINGS.MONGO_URL, {
       dbName: SETTINGS.DB_NAME,
     }),

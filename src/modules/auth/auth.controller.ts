@@ -15,7 +15,7 @@ export class AuthController {
   async registration() {}
 
   @Post('/login')
-  @HttpCode(204)
+  @HttpCode(200)
   async login() {}
 
   @Post('/logout')
