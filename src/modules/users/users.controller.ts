@@ -12,7 +12,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 
-import { BasicAuthGuard } from '../../guards/auth/basic.auth.guard';
+import { BasicAuthGuard } from '../../infra/guards/auth/basic.auth.guard';
 import { UserQueryPagination } from '../../utils/pagination/pagination';
 import { CreateUserDto } from './dto/input/create.user.dto';
 import { UsersQueryRepo } from './repositories/users.query.repo';

@@ -13,7 +13,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 
-import { BasicAuthGuard } from '../../guards/auth/basic.auth.guard';
+import { BasicAuthGuard } from '../../infra/guards/auth/basic.auth.guard';
 import {
   CommentQueryPagination,
   PostQueryPagination,
