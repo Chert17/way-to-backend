@@ -10,8 +10,10 @@ import {
   Post,
   Put,
   Query,
+  UseGuards,
 } from '@nestjs/common';
 
+import { BasicAuthGuard } from '../../guards/auth/basic.auth.guard';
 import {
   BlogQueryPagination,
   PostQueryPagination,
@@ -58,6 +60,7 @@ export class BlogsController {
   }
 
   @Post()
+  @UseGuards(BasicAuthGuard)
   async createBlog(@Body() dto: CreateBlogDto) {
     const result = await this.blogsService.createBlog(dto);
     console.log(result);
@@ -67,6 +70,7 @@ export class BlogsController {
   }
 
   @Post('/:blogId/posts')
+  @UseGuards(BasicAuthGuard)
   async createPostByBlog(
     @Param('blogId') blogId: string,
     @Body() dto: Omit<createPostDto, 'blogId'>,
@@ -79,6 +83,7 @@ export class BlogsController {
   }
 
   @Put('/:id')
+  @UseGuards(BasicAuthGuard)
   @HttpCode(204)
   async updateBlog(
     @Param() blogId: string,
@@ -92,6 +97,7 @@ export class BlogsController {
   }
 
   @Delete('/:id')
+  @UseGuards(BasicAuthGuard)
   @HttpCode(204)
   async deleteBlog(@Param() blogId: string) {
     const result = await this.blogsService.deleteBlog(blogId);
