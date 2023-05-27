@@ -11,9 +11,7 @@ import { SETTINGS } from '../../../utils/settings';
 
 @Injectable()
 export class BasicAuthGuard implements CanActivate {
-  canActivate(
-    context: ExecutionContext,
-  ): boolean | Promise<boolean> | Observable<boolean> {
+  canActivate(context: ExecutionContext): boolean {
     const request = context.switchToHttp().getRequest();
 
     if (!request.headers.authorization) throw new UnauthorizedException();

@@ -2,6 +2,9 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
 
+import { AuthController } from './modules/auth/auth.controller';
+import { AuthModule } from './modules/auth/auth.module';
+import { AuthService } from './modules/auth/auth.service';
 import { BlogsController } from './modules/blogs/blogs.controller';
 import { Blog, BlogSchema } from './modules/blogs/blogs.schema';
 import { BlogsService } from './modules/blogs/blogs.service';
@@ -31,9 +34,16 @@ const controllers = [
   PostsController,
   CommentsController,
   UsersController,
+  AuthController,
 ];
 
-const services = [BlogsService, PostsService, CommentsService, UsersService];
+const services = [
+  BlogsService,
+  PostsService,
+  CommentsService,
+  UsersService,
+  AuthService,
+];
 
 const queryRepo = [
   BlogsQueryRepo,
@@ -51,6 +61,8 @@ const mongooseModels = [
   { name: User.name, schema: UserSchema },
 ];
 
+const modules = [AuthModule];
+
 @Module({
   controllers: [...controllers],
   providers: [...services, ...repo],
@@ -60,6 +72,8 @@ const mongooseModels = [
       dbName: SETTINGS.DB_NAME,
     }),
     MongooseModule.forFeature(mongooseModels),
+
+    ...modules,
   ],
 })
 export class AppModule {}
