@@ -2,7 +2,7 @@ import { IsEmail, IsString, Length, Matches } from 'class-validator';
 
 import { Trim } from '../../../../infra/decorators/validation/trim.decorator';
 
-export class CreateUserDto {
+export class RegisterDto {
   @IsString()
   @Length(3, 10)
   @Matches('^[a-zA-Z0-9_-]*$')

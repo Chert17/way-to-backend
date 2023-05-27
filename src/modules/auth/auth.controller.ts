@@ -1,10 +1,14 @@
-import { Controller, HttpCode, Post, UseGuards } from '@nestjs/common';
+import { Controller, Get, HttpCode, Post, UseGuards } from '@nestjs/common';
 import { SkipThrottle, ThrottlerGuard } from '@nestjs/throttler';
 
 @Controller('auth')
 @UseGuards(ThrottlerGuard)
 export class AuthController {
   constructor() {}
+
+  @Get()
+  @SkipThrottle()
+  async getMe() {}
 
   @Post('/registration')
   @HttpCode(204)

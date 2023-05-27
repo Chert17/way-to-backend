@@ -1,5 +1,6 @@
-import { Transform } from 'class-transformer';
 import { IsString, Length } from 'class-validator';
+
+import { Trim } from '../../../../infra/decorators/validation/trim.decorator';
 
 export class updatePostDto {
   @IsString()
@@ -10,16 +11,16 @@ export class updatePostDto {
 
   @IsString()
   @Length(1, 30)
-  @Transform(({ value }) => value.trim())
+  @Trim()
   readonly title: string;
 
   @IsString()
   @Length(1, 100)
-  @Transform(({ value }) => value.trim())
+  @Trim()
   readonly shortDescription: string;
 
   @IsString()
   @Length(1, 1000)
-  @Transform(({ value }) => value.trim())
+  @Trim()
   readonly content: string;
 }
