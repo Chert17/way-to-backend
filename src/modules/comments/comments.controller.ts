@@ -1,18 +1,10 @@
-import {
-  Controller,
-  Get,
-  Inject,
-  NotFoundException,
-  Param,
-} from '@nestjs/common';
+import { Controller, Get, NotFoundException, Param } from '@nestjs/common';
 
 import { CommentsQueryRepo } from './repositories/comments.query.repo';
 
 @Controller('comments')
 export class CommentsController {
-  constructor(
-    @Inject(CommentsQueryRepo) private commentsQueryRepo: CommentsQueryRepo,
-  ) {}
+  constructor(private commentsQueryRepo: CommentsQueryRepo) {}
 
   @Get('/:id')
   async getCommentById(@Param() commentId: string) {

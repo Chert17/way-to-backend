@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 
 import { LikeStatus } from '../../utils/like.status';
 import { Comment } from './comments.schema';
@@ -7,7 +7,7 @@ import { CommentsRepo } from './repositories/comments.repo';
 
 @Injectable()
 export class CommentsService {
-  constructor(@Inject(CommentsRepo) private commentsRepo: CommentsRepo) {}
+  constructor(private commentsRepo: CommentsRepo) {}
 
   async createComment(dto: CreateCommentDto) {
     const newComment: Comment = {

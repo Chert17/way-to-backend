@@ -4,7 +4,6 @@ import {
   Delete,
   Get,
   HttpCode,
-  Inject,
   NotFoundException,
   Param,
   Post,
@@ -28,9 +27,9 @@ import { BlogsQueryRepo } from './repositories/blogs.query.repo';
 @Controller('blogs')
 export class BlogsController {
   constructor(
-    @Inject(BlogsQueryRepo) private blogsQueryRepo: BlogsQueryRepo,
-    @Inject(BlogsService) private blogsService: BlogsService,
-    @Inject(PostsQueryRepo) private postsQueryRepo: PostsQueryRepo,
+    private blogsQueryRepo: BlogsQueryRepo,
+    private blogsService: BlogsService,
+    private postsQueryRepo: PostsQueryRepo,
   ) {}
 
   @Get()

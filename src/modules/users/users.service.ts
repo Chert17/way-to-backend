@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 
 import { generateHash } from '../../helpers/generate.hash';
 import { DbType } from '../../types/db.interface';
@@ -8,7 +8,7 @@ import { User } from './users.schema';
 
 @Injectable()
 export class UsersService {
-  constructor(@Inject(UsersRepo) private usersRepo: UsersRepo) {}
+  constructor(private usersRepo: UsersRepo) {}
 
   async createUser(dto: CreateUserDto): Promise<DbType<User>> {
     const { email, login, password } = dto;

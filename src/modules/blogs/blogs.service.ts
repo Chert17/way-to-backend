@@ -1,10 +1,8 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 
 import { DbType } from '../../types/db.interface';
 import { createPostDto } from '../posts/dto/input/create.post.dto';
-import { PostViewDto } from '../posts/dto/view/post.view.dto';
 import { Post } from '../posts/posts.schema';
-import { PostsQueryRepo } from '../posts/repositories/posts.query.repo';
 import { PostsRepo } from '../posts/repositories/posts.repo';
 import { Blog } from './blogs.schema';
 import { CreateBlogDto } from './dto/input/create.blog.dto';
@@ -13,10 +11,7 @@ import { BlogsRepo } from './repositories/blogs.repo';
 
 @Injectable()
 export class BlogsService {
-  constructor(
-    @Inject(BlogsRepo) private blogsRepo: BlogsRepo,
-    @Inject(PostsRepo) private postsRepo: PostsRepo,
-  ) {}
+  constructor(private blogsRepo: BlogsRepo, private postsRepo: PostsRepo) {}
 
   async createBlog(dto: CreateBlogDto): Promise<DbType<Blog>> {
     return await this.blogsRepo.createBlog(dto);

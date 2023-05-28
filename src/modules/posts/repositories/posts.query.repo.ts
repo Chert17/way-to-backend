@@ -88,12 +88,14 @@ export class PostsQueryRepo {
       .filter(i => i.status === LikeStatus.Like)
       .sort(
         (a, b) =>
-          // @ts-ignore  //! because I'm add timestamps in schema
           new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime(),
       )
       .splice(0, 3)
-      // @ts-ignore      //! because I'm add timestamps in schema
-      .map(i => ({ addedAt: i.createdAt, userId: i.userId, login: i.login }));
+      .map(i => ({
+        addedAt: i.createdAt.toISOString(),
+        userId: i.userId,
+        login: i.login,
+      }));
 
     return {
       id: _id.toString(),

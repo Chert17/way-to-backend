@@ -1,10 +1,14 @@
-import { Controller, Get, HttpCode, Post, UseGuards } from '@nestjs/common';
-import { SkipThrottle, ThrottlerGuard } from '@nestjs/throttler';
+import { Body, Controller, Get, HttpCode, Post } from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
+import { SkipThrottle, Throttle } from '@nestjs/throttler';
+
+import { AuthService } from './auth.service';
+import { RegisterDto } from './dto/input/register.dto';
 
 @Controller('auth')
-@UseGuards(ThrottlerGuard)
+@Throttle(5, 10)
 export class AuthController {
-  constructor() {}
+  constructor(private authService: AuthService) {}
 
   @Get()
   @SkipThrottle()
@@ -12,7 +16,9 @@ export class AuthController {
 
   @Post('/registration')
   @HttpCode(204)
-  async registration() {}
+  async registration(@Body() dto: RegisterDto) {
+    return await this.authService.register(dto);
+  }
 
   @Post('/login')
   @HttpCode(200)

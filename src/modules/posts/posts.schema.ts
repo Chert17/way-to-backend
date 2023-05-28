@@ -6,7 +6,7 @@ import { LikeStatus } from '../../utils/like.status';
 
 export type PostDocument = HydratedDocument<Post>;
 
-@Schema({ timestamps: true })
+@Schema({ id: false, _id: false, versionKey: false, timestamps: true })
 class PostLikeInfoSchema {
   @Prop({ type: String, require: true })
   userId: string;
@@ -16,6 +16,10 @@ class PostLikeInfoSchema {
 
   @Prop({ type: String, require: true })
   login: string;
+
+  createdAt?: Date;
+
+  updatedAt?: Date;
 }
 
 @Schema()

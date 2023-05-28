@@ -4,7 +4,6 @@ import {
   Delete,
   Get,
   HttpCode,
-  Inject,
   NotFoundException,
   Param,
   Post,
@@ -22,8 +21,8 @@ import { UsersService } from './users.service';
 @UseGuards(BasicAuthGuard)
 export class UsersController {
   constructor(
-    @Inject(UsersQueryRepo) private usersQueryRepo: UsersQueryRepo,
-    @Inject(UsersService) private usersService: UsersService,
+    private usersQueryRepo: UsersQueryRepo,
+    private usersService: UsersService,
   ) {}
 
   @Get()

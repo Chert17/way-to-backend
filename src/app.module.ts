@@ -1,13 +1,16 @@
+import { MailerModule } from '@nestjs-modules/mailer';
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { JwtModule } from '@nestjs/jwt';
 import { MongooseModule } from '@nestjs/mongoose';
+import { PassportModule } from '@nestjs/passport';
+import { ThrottlerModule } from '@nestjs/throttler';
 
-import { EmailModule } from './adapters/email/email.module';
-import { EmailService } from './adapters/email/email.service';
-import { EmailManagerModule } from './managers/email.manager/email.manager.module';
-import { EmailManagerService } from './managers/email.manager/email.manager.service';
+import { JwtConfigService } from './configs/jwt.config';
+import { MailerConfigService } from './configs/mailer.config';
+import { MongooseConfigService } from './configs/mongo.config';
+import { ThrottleConfigService } from './configs/throttle.config';
 import { AuthController } from './modules/auth/auth.controller';
-import { AuthModule } from './modules/auth/auth.module';
 import { AuthService } from './modules/auth/auth.service';
 import { BlogsController } from './modules/blogs/blogs.controller';
 import { Blog, BlogSchema } from './modules/blogs/blogs.schema';
@@ -20,6 +23,7 @@ import { CommentsService } from './modules/comments/comments.service';
 import { CommentsQueryRepo } from './modules/comments/repositories/comments.query.repo';
 import { CommentsRepo } from './modules/comments/repositories/comments.repo';
 import { DeleteAllController } from './modules/delete-all/delete-all.controller';
+import { EmailService } from './modules/email/email.service';
 import { PostsController } from './modules/posts/posts.controller';
 import { Post, PostSchema } from './modules/posts/posts.schema';
 import { PostsService } from './modules/posts/posts.service';
@@ -30,7 +34,6 @@ import { UsersRepo } from './modules/users/repositories/users.repo';
 import { UsersController } from './modules/users/users.controller';
 import { User, UserSchema } from './modules/users/users.schema';
 import { UsersService } from './modules/users/users.service';
-import { SETTINGS } from './utils/settings';
 
 const controllers = [
   DeleteAllController,
@@ -48,7 +51,6 @@ const services = [
   UsersService,
   AuthService,
   EmailService,
-  EmailManagerService,
 ];
 
 const queryRepo = [
@@ -67,19 +69,17 @@ const mongooseModels = [
   { name: User.name, schema: UserSchema },
 ];
 
-const modules = [AuthModule, EmailModule, EmailManagerModule];
-
 @Module({
+  imports: [
+    ConfigModule.forRoot({ isGlobal: true, envFilePath: '.env' }),
+    MongooseModule.forRootAsync({ useClass: MongooseConfigService }),
+    MongooseModule.forFeature(mongooseModels),
+    MailerModule.forRootAsync({ useClass: MailerConfigService }),
+    PassportModule,
+    JwtModule.registerAsync({ useClass: JwtConfigService }),
+    ThrottlerModule.forRootAsync({ useClass: ThrottleConfigService }),
+  ],
   controllers: [...controllers],
   providers: [...services, ...repo],
-  imports: [
-    ConfigModule.forRoot({ envFilePath: '.env' }),
-    MongooseModule.forRoot(SETTINGS.MONGO_URL, {
-      dbName: SETTINGS.DB_NAME,
-    }),
-    MongooseModule.forFeature(mongooseModels),
-
-    ...modules,
-  ],
 })
 export class AppModule {}
