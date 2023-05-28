@@ -80,9 +80,9 @@ export class PostsQueryRepo {
       title,
     } = post;
 
-    let likesCount = 0;
-    let dislikesCount = 0;
-    let myStatus = LikeStatus.None;
+    const likesCount = 0;
+    const dislikesCount = 0;
+    const myStatus = LikeStatus.None;
 
     const newestLikes = extendedLikesInfo
       .filter(i => i.status === LikeStatus.Like)

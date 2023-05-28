@@ -1,7 +1,8 @@
 import { registerDecorator, ValidationArguments } from 'class-validator';
 
 export const Trim =
-  (): PropertyDecorator => (target: Object, propertyKey: string) => {
+  (): PropertyDecorator =>
+  (target: Record<string, unknown>, propertyKey: string) => {
     registerDecorator({
       name: 'trim',
       target: target.constructor,

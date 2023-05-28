@@ -1,5 +1,3 @@
-import { Observable } from 'rxjs';
-
 import {
   CanActivate,
   ExecutionContext,

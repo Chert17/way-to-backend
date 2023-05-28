@@ -1,5 +1,4 @@
 import { LikeInfoViewModel } from 'src/types/like.info.interface';
-import { LikeStatus } from 'src/utils/like.status';
 
 export class PostViewDto {
   readonly id: string;

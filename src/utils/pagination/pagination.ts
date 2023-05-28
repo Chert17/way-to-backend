@@ -30,14 +30,14 @@ const toNumber = (value: string, opts: ToNumberOptions = {}): number => {
 export class DefaultPagination {
   @Transform(({ value }) => toNumber(value, { min: 1, default: 1 }))
   @IsOptional()
-  pageNumber: number = 1;
+  pageNumber = 1;
 
   @Transform(({ value }) => toNumber(value, { min: 1, default: 10 }))
   @IsOptional()
-  pageSize: number = 10;
+  pageSize = 10;
 
   @IsOptional()
-  sortBy: string = 'createdAt';
+  sortBy = 'createdAt';
 
   @Transform(({ value }) => (value === 'asc' ? 'asc' : 'desc'))
   @IsOptional()
@@ -51,7 +51,7 @@ export class DefaultPagination {
 export class BlogQueryPagination extends DefaultPagination {
   @Transform(({ value }) => value ?? '')
   @IsOptional()
-  searchNameTerm: string = '';
+  searchNameTerm = '';
 }
 
 export class PostQueryPagination extends DefaultPagination {}
@@ -61,9 +61,9 @@ export class CommentQueryPagination extends DefaultPagination {}
 export class UserQueryPagination extends DefaultPagination {
   @Transform(({ value }) => value ?? '')
   @IsOptional()
-  searchEmailTerm: string = '';
+  searchEmailTerm = '';
 
   @Transform(({ value }) => value ?? '')
   @IsOptional()
-  searchLoginTerm: string = '';
+  searchLoginTerm = '';
 }

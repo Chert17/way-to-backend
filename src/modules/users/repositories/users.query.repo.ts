@@ -26,7 +26,7 @@ export class UsersQueryRepo {
       sortDirection,
     } = pagination;
 
-    let query = [];
+    const query = [];
 
     if (searchEmailTerm) {
       query.push({ email: { $regex: searchEmailTerm, $options: 'i' } });
