@@ -12,6 +12,11 @@ import { MongooseConfigService } from './configs/mongo.config';
 import { ThrottleConfigService } from './configs/throttle.config';
 import { AuthController } from './modules/auth/auth.controller';
 import { AuthService } from './modules/auth/auth.service';
+import { AuthRepo } from './modules/auth/repositories/auth.repo';
+import {
+  ConfirmEmail,
+  ConfirmEmailSchema,
+} from './modules/auth/schemas/confirm.email.schema';
 import { BlogsController } from './modules/blogs/blogs.controller';
 import { Blog, BlogSchema } from './modules/blogs/blogs.schema';
 import { BlogsService } from './modules/blogs/blogs.service';
@@ -60,13 +65,21 @@ const queryRepo = [
   UsersQueryRepo,
 ];
 
-const repo = [BlogsRepo, PostsRepo, CommentsRepo, UsersRepo, ...queryRepo];
+const repo = [
+  AuthRepo,
+  BlogsRepo,
+  PostsRepo,
+  CommentsRepo,
+  UsersRepo,
+  ...queryRepo,
+];
 
 const mongooseModels = [
   { name: Blog.name, schema: BlogSchema },
   { name: Post.name, schema: PostSchema },
   { name: Comment.name, schema: CommentSchema },
   { name: User.name, schema: UserSchema },
+  { name: ConfirmEmail.name, schema: ConfirmEmailSchema },
 ];
 
 @Module({

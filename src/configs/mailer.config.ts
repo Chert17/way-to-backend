@@ -24,10 +24,12 @@ export class MailerConfigService implements MailerOptionsFactory {
         },
       },
       defaults: {
-        from: 'WAY TO BACKEND',
+        from: `"WAY TO BACKEND" <${this.configService.get(
+          SETTINGS.TEST_EMAIL,
+        )}>`,
       },
       template: {
-        dir: join(__dirname, 'templates'),
+        dir: join(__dirname, '../modules/email/templates'),
         adapter: new HandlebarsAdapter(),
         options: {
           strict: true,

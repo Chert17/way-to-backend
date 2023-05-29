@@ -7,13 +7,20 @@ export class EmailService {
   constructor(private mailerService: MailerService) {}
 
   async sendRegistrationEmail(email: string, code: string) {
-    await this.mailerService.sendMail({
-      to: email,
-      subject: this._subject,
-      template: './templates/register.hbs',
-      context: {
-        code,
-      },
-    });
+    try {
+      await this.mailerService.sendMail({
+        to: email,
+        subject: this._subject,
+        template: './register',
+        context: {
+          code,
+        },
+      });
+
+      return true;
+    } catch (error) {
+      console.log(error);
+      return null;
+    }
   }
 }
