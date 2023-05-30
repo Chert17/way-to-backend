@@ -3,20 +3,14 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
 import { MongooseModule } from '@nestjs/mongoose';
-import { PassportModule } from '@nestjs/passport';
 import { ThrottlerModule } from '@nestjs/throttler';
 
 import { JwtConfigService } from './configs/jwt.config';
 import { MailerConfigService } from './configs/mailer.config';
-import { MongooseConfigService } from './configs/mongo.config';
 import { ThrottleConfigService } from './configs/throttle.config';
+import { ConfirmCodeExist } from './infra/decorators/auth/confirm.code.exist';
 import { AuthController } from './modules/auth/auth.controller';
 import { AuthService } from './modules/auth/auth.service';
-import { AuthRepo } from './modules/auth/repositories/auth.repo';
-import {
-  ConfirmEmail,
-  ConfirmEmailSchema,
-} from './modules/auth/schemas/confirm.email.schema';
 import { BlogsController } from './modules/blogs/blogs.controller';
 import { Blog, BlogSchema } from './modules/blogs/blogs.schema';
 import { BlogsService } from './modules/blogs/blogs.service';
@@ -27,6 +21,7 @@ import { Comment, CommentSchema } from './modules/comments/comments.schema';
 import { CommentsService } from './modules/comments/comments.service';
 import { CommentsQueryRepo } from './modules/comments/repositories/comments.query.repo';
 import { CommentsRepo } from './modules/comments/repositories/comments.repo';
+import { MongoModule } from './modules/db-module/mongoose.module';
 import { DeleteAllController } from './modules/delete-all/delete-all.controller';
 import { EmailService } from './modules/email/email.service';
 import { PostsController } from './modules/posts/posts.controller';
@@ -36,8 +31,8 @@ import { PostsQueryRepo } from './modules/posts/repositories/posts.query.repo';
 import { PostsRepo } from './modules/posts/repositories/posts.repo';
 import { UsersQueryRepo } from './modules/users/repositories/users.query.repo';
 import { UsersRepo } from './modules/users/repositories/users.repo';
+import { User, UserSchema } from './modules/users/schemas/users.schema';
 import { UsersController } from './modules/users/users.controller';
-import { User, UserSchema } from './modules/users/users.schema';
 import { UsersService } from './modules/users/users.service';
 
 const controllers = [
@@ -65,34 +60,28 @@ const queryRepo = [
   UsersQueryRepo,
 ];
 
-const repo = [
-  AuthRepo,
-  BlogsRepo,
-  PostsRepo,
-  CommentsRepo,
-  UsersRepo,
-  ...queryRepo,
-];
+const repo = [BlogsRepo, PostsRepo, CommentsRepo, UsersRepo, ...queryRepo];
+
+const validators = [ConfirmCodeExist];
 
 const mongooseModels = [
   { name: Blog.name, schema: BlogSchema },
   { name: Post.name, schema: PostSchema },
   { name: Comment.name, schema: CommentSchema },
   { name: User.name, schema: UserSchema },
-  { name: ConfirmEmail.name, schema: ConfirmEmailSchema },
 ];
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true, envFilePath: '.env' }),
-    MongooseModule.forRootAsync({ useClass: MongooseConfigService }),
     MongooseModule.forFeature(mongooseModels),
     MailerModule.forRootAsync({ useClass: MailerConfigService }),
-    PassportModule,
     JwtModule.registerAsync({ useClass: JwtConfigService }),
     ThrottlerModule.forRootAsync({ useClass: ThrottleConfigService }),
+
+    MongoModule, // in modules/db-module , bacause need for test
   ],
   controllers: [...controllers],
-  providers: [...services, ...repo],
+  providers: [...validators, ...services, ...repo],
 })
 export class AppModule {}

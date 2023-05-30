@@ -6,7 +6,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Blog } from '../blogs/blogs.schema';
 import { Comment } from '../comments/comments.schema';
 import { Post } from '../posts/posts.schema';
-import { User } from '../users/users.schema';
+import { User } from '../users/schemas/users.schema';
 
 @Controller('/testing/all-data')
 export class DeleteAllController {

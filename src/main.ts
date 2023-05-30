@@ -5,9 +5,9 @@ import { initApp } from './utils/init.app/init.app';
 import { SETTINGS } from './utils/settings';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const rawApp = await NestFactory.create(AppModule);
 
-  initApp(app);
+  const app = initApp(rawApp);
 
   await app.listen(SETTINGS.PORT);
 }

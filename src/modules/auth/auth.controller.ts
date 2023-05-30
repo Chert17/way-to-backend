@@ -3,12 +3,14 @@ import {
   Controller,
   Get,
   HttpCode,
+  HttpStatus,
   Post,
   UseGuards,
 } from '@nestjs/common';
 import { SkipThrottle, ThrottlerGuard } from '@nestjs/throttler';
 
 import { AuthService } from './auth.service';
+import { ConfirmRegisterDto } from './dto/input/confirm.register.dto';
 import { RegisterDto } from './dto/input/register.dto';
 
 @Controller('auth')
@@ -27,7 +29,7 @@ export class AuthController {
   }
 
   @Post('/login')
-  @HttpCode(200)
+  @HttpCode(HttpStatus.OK)
   async login() {}
 
   @Post('/logout')
@@ -41,7 +43,9 @@ export class AuthController {
 
   @Post('/registration-confirmation')
   @HttpCode(204)
-  async confirmRegistration() {}
+  async confirmRegistration(@Body() dto: ConfirmRegisterDto) {
+    return await this.authService.confirmRegister(dto);
+  }
 
   @Post('/registration-email-resending')
   @HttpCode(204)

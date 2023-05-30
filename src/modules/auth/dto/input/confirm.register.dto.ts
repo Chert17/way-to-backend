@@ -1,9 +1,11 @@
-import { IsString } from 'class-validator';
+import { IsString, Validate } from 'class-validator';
 
+import { ConfirmCodeExist } from '../../../../infra/decorators/auth/confirm.code.exist';
 import { Trim } from '../../../../infra/decorators/validation/trim.decorator';
 
 export class ConfirmRegisterDto {
-  @IsString()
+  @Validate(ConfirmCodeExist)
   @Trim()
+  @IsString()
   readonly code: string;
 }

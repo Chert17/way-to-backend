@@ -1,11 +1,12 @@
-import { Model } from 'mongoose';
+import { Model, UpdateWriteOpResult } from 'mongoose';
 
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 
 import { DbType } from '../../../types/db.interface';
 import { tryConvertToObjectId } from '../../../utils/converter.object.id';
-import { User } from '../users.schema';
+import { EmailInfo } from '../schemas/email.info.schema';
+import { User } from '../schemas/users.schema';
 
 @Injectable()
 export class UsersRepo {
@@ -33,5 +34,19 @@ export class UsersRepo {
     const user = await this.userModel.countDocuments({ _id: convertId });
 
     return !!user;
+  }
+
+  async getConfirmEmailByCode(code: string): Promise<EmailInfo> {
+    return await this.userModel.findOne(
+      { 'emailInfo.confirmationCode': code },
+      { emailInfo: true },
+    );
+  }
+
+  async updateConfirmEmailStatus(code: string): Promise<UpdateWriteOpResult> {
+    return await this.userModel.updateOne(
+      { $where: code },
+      { isConfirmed: true },
+    );
   }
 }
