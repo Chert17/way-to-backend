@@ -45,8 +45,9 @@ export class UsersRepo {
 
   async updateConfirmEmailStatus(code: string): Promise<UpdateWriteOpResult> {
     return await this.userModel.updateOne(
-      { $where: code },
-      { isConfirmed: true },
+      { 'emailInfo.confirmationCode': code },
+      { $set: { 'emailInfo.isConfirmed': true } },
+      { returnDocument: 'after' },
     );
   }
 }
