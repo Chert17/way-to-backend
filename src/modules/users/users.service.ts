@@ -3,6 +3,7 @@ import { UpdateWriteOpResult } from 'mongoose';
 
 import { Injectable } from '@nestjs/common';
 
+import { addMinutesToCurrentDate } from '../../helpers/add.minutes.current.date';
 import { generateHash } from '../../helpers/generate.hash';
 import { DbType } from '../../types/db.interface';
 import { CreateUserDto } from './dto/input/create.user.dto';
@@ -53,7 +54,7 @@ export class UsersService {
       emailInfo: {
         confirmationCode: randomUUID(),
         isConfirmed: true,
-        expirationDate: new Date(new Date().getTime() + 60000 * 2), // add 2 minutes to expirationDate
+        expirationDate: addMinutesToCurrentDate(2), // add 2 minutes to expirationDate
       },
       passwordRecoveryInfo: {
         recoveryCode: null,

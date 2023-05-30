@@ -11,6 +11,7 @@ import { SkipThrottle, ThrottlerGuard } from '@nestjs/throttler';
 
 import { AuthService } from './auth.service';
 import { ConfirmRegisterDto } from './dto/input/confirm.register.dto';
+import { EmailResendingDto } from './dto/input/email.resending.dto';
 import { RegisterDto } from './dto/input/register.dto';
 
 @Controller('auth')
@@ -49,7 +50,9 @@ export class AuthController {
 
   @Post('/registration-email-resending')
   @HttpCode(204)
-  async emailResending() {}
+  async emailResending(@Body() dto: EmailResendingDto) {
+    return await this.authService.resendingEmail(dto);
+  }
 
   @Post('/password-recovery')
   @HttpCode(204)

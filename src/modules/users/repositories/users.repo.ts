@@ -37,16 +37,38 @@ export class UsersRepo {
   }
 
   async getConfirmEmailByCode(code: string): Promise<EmailInfo> {
-    return await this.userModel.findOne(
-      { 'emailInfo.confirmationCode': code },
-      { emailInfo: true },
-    );
+    return await this.userModel
+      .findOne({ 'emailInfo.confirmationCode': code }, { emailInfo: true })
+      .lean();
+  }
+
+  async getConfirmEmailByEmail(email: string): Promise<EmailInfo> {
+    return await this.userModel
+      .findOne({ 'accountData.email': email }, { emailInfo: true })
+      .lean();
   }
 
   async updateConfirmEmailStatus(code: string): Promise<UpdateWriteOpResult> {
     return await this.userModel.updateOne(
       { 'emailInfo.confirmationCode': code },
       { $set: { 'emailInfo.isConfirmed': true } },
+      { returnDocument: 'after' },
+    );
+  }
+
+  async updateConfirmCodeByEmail(
+    email: string,
+    newConfirmCode: string,
+    newExpirationDate: Date,
+  ) {
+    return await this.userModel.updateOne(
+      { 'accountData.email': email },
+      {
+        $set: {
+          'emailInfo.confirmationCode': newConfirmCode,
+          'emailInfo.expirationDate': newExpirationDate,
+        },
+      },
       { returnDocument: 'after' },
     );
   }

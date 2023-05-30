@@ -9,6 +9,7 @@ import { JwtConfigService } from './configs/jwt.config';
 import { MailerConfigService } from './configs/mailer.config';
 import { ThrottleConfigService } from './configs/throttle.config';
 import { ConfirmCodeExist } from './infra/decorators/auth/confirm.code.exist';
+import { ResendingEmailExist } from './infra/decorators/auth/resending.email.exist';
 import { AuthController } from './modules/auth/auth.controller';
 import { AuthService } from './modules/auth/auth.service';
 import { BlogsController } from './modules/blogs/blogs.controller';
@@ -62,7 +63,7 @@ const queryRepo = [
 
 const repo = [BlogsRepo, PostsRepo, CommentsRepo, UsersRepo, ...queryRepo];
 
-const validators = [ConfirmCodeExist];
+const validators = [ConfirmCodeExist, ResendingEmailExist];
 
 const mongooseModels = [
   { name: Blog.name, schema: BlogSchema },
