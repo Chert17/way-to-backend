@@ -29,11 +29,15 @@ export class UsersQueryRepo {
     const query = [];
 
     if (searchEmailTerm) {
-      query.push({ email: { $regex: searchEmailTerm, $options: 'i' } });
+      query.push({
+        'accountData.email': { $regex: searchEmailTerm, $options: 'i' },
+      });
     }
 
     if (searchLoginTerm) {
-      query.push({ login: { $regex: searchLoginTerm, $options: 'i' } });
+      query.push({
+        'accountData.login': { $regex: searchLoginTerm, $options: 'i' },
+      });
     }
 
     const filter = { $or: query.length ? query : [{}] };

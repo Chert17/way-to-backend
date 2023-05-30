@@ -1,14 +1,17 @@
-import { IsString, Length } from 'class-validator';
+import { IsString, Length, Validate } from 'class-validator';
 
+import { ExistUser } from '../../../../infra/decorators/users/exist.user';
 import { Trim } from '../../../../infra/decorators/validation/trim.decorator';
 
 export class LoginDto {
-  @IsString()
+  @Validate(ExistUser)
   @Trim()
+  @IsString()
   readonly loginOrEmail: string;
 
-  @IsString()
-  @Length(6, 20)
+  @Validate(ExistUser)
   @Trim()
+  @Length(6, 20)
+  @IsString()
   readonly password: string;
 }

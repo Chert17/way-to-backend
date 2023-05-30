@@ -6,20 +6,18 @@ import {
 import { UsersRepo } from '../../../modules/users/repositories/users.repo';
 
 @ValidatorConstraint({ async: true })
-export class ResendingEmailExist implements ValidatorConstraintInterface {
+export class ExistUser implements ValidatorConstraintInterface {
   constructor(private usersRepo: UsersRepo) {}
 
   async validate(value: string) {
-    const confirmEmail = await this.usersRepo.getConfirmEmailByEmail(value);
+    const alreadyUser = await this.usersRepo.checkUserByLoginOrEmail(value);
 
-    if (!confirmEmail) return false;
-
-    if (confirmEmail.isConfirmed === true) return false; // user has already been verified
+    if (alreadyUser) return false;
 
     return true;
   }
 
   defaultMessage() {
-    return 'Incorrect value';
+    return 'Incorrect login or email';
   }
 }

@@ -1,3 +1,4 @@
+import { compare } from 'bcrypt';
 import { randomUUID } from 'crypto';
 
 import { Injectable } from '@nestjs/common';
@@ -8,7 +9,10 @@ import { UsersRepo } from '../users/repositories/users.repo';
 import { UsersService } from '../users/users.service';
 import { ConfirmRegisterDto } from './dto/input/confirm.register.dto';
 import { EmailResendingDto } from './dto/input/email.resending.dto';
+import { LoginDto } from './dto/input/login.dto';
 import { RegisterDto } from './dto/input/register.dto';
+import { JwtTokensDto } from './dto/view/tokens.view.dto';
+import { JwtService } from './jwt.service';
 
 @Injectable()
 export class AuthService {
@@ -16,6 +20,7 @@ export class AuthService {
     private usersService: UsersService,
     private emailService: EmailService,
     private usersRepo: UsersRepo,
+    private jwtService: JwtService,
   ) {}
 
   async register(dto: RegisterDto): Promise<void> {
@@ -43,5 +48,17 @@ export class AuthService {
 
     await this.emailService.sendRegistrationEmail(email, newCode);
     return;
+  }
+
+  async login(dto: LoginDto): Promise<JwtTokensDto | null> {
+    const user = await this.usersRepo.checkUserByLoginOrEmail(dto.loginOrEmail);
+
+    if (!user) return null;
+
+    const pass = await compare(dto.password, user.passwordHash);
+
+    if (!pass) return null;
+
+    return this.jwtService.createJWT(String(user.userId));
   }
 }

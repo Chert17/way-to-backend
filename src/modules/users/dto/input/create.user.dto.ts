@@ -1,8 +1,10 @@
-import { IsEmail, IsString, Length, Matches } from 'class-validator';
+import { IsEmail, IsString, Length, Matches, Validate } from 'class-validator';
 
+import { ExistUser } from '../../../../infra/decorators/users/exist.user';
 import { Trim } from '../../../../infra/decorators/validation/trim.decorator';
 
 export class CreateUserDto {
+  @Validate(ExistUser)
   @IsString()
   @Length(3, 10)
   @Matches('^[a-zA-Z0-9_-]*$')
@@ -14,6 +16,7 @@ export class CreateUserDto {
   @Trim()
   readonly password: string;
 
+  @Validate(ExistUser)
   @IsString()
   @IsEmail()
   @Matches(

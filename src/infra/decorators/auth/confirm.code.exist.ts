@@ -10,13 +10,7 @@ export class ConfirmCodeExist implements ValidatorConstraintInterface {
   constructor(private usersRepo: UsersRepo) {}
 
   async validate(value: string) {
-    if (typeof value !== 'string') return false;
-
-    const trimValue = value.trim();
-
-    if (!trimValue.length) return false;
-
-    const confirmEmail = await this.usersRepo.getConfirmEmailByCode(trimValue);
+    const confirmEmail = await this.usersRepo.getConfirmEmailByCode(value);
 
     if (!confirmEmail) return false;
 

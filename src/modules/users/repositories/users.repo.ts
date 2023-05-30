@@ -1,4 +1,4 @@
-import { Model, UpdateWriteOpResult } from 'mongoose';
+import { Model, Types, UpdateWriteOpResult } from 'mongoose';
 
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
@@ -71,5 +71,24 @@ export class UsersRepo {
       },
       { returnDocument: 'after' },
     );
+  }
+
+  async checkUserByLoginOrEmail(loginOrEmail: string): Promise<{
+    userId: Types.ObjectId;
+    passwordHash: string;
+  } | null> {
+    const result = await this.userModel.findOne(
+      {
+        $or: [
+          { 'accountData.email': loginOrEmail },
+          { 'accountData.login': loginOrEmail },
+        ],
+      },
+      { 'accountData.passwordHash': true, _id: true },
+    );
+
+    return !result
+      ? null
+      : { userId: result._id, passwordHash: result.accountData.passwordHash };
   }
 }

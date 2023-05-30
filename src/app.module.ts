@@ -1,17 +1,17 @@
 import { MailerModule } from '@nestjs-modules/mailer';
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import { JwtModule } from '@nestjs/jwt';
 import { MongooseModule } from '@nestjs/mongoose';
 import { ThrottlerModule } from '@nestjs/throttler';
 
-import { JwtConfigService } from './configs/jwt.config';
 import { MailerConfigService } from './configs/mailer.config';
 import { ThrottleConfigService } from './configs/throttle.config';
 import { ConfirmCodeExist } from './infra/decorators/auth/confirm.code.exist';
 import { ResendingEmailExist } from './infra/decorators/auth/resending.email.exist';
+import { ExistUser } from './infra/decorators/users/exist.user';
 import { AuthController } from './modules/auth/auth.controller';
 import { AuthService } from './modules/auth/auth.service';
+import { JwtService } from './modules/auth/jwt.service';
 import { BlogsController } from './modules/blogs/blogs.controller';
 import { Blog, BlogSchema } from './modules/blogs/blogs.schema';
 import { BlogsService } from './modules/blogs/blogs.service';
@@ -52,6 +52,7 @@ const services = [
   UsersService,
   AuthService,
   EmailService,
+  JwtService,
 ];
 
 const queryRepo = [
@@ -63,7 +64,7 @@ const queryRepo = [
 
 const repo = [BlogsRepo, PostsRepo, CommentsRepo, UsersRepo, ...queryRepo];
 
-const validators = [ConfirmCodeExist, ResendingEmailExist];
+const validators = [ConfirmCodeExist, ResendingEmailExist, ExistUser];
 
 const mongooseModels = [
   { name: Blog.name, schema: BlogSchema },
@@ -77,7 +78,6 @@ const mongooseModels = [
     ConfigModule.forRoot({ isGlobal: true, envFilePath: '.env' }),
     MongooseModule.forFeature(mongooseModels),
     MailerModule.forRootAsync({ useClass: MailerConfigService }),
-    JwtModule.registerAsync({ useClass: JwtConfigService }),
     ThrottlerModule.forRootAsync({ useClass: ThrottleConfigService }),
 
     MongoModule, // in modules/db-module , bacause need for test
