@@ -7,7 +7,6 @@ import { ThrottlerModule } from '@nestjs/throttler';
 import { MailerConfigService } from './configs/mailer.config';
 import { ThrottleConfigService } from './configs/throttle.config';
 import { ConfirmCodeExist } from './infra/decorators/auth/confirm.code.exist';
-import { NoExistUser } from './infra/decorators/auth/no.exist.user';
 import { ResendingEmailExist } from './infra/decorators/auth/resending.email.exist';
 import { ExistUser } from './infra/decorators/users/exist.user';
 import { AuthController } from './modules/auth/auth.controller';
