@@ -1,24 +1,26 @@
-import { IsString, Length, Matches } from 'class-validator';
+import { IsString, Length, Matches, Validate } from 'class-validator';
 
+import { ExistBlog } from '../../../../infra/decorators/blogs/exist.blog';
 import { Trim } from '../../../../infra/decorators/validation/trim.decorator';
 
 export class UpdateBlogDto {
+  @Validate(ExistBlog)
   @IsString()
   readonly blogId: string;
 
-  @IsString()
   @Length(1, 15)
   @Trim()
+  @IsString()
   readonly name: string;
 
-  @IsString()
   @Length(1, 500)
   @Trim()
+  @IsString()
   readonly description: string;
 
-  @IsString()
-  @Length(1, 100)
   @Matches('^https://([a-zA-Z0-9_-]+.)+[a-zA-Z0-9_-]+(/[a-zA-Z0-9_-]+)*/?$')
+  @Length(1, 100)
   @Trim()
+  @IsString()
   readonly websiteUrl: string;
 }

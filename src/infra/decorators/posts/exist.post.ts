@@ -3,6 +3,8 @@ import {
   ValidatorConstraintInterface,
 } from 'class-validator';
 
+import { NotFoundException } from '@nestjs/common';
+
 import { PostsRepo } from '../../../modules/posts/repositories/posts.repo';
 
 @ValidatorConstraint({ async: true })
@@ -12,7 +14,7 @@ export class ExistPost implements ValidatorConstraintInterface {
   async validate(value: string) {
     const blog = await this.postsRepo.checkPostById(value);
 
-    if (!blog) return false;
+    if (!blog) throw new NotFoundException();
 
     return true;
   }
