@@ -26,8 +26,6 @@ export class UsersQueryRepo {
       sortDirection,
     } = pagination;
 
-    console.log(sortBy, sortDirection);
-
     const query = [];
 
     if (searchEmailTerm) {
@@ -46,7 +44,7 @@ export class UsersQueryRepo {
 
     const users = await this.userModel
       .find(filter)
-      .sort({ [sortBy]: sortDirection === 'desc' ? -1 : 1 })
+      .sort({ [`accountData.${sortBy}`]: sortDirection })
       .skip(pagination.skip())
       .limit(pageSize)
       .lean();
@@ -77,8 +75,7 @@ export class UsersQueryRepo {
   private _userMapping(user: DbType<User>): UserViewDto {
     const {
       _id,
-      accountData: { login, email },
-      createdAt,
+      accountData: { login, email, createdAt },
     } = user;
 
     return {
