@@ -1,4 +1,5 @@
 import { useContainer } from 'class-validator';
+import cookieParser from 'cookie-parser';
 
 import { INestApplication } from '@nestjs/common';
 
@@ -12,6 +13,8 @@ export const initApp = (app: INestApplication): INestApplication => {
   app.useGlobalPipes(GlobalValidationPipe);
 
   app.useGlobalFilters(new HttpExceptionFilter());
+
+  app.use(cookieParser());
 
   useContainer(app.select(AppModule), { fallbackOnErrors: true });
 
