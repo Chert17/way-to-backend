@@ -37,6 +37,7 @@ export class UsersRepo {
   }
 
   async getConfirmEmailByCode(code: string): Promise<EmailInfo | null> {
+
     const result = await this.userModel
       .findOne({ 'emailInfo.confirmationCode': code }, { emailInfo: 1, _id: 0 })
       .lean();
