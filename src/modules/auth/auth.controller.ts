@@ -87,7 +87,6 @@ export class AuthController {
   @HttpCode(HttpStatus.NO_CONTENT)
   async newPassword() {}
 
-
   private _setRefreshTokenToCookie(res: Response, refreshToken: string) {
     return res.cookie('refreshToken ', refreshToken, {
       httpOnly: Boolean(this.configService.get(COOKIE_HTTP_ONLY)),
