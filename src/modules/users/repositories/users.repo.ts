@@ -36,18 +36,25 @@ export class UsersRepo {
     return !!user;
   }
 
-  async getConfirmEmailByCode(code: string): Promise<EmailInfo> {
+  async getConfirmEmailByCode(code: string): Promise<EmailInfo | null> {
+
     const result = await this.userModel
       .findOne({ 'emailInfo.confirmationCode': code }, { emailInfo: 1, _id: 0 })
       .lean();
 
+    if (!result) return null;
+
     return { ...result.emailInfo };
   }
 
-  async getConfirmEmailByEmail(email: string): Promise<EmailInfo> {
-    return await this.userModel
+  async getConfirmEmailByEmail(email: string): Promise<EmailInfo | null> {
+    const result = await this.userModel
       .findOne({ 'accountData.email': email }, { emailInfo: true })
       .lean();
+
+    if (!result) return null;
+
+    return { ...result.emailInfo };
   }
 
   async updateConfirmEmailStatus(code: string): Promise<UpdateWriteOpResult> {
