@@ -68,8 +68,7 @@ const repo = [BlogsRepo, PostsRepo, CommentsRepo, UsersRepo, ...queryRepo];
 const validators = [
   ConfirmCodeExist,
   ResendingEmailExist,
-  ExistUser, //register
-  NoExistUser, //login
+  ExistUser, //register //
 ];
 
 const mongooseModels = [

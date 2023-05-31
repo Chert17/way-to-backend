@@ -16,7 +16,6 @@ export class RegisterDto {
   @Trim()
   readonly password: string;
 
-
   @Validate(ExistUser)
   @IsString()
   @IsEmail()
