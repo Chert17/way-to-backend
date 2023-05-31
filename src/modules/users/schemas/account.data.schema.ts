@@ -10,6 +10,9 @@ export class AccountData {
 
   @Prop({ required: true, type: String })
   passwordHash: string;
+
+  @Prop({ required: true, type: Date, default: Date.now })
+  createdAt: Date;
 }
 
 export const AccountDataSchema = SchemaFactory.createForClass(AccountData);

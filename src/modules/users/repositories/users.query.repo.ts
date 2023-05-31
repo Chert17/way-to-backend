@@ -77,8 +77,7 @@ export class UsersQueryRepo {
   private _userMapping(user: DbType<User>): UserViewDto {
     const {
       _id,
-      accountData: { login, email },
-      createdAt,
+      accountData: { login, email, createdAt },
     } = user;
 
     return {
