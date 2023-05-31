@@ -8,6 +8,7 @@ import {
   HttpStatus,
   Post,
   Res,
+  UnauthorizedException,
   UseGuards,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
@@ -48,11 +49,11 @@ export class AuthController {
   ) {
     const result = await this.authService.login(dto);
 
-    if (!result) return res.sendStatus(HttpStatus.UNAUTHORIZED);
+    if (!result) throw new UnauthorizedException();
 
     const { accessToken, refreshToken } = result;
 
-    await this._setRefreshTokenToCookie(res, refreshToken);
+    this._setRefreshTokenToCookie(res, refreshToken);
 
     return { accessToken };
   }
@@ -86,7 +87,7 @@ export class AuthController {
   @HttpCode(HttpStatus.NO_CONTENT)
   async newPassword() {}
 
-  private async _setRefreshTokenToCookie(res: Response, refreshToken: string) {
+  private _setRefreshTokenToCookie(res: Response, refreshToken: string) {
     return res.cookie('refreshToken ', refreshToken, {
       httpOnly: Boolean(this.configService.get(COOKIE_HTTP_ONLY)),
       secure: Boolean(this.configService.get(COOKIE_SECURE)),

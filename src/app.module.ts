@@ -7,6 +7,7 @@ import { ThrottlerModule } from '@nestjs/throttler';
 import { MailerConfigService } from './configs/mailer.config';
 import { ThrottleConfigService } from './configs/throttle.config';
 import { ConfirmCodeExist } from './infra/decorators/auth/confirm.code.exist';
+import { NoExistUser } from './infra/decorators/auth/no.exist.user';
 import { ResendingEmailExist } from './infra/decorators/auth/resending.email.exist';
 import { ExistUser } from './infra/decorators/users/exist.user';
 import { AuthController } from './modules/auth/auth.controller';
@@ -64,7 +65,12 @@ const queryRepo = [
 
 const repo = [BlogsRepo, PostsRepo, CommentsRepo, UsersRepo, ...queryRepo];
 
-const validators = [ConfirmCodeExist, ResendingEmailExist, ExistUser];
+const validators = [
+  ConfirmCodeExist,
+  ResendingEmailExist,
+  ExistUser, //register
+  NoExistUser, //login
+];
 
 const mongooseModels = [
   { name: Blog.name, schema: BlogSchema },
