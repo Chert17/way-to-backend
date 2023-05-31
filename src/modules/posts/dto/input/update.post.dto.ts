@@ -1,4 +1,6 @@
-import { IsString } from 'class-validator';
+import { IsString, Length } from 'class-validator';
+
+import { Trim } from '../../../../infra/decorators/validation/trim.decorator';
 
 export class updatePostDto {
   @IsString()
@@ -8,11 +10,17 @@ export class updatePostDto {
   readonly blogId: string;
 
   @IsString()
-  readonly content: string;
+  @Length(1, 30)
+  @Trim()
+  readonly title: string;
 
   @IsString()
+  @Length(1, 100)
+  @Trim()
   readonly shortDescription: string;
 
   @IsString()
-  readonly title: string;
+  @Length(1, 1000)
+  @Trim()
+  readonly content: string;
 }

@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 
 import { DbType } from '../../types/db.interface';
 import { BlogsRepo } from '../blogs/repositories/blogs.repo';
@@ -13,9 +13,9 @@ import { PostsRepo } from './repositories/posts.repo';
 @Injectable()
 export class PostsService {
   constructor(
-    @Inject(PostsRepo) private postsRepo: PostsRepo,
-    @Inject(BlogsRepo) private blogsRepo: BlogsRepo,
-    @Inject(CommentsService) private commentsService: CommentsService,
+    private postsRepo: PostsRepo,
+    private blogsRepo: BlogsRepo,
+    private commentsService: CommentsService,
   ) {}
 
   async createPost(dto: createPostDto): Promise<false | DbType<Post>> {

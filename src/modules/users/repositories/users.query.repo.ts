@@ -8,7 +8,7 @@ import { WithPagination } from '../../../types/pagination.interface';
 import { tryConvertToObjectId } from '../../../utils/converter.object.id';
 import { UserQueryPagination } from '../../../utils/pagination/pagination';
 import { UserViewDto } from '../dto/view/user.view.dto';
-import { User } from '../users.schema';
+import { User } from '../schemas/users.schema';
 
 @Injectable()
 export class UsersQueryRepo {
@@ -26,14 +26,18 @@ export class UsersQueryRepo {
       sortDirection,
     } = pagination;
 
-    let query = [];
+    const query = [];
 
     if (searchEmailTerm) {
-      query.push({ email: { $regex: searchEmailTerm, $options: 'i' } });
+      query.push({
+        'accountData.email': { $regex: searchEmailTerm, $options: 'i' },
+      });
     }
 
     if (searchLoginTerm) {
-      query.push({ login: { $regex: searchLoginTerm, $options: 'i' } });
+      query.push({
+        'accountData.login': { $regex: searchLoginTerm, $options: 'i' },
+      });
     }
 
     const filter = { $or: query.length ? query : [{}] };
@@ -69,13 +73,16 @@ export class UsersQueryRepo {
   }
 
   private _userMapping(user: DbType<User>): UserViewDto {
-    const { _id, login, email, createdAt } = user;
+    const {
+      _id,
+      accountData: { login, email, createdAt },
+    } = user;
 
     return {
       id: _id.toString(),
       login,
       email,
-      createdAt,
+      createdAt: createdAt.toISOString(),
     };
   }
 }

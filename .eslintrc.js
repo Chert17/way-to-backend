@@ -21,18 +21,10 @@ module.exports = {
     '@typescript-eslint/explicit-function-return-type': 'off',
     '@typescript-eslint/explicit-module-boundary-types': 'off',
     '@typescript-eslint/no-explicit-any': 'off',
+
+    'no-unused-vars': 'off',
+    '@typescript-eslint/no-unused-vars': 'error',
+
+    'prettier/prettier': ['error', { endOfLine: 'auto' }],
   },
-  'prettier/prettier': [
-    'error',
-    {
-      singleQuote: true,
-      parser: 'flow',
-    },
-    {
-      fileInfoOptions: {
-        withNodeModules: true,
-        usePrettierrc: false,
-      },
-    },
-  ],
 };

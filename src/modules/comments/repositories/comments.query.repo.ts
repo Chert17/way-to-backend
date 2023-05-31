@@ -57,9 +57,9 @@ export class CommentsQueryRepo {
   private _commentMapping(comment: DbType<Comment>): CommentViewDto {
     const { _id, commentatorInfo, content, createdAt } = comment;
 
-    let likesCount = 0;
-    let dislikesCount = 0;
-    let myStatus = LikeStatus.None;
+    const likesCount = 0;
+    const dislikesCount = 0;
+    const myStatus = LikeStatus.None;
 
     return {
       id: _id.toString(),

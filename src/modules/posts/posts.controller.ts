@@ -4,14 +4,15 @@ import {
   Delete,
   Get,
   HttpCode,
-  Inject,
   NotFoundException,
   Param,
   Post,
   Put,
   Query,
+  UseGuards,
 } from '@nestjs/common';
 
+import { BasicAuthGuard } from '../../infra/guards/auth/basic.auth.guard';
 import {
   CommentQueryPagination,
   PostQueryPagination,
@@ -26,9 +27,9 @@ import { PostsQueryRepo } from './repositories/posts.query.repo';
 @Controller('posts')
 export class PostsController {
   constructor(
-    @Inject(PostsQueryRepo) private postsQueryRepo: PostsQueryRepo,
-    @Inject(PostsService) private postsService: PostsService,
-    @Inject(CommentsQueryRepo) private commentsQueryRepo: CommentsQueryRepo,
+    private postsQueryRepo: PostsQueryRepo,
+    private postsService: PostsService,
+    private commentsQueryRepo: CommentsQueryRepo,
   ) {}
 
   @Get()
@@ -61,6 +62,7 @@ export class PostsController {
   }
 
   @Post()
+  @UseGuards(BasicAuthGuard)
   async createPost(@Body() postDto: createPostDto) {
     const result = await this.postsService.createPost(postDto);
 
@@ -87,6 +89,7 @@ export class PostsController {
   }
 
   @Put('/:id')
+  @UseGuards(BasicAuthGuard)
   @HttpCode(204)
   async updatePost(
     @Param() postId: string,
@@ -100,6 +103,7 @@ export class PostsController {
   }
 
   @Delete('/:id')
+  @UseGuards(BasicAuthGuard)
   @HttpCode(204)
   async deleteBlog(@Param() postId: string) {
     const result = await this.postsService.deletePost(postId);

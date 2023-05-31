@@ -4,14 +4,15 @@ import {
   Delete,
   Get,
   HttpCode,
-  Inject,
   NotFoundException,
   Param,
   Post,
   Put,
   Query,
+  UseGuards,
 } from '@nestjs/common';
 
+import { BasicAuthGuard } from '../../infra/guards/auth/basic.auth.guard';
 import {
   BlogQueryPagination,
   PostQueryPagination,
@@ -26,9 +27,9 @@ import { BlogsQueryRepo } from './repositories/blogs.query.repo';
 @Controller('blogs')
 export class BlogsController {
   constructor(
-    @Inject(BlogsQueryRepo) private blogsQueryRepo: BlogsQueryRepo,
-    @Inject(BlogsService) private blogsService: BlogsService,
-    @Inject(PostsQueryRepo) private postsQueryRepo: PostsQueryRepo,
+    private blogsQueryRepo: BlogsQueryRepo,
+    private blogsService: BlogsService,
+    private postsQueryRepo: PostsQueryRepo,
   ) {}
 
   @Get()
@@ -58,15 +59,15 @@ export class BlogsController {
   }
 
   @Post()
+  @UseGuards(BasicAuthGuard)
   async createBlog(@Body() dto: CreateBlogDto) {
     const result = await this.blogsService.createBlog(dto);
-    console.log(result);
-    console.log(new Date());
 
     return await this.blogsQueryRepo.getBlogById(result._id.toString());
   }
 
   @Post('/:blogId/posts')
+  @UseGuards(BasicAuthGuard)
   async createPostByBlog(
     @Param('blogId') blogId: string,
     @Body() dto: Omit<createPostDto, 'blogId'>,
@@ -79,6 +80,7 @@ export class BlogsController {
   }
 
   @Put('/:id')
+  @UseGuards(BasicAuthGuard)
   @HttpCode(204)
   async updateBlog(
     @Param() blogId: string,
@@ -92,6 +94,7 @@ export class BlogsController {
   }
 
   @Delete('/:id')
+  @UseGuards(BasicAuthGuard)
   @HttpCode(204)
   async deleteBlog(@Param() blogId: string) {
     const result = await this.blogsService.deleteBlog(blogId);
