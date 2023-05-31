@@ -26,8 +26,6 @@ export class UsersQueryRepo {
       sortDirection,
     } = pagination;
 
-    console.log(sortBy, sortDirection);
-
     const query = [];
 
     if (searchEmailTerm) {

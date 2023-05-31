@@ -12,14 +12,18 @@ import {
   UseGuards,
 } from '@nestjs/common';
 
+import { ReqUser } from '../../infra/decorators/param/req.user.decorator';
 import { BasicAuthGuard } from '../../infra/guards/auth/basic.auth.guard';
+import { JwtAuthGuard } from '../../infra/guards/auth/jwt.auth.guard';
 import {
   CommentQueryPagination,
   PostQueryPagination,
 } from '../../utils/pagination/pagination';
 import { CreateCommentDto } from '../comments/dto/input/create.comment.dto';
 import { CommentsQueryRepo } from '../comments/repositories/comments.query.repo';
+import { UserViewDto } from '../users/dto/view/user.view.dto';
 import { createPostDto } from './dto/input/create.post.dto';
+import { LikeStatusDto } from './dto/input/like.status.dto';
 import { updatePostDto } from './dto/input/update.post.dto';
 import { PostsService } from './posts.service';
 import { PostsQueryRepo } from './repositories/posts.query.repo';
@@ -41,7 +45,7 @@ export class PostsController {
   async getPostById(@Param() postId: string) {
     const result = await this.postsQueryRepo.getPostById(postId);
 
-    if (!result) throw new NotFoundException();
+    if (!result) throw new NotFoundException(); // If specified post doesn't exists
 
     return result;
   }
@@ -53,7 +57,7 @@ export class PostsController {
   ) {
     const post = await this.postsQueryRepo.getPostById(postId);
 
-    if (!post) throw new NotFoundException();
+    if (!post) throw new NotFoundException(); // If specified post doesn't exists
 
     return await this.commentsQueryRepo.getAllCommentsByPostId(
       postId,
@@ -74,6 +78,7 @@ export class PostsController {
   }
 
   @Post('/:postId/comments')
+  @UseGuards(JwtAuthGuard)
   async createCommentByPost(
     @Param('postId') postId: string,
     @Body() dto: Omit<CreateCommentDto, 'postId'>,
@@ -83,7 +88,7 @@ export class PostsController {
       postId,
     });
 
-    if (!result) throw new NotFoundException();
+    if (!result) throw new NotFoundException(); // If specified post doesn't exists
 
     return await this.commentsQueryRepo.getCommentById(result._id.toString());
   }
@@ -100,6 +105,26 @@ export class PostsController {
     if (!result) throw new NotFoundException();
 
     return;
+  }
+
+  @Put('/:postId/like-status')
+  @UseGuards(JwtAuthGuard)
+  @HttpCode(204)
+  async updatePostLikeInfo(
+    @Param('postId') postId: string,
+    @Body() dto: LikeStatusDto,
+    @ReqUser() user: UserViewDto,
+  ) {
+    const post = await this.postsQueryRepo.getPostById(postId);
+
+    if (!post) throw new NotFoundException(); // If specified post doesn't exists
+
+    return await this.postsService.updateLikeStatus({
+      postId,
+      likeStatus: dto.likeStatus,
+      userId: user.id,
+      userLogin: user.login,
+    });
   }
 
   @Delete('/:id')

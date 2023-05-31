@@ -1,8 +1,9 @@
-import { sign } from 'jsonwebtoken';
+import { sign, verify } from 'jsonwebtoken';
 
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 
+import { ReqUser } from '../../types/req.user.interface';
 import { SETTINGS } from '../../utils/settings';
 import { JwtTokensDto } from './dto/view/tokens.view.dto';
 
@@ -27,6 +28,17 @@ export class JwtService {
       });
 
       return { accessToken, refreshToken };
+    } catch (error) {
+      console.log(error);
+      return null;
+    }
+  }
+
+  verify(accessToken: string) {
+    try {
+      const result = verify(accessToken, this._jwtSecret) as ReqUser;
+
+      return { userId: result.userId };
     } catch (error) {
       console.log(error);
       return null;

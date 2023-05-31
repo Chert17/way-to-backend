@@ -8,6 +8,7 @@ import { MailerConfigService } from './configs/mailer.config';
 import { ThrottleConfigService } from './configs/throttle.config';
 import { ConfirmCodeExist } from './infra/decorators/auth/confirm.code.exist';
 import { ResendingEmailExist } from './infra/decorators/auth/resending.email.exist';
+import { ExistBlog } from './infra/decorators/blogs/exist.blog';
 import { ExistUser } from './infra/decorators/users/exist.user';
 import { AuthController } from './modules/auth/auth.controller';
 import { AuthService } from './modules/auth/auth.service';
@@ -68,6 +69,7 @@ const validators = [
   ConfirmCodeExist,
   ResendingEmailExist,
   ExistUser, //register //
+  ExistBlog,
 ];
 
 const mongooseModels = [

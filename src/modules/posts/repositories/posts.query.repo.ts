@@ -64,11 +64,11 @@ export class PostsQueryRepo {
       pageSize,
       page: pageNumber,
       totalCount,
-      items: posts.map(this._postMapping),
+      items: posts.map(post => this._postMapping(post)),
     };
   }
 
-  private _postMapping(post: DbType<Post>): PostViewDto {
+  private _postMapping(post: DbType<Post>, userId?: string): PostViewDto {
     const {
       _id,
       blogId,
@@ -80,9 +80,17 @@ export class PostsQueryRepo {
       title,
     } = post;
 
-    const likesCount = 0;
-    const dislikesCount = 0;
-    const myStatus = LikeStatus.None;
+    let likesCount = 0;
+    let dislikesCount = 0;
+    let myStatus = LikeStatus.None;
+
+    extendedLikesInfo.forEach(i => {
+      if (userId && i.userId === userId) myStatus = i.status;
+
+      if (i.status === LikeStatus.Like) likesCount += 1;
+
+      if (i.status === LikeStatus.Dislike) dislikesCount += 1;
+    });
 
     const newestLikes = extendedLikesInfo
       .filter(i => i.status === LikeStatus.Like)
@@ -94,7 +102,7 @@ export class PostsQueryRepo {
       .map(i => ({
         addedAt: i.createdAt.toISOString(),
         userId: i.userId,
-        login: i.login,
+        login: i.userLogin,
       }));
 
     return {
