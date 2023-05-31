@@ -26,6 +26,8 @@ export class UsersQueryRepo {
       sortDirection,
     } = pagination;
 
+    console.log(sortBy, sortDirection);
+
     const query = [];
 
     if (searchEmailTerm) {
@@ -75,7 +77,8 @@ export class UsersQueryRepo {
   private _userMapping(user: DbType<User>): UserViewDto {
     const {
       _id,
-      accountData: { login, email, createdAt },
+      accountData: { login, email },
+      createdAt,
     } = user;
 
     return {
