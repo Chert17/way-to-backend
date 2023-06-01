@@ -20,8 +20,8 @@ export class PostsRepo {
     return await this.postModel.create(dto);
   }
 
-  async updatePost(dto: updatePostDto): Promise<boolean> {
-    const { postId, blogId, content, shortDescription, title } = dto;
+  async updatePost(dto: updatePostDto, postId: string): Promise<boolean> {
+    const { blogId, content, shortDescription, title } = dto;
 
     const convertId = tryConvertToObjectId(postId);
 

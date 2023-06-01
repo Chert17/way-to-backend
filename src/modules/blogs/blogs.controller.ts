@@ -20,10 +20,10 @@ import {
   BlogQueryPagination,
   PostQueryPagination,
 } from '../../utils/pagination/pagination';
-import { createPostDto } from '../posts/dto/input/create.post.dto';
 import { PostsQueryRepo } from '../posts/repositories/posts.query.repo';
 import { BlogsService } from './blogs.service';
 import { CreateBlogDto } from './dto/input/create.blog.dto';
+import { CreatePostByBlogDto } from './dto/input/create.post.by.blog.dto';
 import { UpdateBlogDto } from './dto/input/update.blog.dto';
 import { BlogsQueryRepo } from './repositories/blogs.query.repo';
 
@@ -80,7 +80,7 @@ export class BlogsController {
   @UseGuards(BasicAuthGuard)
   async createPostByBlog(
     @Param('blogId') blogId: string,
-    @Body() dto: Omit<createPostDto, 'blogId'>,
+    @Body() dto: CreatePostByBlogDto,
     @UserId() userId: ReqUserId,
   ) {
     const result = await this.blogsService.createPostByBlog({ ...dto, blogId });
