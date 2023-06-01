@@ -93,11 +93,8 @@ export class BlogsController {
   @Put('/:id')
   @UseGuards(BasicAuthGuard)
   @HttpCode(204)
-  async updateBlog(
-    @Param() blogId: string,
-    @Body() dto: Omit<UpdateBlogDto, 'blogId'>,
-  ) {
-    const result = await this.blogsService.updateBlog({ blogId, ...dto });
+  async updateBlog(@Param() blogId: string, @Body() dto: UpdateBlogDto) {
+    const result = await this.blogsService.updateBlog(dto, blogId);
 
     if (!result) throw new NotFoundException();
 
