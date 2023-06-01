@@ -25,6 +25,10 @@ export class CommentsService {
   }
 
   async updateComment(commentId: string, dto: updateCommentDto) {
+    const comment = await this.commentsRepo.checkCommentById(commentId);
+
+    if (!comment) return false;
+
     return await this.commentsRepo.updateComment(commentId, dto.content);
   }
 
@@ -33,6 +37,10 @@ export class CommentsService {
   }
 
   async deleteComment(commentId: string) {
+    const comment = await this.commentsRepo.checkCommentById(commentId);
+
+    if (!comment) return false;
+
     return await this.commentsRepo.deleteComment(commentId);
   }
 }
