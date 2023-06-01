@@ -4,10 +4,6 @@ import { ExistBlog } from '../../../../infra/decorators/blogs/exist.blog';
 import { Trim } from '../../../../infra/decorators/validation/trim.decorator';
 
 export class UpdateBlogDto {
-  @Validate(ExistBlog)
-  @IsString()
-  readonly blogId: string;
-
   @Length(1, 15)
   @Trim()
   @IsString()

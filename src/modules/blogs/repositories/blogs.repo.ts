@@ -17,8 +17,8 @@ export class BlogsRepo {
     return await this.blogModel.create(dto);
   }
 
-  async updateBlog(dto: UpdateBlogDto): Promise<boolean> {
-    const { blogId, description, name, websiteUrl } = dto;
+  async updateBlog(dto: UpdateBlogDto, blogId: string): Promise<boolean> {
+    const { description, name, websiteUrl } = dto;
 
     const convertId = tryConvertToObjectId(blogId);
 
