@@ -47,7 +47,7 @@ export class CommentsController {
   }
 
   @Put('/:id')
-  @UseGuards(CanUserWorkWithComment, JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, CanUserWorkWithComment)
   @HttpCode(HttpStatus.NO_CONTENT)
   async updateComment(
     @Param() commentId: string,
@@ -76,7 +76,7 @@ export class CommentsController {
   }
 
   @Delete('/:id')
-  @UseGuards(CanUserWorkWithComment, JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, CanUserWorkWithComment)
   @HttpCode(HttpStatus.NO_CONTENT)
   async deleteComment(@Param() commentId: string) {
     const result = await this.commentsService.deleteComment(commentId);
