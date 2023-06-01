@@ -54,7 +54,11 @@ export class CommentsController {
     @Param() commentId: string,
     @Body() dto: updateCommentDto,
   ) {
-    return await this.commentsService.updateComment(commentId, dto);
+    const result = await this.commentsService.updateComment(commentId, dto);
+
+    if (!result) throw new NotFoundException();
+
+    return;
   }
 
   @Put('/:commentId/like-status')
@@ -77,6 +81,10 @@ export class CommentsController {
   @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.NO_CONTENT)
   async deleteComment(@Param() commentId: string) {
-    return await this.commentsService.deleteComment(commentId);
+    const result = await this.commentsService.deleteComment(commentId);
+
+    if (!result) throw new NotFoundException();
+
+    return;
   }
 }

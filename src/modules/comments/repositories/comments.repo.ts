@@ -4,6 +4,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 
 import { DbType } from '../../../types/db.interface';
+import { tryConvertToObjectId } from '../../../utils/converter.object.id';
 import { Comment } from '../comments.schema';
 import { CommentsLikeStatusDbDto } from '../dto/input/comment.like.status.db';
 
@@ -45,5 +46,15 @@ export class CommentsRepo {
     return await this.commentModel.deleteOne({
       _id: new Types.ObjectId(commentId),
     });
+  }
+
+  async checkCommentById(commentId: string): Promise<boolean> {
+    const convertId = tryConvertToObjectId(commentId);
+
+    if (!convertId) return false;
+
+    const comment = await this.commentModel.countDocuments({ _id: convertId });
+
+    return !!comment;
   }
 }
