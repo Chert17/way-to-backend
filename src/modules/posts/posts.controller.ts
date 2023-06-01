@@ -116,11 +116,8 @@ export class PostsController {
   @Put('/:id')
   @UseGuards(BasicAuthGuard)
   @HttpCode(204)
-  async updatePost(
-    @Param() postId: string,
-    @Body() postDto: Omit<updatePostDto, 'postId'>,
-  ) {
-    const result = await this.postsService.updatePost({ ...postDto, postId });
+  async updatePost(@Param() postId: string, @Body() dto: updatePostDto) {
+    const result = await this.postsService.updatePost(dto, postId);
 
     if (!result) throw new NotFoundException();
 

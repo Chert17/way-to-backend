@@ -37,12 +37,12 @@ export class PostsService {
     return await this.commentsService.createComment(dto);
   }
 
-  async updatePost(dto: updatePostDto): Promise<boolean> {
-    const post = await this.postsRepo.checkPostById(dto.postId);
+  async updatePost(dto: updatePostDto, postId: string): Promise<boolean> {
+    const post = await this.postsRepo.checkPostById(postId);
 
-    if (!post) return false; // not found post by post id
+    if (!post) return false; // not found post by id
 
-    return await this.postsRepo.updatePost(dto);
+    return await this.postsRepo.updatePost(dto, postId);
   }
 
   async updateLikeStatus(dto: PostsLikeStatusDbDto) {
