@@ -4,6 +4,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 
 import { DbType } from '../../../types/db.interface';
+import { ReqUserId } from '../../../types/req.user.interface';
 import { tryConvertToObjectId } from '../../../utils/converter.object.id';
 import { LikeStatus } from '../../../utils/like.status';
 import { CommentQueryPagination } from '../../../utils/pagination/pagination';
@@ -19,6 +20,7 @@ export class CommentsQueryRepo {
   async getAllCommentsByPostId(
     postId: string,
     pagination: CommentQueryPagination,
+    userId: ReqUserId,
   ) {
     const filter = { postId };
 
@@ -40,26 +42,40 @@ export class CommentsQueryRepo {
       pageSize,
       page: pageNumber,
       totalCount,
-      items: posts.map(this._commentMapping),
+      items: posts.map(comment => this._commentMapping(comment, userId)),
     };
   }
 
-  async getCommentById(commentId: string): Promise<false | CommentViewDto> {
+  async getCommentById(
+    commentId: string,
+    userId: ReqUserId,
+  ): Promise<false | CommentViewDto> {
     const convertId = tryConvertToObjectId(commentId);
 
     if (!convertId) return false;
 
     const comment = await this.commentModel.findById(convertId).lean();
 
-    return !comment ? false : this._commentMapping(comment);
+    return !comment ? false : this._commentMapping(comment, userId);
   }
 
-  private _commentMapping(comment: DbType<Comment>): CommentViewDto {
-    const { _id, commentatorInfo, content, createdAt } = comment;
+  private _commentMapping(
+    comment: DbType<Comment>,
+    userId: ReqUserId,
+  ): CommentViewDto {
+    const { _id, commentatorInfo, content, createdAt, likesInfo } = comment;
 
-    const likesCount = 0;
-    const dislikesCount = 0;
-    const myStatus = LikeStatus.None;
+    let likesCount = 0;
+    let dislikesCount = 0;
+    let myStatus = LikeStatus.None;
+
+    likesInfo.forEach(i => {
+      if (userId && i.userId === userId) myStatus = i.status;
+
+      if (i.status === LikeStatus.Like) likesCount += 1;
+
+      if (i.status === LikeStatus.Dislike) dislikesCount += 1;
+    });
 
     return {
       id: _id.toString(),

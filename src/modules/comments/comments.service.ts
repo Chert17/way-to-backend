@@ -1,23 +1,38 @@
 import { Injectable } from '@nestjs/common';
 
-import { LikeStatus } from '../../utils/like.status';
 import { Comment } from './comments.schema';
-import { CreateCommentDto } from './dto/input/create.comment.dto';
+import { CommentsLikeStatusDbDto } from './dto/input/comment.like.status.db';
+import { CreateCommentServiceDto } from './dto/input/create.comment.dto';
+import { updateCommentDto } from './dto/input/update.comment.dto';
 import { CommentsRepo } from './repositories/comments.repo';
 
 @Injectable()
 export class CommentsService {
   constructor(private commentsRepo: CommentsRepo) {}
 
-  async createComment(dto: CreateCommentDto) {
+  async createComment(dto: CreateCommentServiceDto) {
+    const { postId, content, userId, userLogin } = dto;
+
     const newComment: Comment = {
-      content: dto.content,
-      postId: dto.postId,
-      commentatorInfo: { userId: 'string', userLogin: 'string' },
+      postId,
+      content,
+      commentatorInfo: { userId, userLogin },
       createdAt: new Date().toISOString(),
-      likesInfo: [{ userId: 'string', status: LikeStatus.None }],
+      likesInfo: [],
     };
 
     return await this.commentsRepo.createComment(newComment);
+  }
+
+  async updateComment(commentId: string, dto: updateCommentDto) {
+    return await this.commentsRepo.updateComment(commentId, dto.content);
+  }
+
+  async updateLikeInfo(dto: CommentsLikeStatusDbDto) {
+    return await this.commentsRepo.updateLikeInfo(dto);
+  }
+
+  async deleteComment(commentId: string) {
+    return await this.commentsRepo.deleteComment(commentId);
   }
 }

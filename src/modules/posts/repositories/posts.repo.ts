@@ -5,6 +5,7 @@ import { InjectModel } from '@nestjs/mongoose';
 
 import { DbType } from '../../../types/db.interface';
 import { tryConvertToObjectId } from '../../../utils/converter.object.id';
+import { PostsLikeStatusDbDto } from '../dto/db/like.status.db.dto';
 import { createPostDto } from '../dto/input/create.post.dto';
 import { updatePostDto } from '../dto/input/update.post.dto';
 import { Post } from '../posts.schema';
@@ -33,6 +34,20 @@ export class PostsRepo {
     );
 
     return post.matchedCount === 1;
+  }
+
+  async updatePostLikeStatus(dto: PostsLikeStatusDbDto): Promise<void> {
+    const { postId, likeStatus, userId, userLogin } = dto;
+
+    const post = await this.postModel.findById(postId);
+
+    const likeInfo = post.extendedLikesInfo.find(i => i.userId === userId);
+
+    if (!likeInfo) {
+      post.extendedLikesInfo.push({ userId, userLogin, status: likeStatus });
+    } else likeInfo.status = likeStatus;
+
+    post.save();
   }
 
   async deletePost(postId: string): Promise<boolean> {

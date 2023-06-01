@@ -43,7 +43,7 @@ export class BlogsRepo {
     return blog.deletedCount === 1;
   }
 
-  async getAndCheckBlogName(blogId: string) {
+  async getAndCheckBlogName(blogId: string): Promise<string | false> {
     const convertId = tryConvertToObjectId(blogId);
 
     if (!convertId) return false;
@@ -52,7 +52,7 @@ export class BlogsRepo {
       .findById({ _id: convertId }, {}, { projection: { name: true } })
       .lean();
 
-    return !blog ? false : blog;
+    return !blog ? false : blog.name;
   }
 
   async checkBlogById(blogId: string): Promise<boolean> {

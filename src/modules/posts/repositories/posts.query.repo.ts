@@ -5,6 +5,7 @@ import { InjectModel } from '@nestjs/mongoose';
 
 import { DbType } from '../../../types/db.interface';
 import { WithPagination } from '../../../types/pagination.interface';
+import { ReqUserId } from '../../../types/req.user.interface';
 import { tryConvertToObjectId } from '../../../utils/converter.object.id';
 import { LikeStatus } from '../../../utils/like.status';
 import { PostQueryPagination } from '../../../utils/pagination/pagination';
@@ -17,34 +18,40 @@ export class PostsQueryRepo {
 
   async getAllPosts(
     pagination: PostQueryPagination,
+    userId: ReqUserId,
   ): Promise<WithPagination<PostViewDto>> {
     const filter = {};
 
-    return await this._getPosts(filter, pagination);
+    return await this._getPosts(filter, pagination, userId);
   }
 
-  async getPostById(postId: string): Promise<PostViewDto | false> {
+  async getPostById(
+    postId: string,
+    userId: ReqUserId,
+  ): Promise<PostViewDto | false> {
     const convertId = tryConvertToObjectId(postId);
 
     if (!convertId) return false;
 
     const post = await this.postModel.findById(convertId).lean();
 
-    return !post ? false : this._postMapping(post);
+    return !post ? false : this._postMapping(post, userId);
   }
 
   async getAllPostsByBlogId(
     blogId: string,
     pagination: PostQueryPagination,
+    userId: ReqUserId,
   ): Promise<WithPagination<PostViewDto>> {
     const filter = { blogId };
 
-    return await this._getPosts(filter, pagination);
+    return await this._getPosts(filter, pagination, userId);
   }
 
   private async _getPosts(
     filter: Record<string, unknown>,
     pagination: PostQueryPagination,
+    userId: ReqUserId,
   ) {
     const { pageNumber, pageSize, sortBy, sortDirection } = pagination;
 
@@ -64,11 +71,11 @@ export class PostsQueryRepo {
       pageSize,
       page: pageNumber,
       totalCount,
-      items: posts.map(this._postMapping),
+      items: posts.map(post => this._postMapping(post, userId)),
     };
   }
 
-  private _postMapping(post: DbType<Post>): PostViewDto {
+  private _postMapping(post: DbType<Post>, userId: ReqUserId): PostViewDto {
     const {
       _id,
       blogId,
@@ -80,9 +87,17 @@ export class PostsQueryRepo {
       title,
     } = post;
 
-    const likesCount = 0;
-    const dislikesCount = 0;
-    const myStatus = LikeStatus.None;
+    let likesCount = 0;
+    let dislikesCount = 0;
+    let myStatus = LikeStatus.None;
+
+    extendedLikesInfo.forEach(i => {
+      if (userId && i.userId === userId) myStatus = i.status;
+
+      if (i.status === LikeStatus.Like) likesCount += 1;
+
+      if (i.status === LikeStatus.Dislike) dislikesCount += 1;
+    });
 
     const newestLikes = extendedLikesInfo
       .filter(i => i.status === LikeStatus.Like)
@@ -94,7 +109,7 @@ export class PostsQueryRepo {
       .map(i => ({
         addedAt: i.createdAt.toISOString(),
         userId: i.userId,
-        login: i.login,
+        login: i.userLogin,
       }));
 
     return {

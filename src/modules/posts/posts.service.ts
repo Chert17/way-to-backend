@@ -4,7 +4,8 @@ import { DbType } from '../../types/db.interface';
 import { BlogsRepo } from '../blogs/repositories/blogs.repo';
 import { Comment } from '../comments/comments.schema';
 import { CommentsService } from '../comments/comments.service';
-import { CreateCommentDto } from '../comments/dto/input/create.comment.dto';
+import { CreateCommentServiceDto } from '../comments/dto/input/create.comment.dto';
+import { PostsLikeStatusDbDto } from './dto/db/like.status.db.dto';
 import { createPostDto } from './dto/input/create.post.dto';
 import { updatePostDto } from './dto/input/update.post.dto';
 import { Post } from './posts.schema';
@@ -19,15 +20,15 @@ export class PostsService {
   ) {}
 
   async createPost(dto: createPostDto): Promise<false | DbType<Post>> {
-    const blog = await this.blogsRepo.getAndCheckBlogName(dto.blogId);
+    const blogName = await this.blogsRepo.getAndCheckBlogName(dto.blogId);
 
-    if (!blog) return false;
+    if (!blogName) return false;
 
-    return await this.postsRepo.createPost({ ...dto, blogName: blog.name });
+    return await this.postsRepo.createPost({ ...dto, blogName });
   }
 
   async createCommentByPost(
-    dto: CreateCommentDto,
+    dto: CreateCommentServiceDto,
   ): Promise<false | DbType<Comment>> {
     const post = await this.postsRepo.checkPostById(dto.postId);
 
@@ -42,6 +43,10 @@ export class PostsService {
     if (!post) return false; // not found post by post id
 
     return await this.postsRepo.updatePost(dto);
+  }
+
+  async updateLikeStatus(dto: PostsLikeStatusDbDto) {
+    return await this.postsRepo.updatePostLikeStatus(dto);
   }
 
   async deletePost(postId: string): Promise<boolean> {

@@ -18,11 +18,11 @@ export class BlogsService {
   }
 
   async createPostByBlog(dto: createPostDto): Promise<false | DbType<Post>> {
-    const blog = await this.blogsRepo.getAndCheckBlogName(dto.blogId);
+    const blogName = await this.blogsRepo.getAndCheckBlogName(dto.blogId);
 
-    if (!blog) return false; // not found blog by blog id
+    if (!blogName) return false; // not found blog by blog id
 
-    return await this.postsRepo.createPost({ ...dto, blogName: blog.name });
+    return await this.postsRepo.createPost({ ...dto, blogName });
   }
 
   async updateBlog(dto: UpdateBlogDto): Promise<boolean> {

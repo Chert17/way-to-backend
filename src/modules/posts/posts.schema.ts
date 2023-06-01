@@ -6,23 +6,25 @@ import { LikeStatus } from '../../utils/like.status';
 
 export type PostDocument = HydratedDocument<Post>;
 
-@Schema({ id: false, _id: false, versionKey: false, timestamps: true })
-class PostLikeInfoSchema {
+@Schema({ _id: false, versionKey: false, timestamps: true })
+export class PostLikeInfo {
   @Prop({ type: String, require: true })
   userId: string;
 
   @Prop({ type: String, enum: LikeStatus, require: true })
-  status: string;
+  status: LikeStatus;
 
   @Prop({ type: String, require: true })
-  login: string;
+  userLogin: string;
 
   createdAt?: Date;
 
   updatedAt?: Date;
 }
 
-@Schema()
+const PostLikeInfoSchema = SchemaFactory.createForClass(PostLikeInfo);
+
+@Schema({ versionKey: false })
 export class Post {
   @Prop({ type: String, require: true, length: { max: 30 } })
   title: string;
@@ -42,8 +44,8 @@ export class Post {
   @Prop({ type: Date, require: true, default: Date.now })
   createdAt: Date;
 
-  @Prop({ type: Array, require: true, default: [] })
-  extendedLikesInfo: [PostLikeInfoSchema];
+  @Prop({ type: [PostLikeInfoSchema], require: true })
+  extendedLikesInfo: PostLikeInfo[];
 }
 
 export const PostSchema = SchemaFactory.createForClass(Post);
