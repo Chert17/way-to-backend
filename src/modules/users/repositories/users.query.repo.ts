@@ -63,13 +63,17 @@ export class UsersQueryRepo {
   }
 
   async getUserById(userId: string) {
-    const convertId = tryConvertToObjectId(userId);
+    try {
+      const convertId = tryConvertToObjectId(userId);
 
-    if (!convertId) return false;
+      if (!convertId) return false;
 
-    const user = await this.userModel.findById(convertId);
+      const user = await this.userModel.findById(convertId);
 
-    return this._userMapping(user);
+      return this._userMapping(user);
+    } catch (error) {
+      return false;
+    }
   }
 
   private _userMapping(user: DbType<User>): UserViewDto {
