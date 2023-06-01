@@ -15,6 +15,9 @@ class CommentatorInfo {
   userLogin: string;
 }
 
+export const CommentatorInfoSchema =
+  SchemaFactory.createForClass(CommentatorInfo);
+
 @Schema({ timestamps: true })
 class LikesInfo {
   @Prop({ type: String, require: true })
@@ -23,6 +26,8 @@ class LikesInfo {
   @Prop({ type: String, enum: LikeStatus, require: true })
   status: LikeStatus;
 }
+
+export const LikesInfoSchema = SchemaFactory.createForClass(LikesInfo);
 
 @Schema()
 export class Comment {
@@ -35,11 +40,11 @@ export class Comment {
   @Prop({ type: Date, require: true, default: Date.now })
   createdAt: string;
 
-  @Prop({ type: Object, required: true })
+  @Prop({ type: CommentatorInfoSchema, required: true })
   commentatorInfo: CommentatorInfo;
 
-  @Prop({ type: Array, required: true })
-  likesInfo: [LikesInfo];
+  @Prop({ type: [LikesInfoSchema], required: true })
+  likesInfo: LikesInfo[];
 }
 
 export const CommentSchema = SchemaFactory.createForClass(Comment);

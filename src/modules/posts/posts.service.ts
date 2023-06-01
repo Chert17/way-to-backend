@@ -5,7 +5,7 @@ import { BlogsRepo } from '../blogs/repositories/blogs.repo';
 import { Comment } from '../comments/comments.schema';
 import { CommentsService } from '../comments/comments.service';
 import { CreateCommentServiceDto } from '../comments/dto/input/create.comment.dto';
-import { LikeStatusDbDto } from './dto/db/like.status.db.dto';
+import { PostsLikeStatusDbDto } from './dto/db/like.status.db.dto';
 import { createPostDto } from './dto/input/create.post.dto';
 import { updatePostDto } from './dto/input/update.post.dto';
 import { Post } from './posts.schema';
@@ -45,7 +45,7 @@ export class PostsService {
     return await this.postsRepo.updatePost(dto);
   }
 
-  async updateLikeStatus(dto: LikeStatusDbDto) {
+  async updateLikeStatus(dto: PostsLikeStatusDbDto) {
     return await this.postsRepo.updatePostLikeStatus(dto);
   }
 

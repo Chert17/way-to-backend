@@ -17,6 +17,7 @@ import { UserId } from '../../infra/decorators/param/req.userId.decorator';
 import { BasicAuthGuard } from '../../infra/guards/auth/basic.auth.guard';
 import { JwtAuthGuard } from '../../infra/guards/auth/jwt.auth.guard';
 import { UserIdFromToken } from '../../infra/guards/auth/userId.from.token.guard';
+import { LikeStatusDto } from '../../types/like.info.interface';
 import { ReqUserId } from '../../types/req.user.interface';
 import {
   CommentQueryPagination,
@@ -26,7 +27,6 @@ import { createCommentDto } from '../comments/dto/input/create.comment.dto';
 import { CommentsQueryRepo } from '../comments/repositories/comments.query.repo';
 import { UserViewDto } from '../users/dto/view/user.view.dto';
 import { createPostDto } from './dto/input/create.post.dto';
-import { LikeStatusDto } from './dto/input/like.status.dto';
 import { updatePostDto } from './dto/input/update.post.dto';
 import { PostsService } from './posts.service';
 import { PostsQueryRepo } from './repositories/posts.query.repo';
