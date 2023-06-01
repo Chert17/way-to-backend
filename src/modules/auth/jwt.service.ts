@@ -1,4 +1,4 @@
-import { sign, verify } from 'jsonwebtoken';
+import { decode, sign, verify } from 'jsonwebtoken';
 
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
@@ -39,6 +39,15 @@ export class JwtService {
       const result = verify(accessToken, this._jwtSecret) as ReqUser;
 
       return { userId: result.userId };
+    } catch (error) {
+      console.log(error);
+      return null;
+    }
+  }
+
+  getUserIdFromAccessToken(accessToken: string) {
+    try {
+      return decode(accessToken) as any;
     } catch (error) {
       console.log(error);
       return null;

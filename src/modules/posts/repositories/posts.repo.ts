@@ -39,17 +39,13 @@ export class PostsRepo {
   async updatePostLikeStatus(dto: LikeStatusDbDto): Promise<void> {
     const { postId, likeStatus, userId, userLogin } = dto;
 
-    const post = await this.postModel.findOne({
-      _id: postId,
-      extendedLikesInfo: { $elemMatch: { userId } },
-    });
-
-    if (!post) {
-      post.extendedLikesInfo.push({ userId, userLogin, status: likeStatus });
-    }
+    const post = await this.postModel.findById(postId);
 
     const likeInfo = post.extendedLikesInfo.find(i => i.userId === userId);
-    likeInfo.status = likeStatus;
+
+    if (!likeInfo) {
+      post.extendedLikesInfo.push({ userId, userLogin, status: likeStatus });
+    } else likeInfo.status = likeStatus;
 
     post.save();
   }

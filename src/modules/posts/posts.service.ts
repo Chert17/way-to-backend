@@ -4,7 +4,7 @@ import { DbType } from '../../types/db.interface';
 import { BlogsRepo } from '../blogs/repositories/blogs.repo';
 import { Comment } from '../comments/comments.schema';
 import { CommentsService } from '../comments/comments.service';
-import { CreateCommentDto } from '../comments/dto/input/create.comment.dto';
+import { CreateCommentServiceDto } from '../comments/dto/input/create.comment.dto';
 import { LikeStatusDbDto } from './dto/db/like.status.db.dto';
 import { createPostDto } from './dto/input/create.post.dto';
 import { updatePostDto } from './dto/input/update.post.dto';
@@ -28,7 +28,7 @@ export class PostsService {
   }
 
   async createCommentByPost(
-    dto: CreateCommentDto,
+    dto: CreateCommentServiceDto,
   ): Promise<false | DbType<Comment>> {
     const post = await this.postsRepo.checkPostById(dto.postId);
 

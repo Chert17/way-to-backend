@@ -21,7 +21,7 @@ class LikesInfo {
   userId: string;
 
   @Prop({ type: String, enum: LikeStatus, require: true })
-  status: string;
+  status: LikeStatus;
 }
 
 @Schema()

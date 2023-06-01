@@ -12,7 +12,10 @@ import {
   UseGuards,
 } from '@nestjs/common';
 
+import { UserId } from '../../infra/decorators/param/req.userId.decorator';
 import { BasicAuthGuard } from '../../infra/guards/auth/basic.auth.guard';
+import { UserIdFromToken } from '../../infra/guards/auth/userId.from.token.guard';
+import { ReqUserId } from '../../types/req.user.interface';
 import {
   BlogQueryPagination,
   PostQueryPagination,
@@ -47,15 +50,21 @@ export class BlogsController {
   }
 
   @Get('/:blogId/posts')
+  @UseGuards(UserIdFromToken)
   async getPostsByBlog(
     @Param('blogId') blogId: string,
     @Query() pagination: PostQueryPagination,
+    @UserId() userId: ReqUserId,
   ) {
     const blog = await this.blogsQueryRepo.getBlogById(blogId);
 
     if (!blog) throw new NotFoundException(); // If specified blog doesn't exists
 
-    return await this.postsQueryRepo.getAllPostsByBlogId(blogId, pagination);
+    return await this.postsQueryRepo.getAllPostsByBlogId(
+      blogId,
+      pagination,
+      userId,
+    );
   }
 
   @Post()
@@ -67,16 +76,18 @@ export class BlogsController {
   }
 
   @Post('/:blogId/posts')
+  @UseGuards(UserIdFromToken)
   @UseGuards(BasicAuthGuard)
   async createPostByBlog(
     @Param('blogId') blogId: string,
     @Body() dto: Omit<createPostDto, 'blogId'>,
+    @UserId() userId: ReqUserId,
   ) {
     const result = await this.blogsService.createPostByBlog({ ...dto, blogId });
 
     if (!result) throw new NotFoundException(); // If specified blog doesn't exists
 
-    return await this.postsQueryRepo.getPostById(result._id.toString());
+    return await this.postsQueryRepo.getPostById(result._id.toString(), userId);
   }
 
   @Put('/:id')

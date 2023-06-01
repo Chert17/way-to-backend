@@ -5,6 +5,7 @@ import { InjectModel } from '@nestjs/mongoose';
 
 import { DbType } from '../../../types/db.interface';
 import { WithPagination } from '../../../types/pagination.interface';
+import { ReqUserId } from '../../../types/req.user.interface';
 import { tryConvertToObjectId } from '../../../utils/converter.object.id';
 import { LikeStatus } from '../../../utils/like.status';
 import { PostQueryPagination } from '../../../utils/pagination/pagination';
@@ -17,34 +18,40 @@ export class PostsQueryRepo {
 
   async getAllPosts(
     pagination: PostQueryPagination,
+    userId: ReqUserId,
   ): Promise<WithPagination<PostViewDto>> {
     const filter = {};
 
-    return await this._getPosts(filter, pagination);
+    return await this._getPosts(filter, pagination, userId);
   }
 
-  async getPostById(postId: string): Promise<PostViewDto | false> {
+  async getPostById(
+    postId: string,
+    userId: ReqUserId,
+  ): Promise<PostViewDto | false> {
     const convertId = tryConvertToObjectId(postId);
 
     if (!convertId) return false;
 
     const post = await this.postModel.findById(convertId).lean();
 
-    return !post ? false : this._postMapping(post);
+    return !post ? false : this._postMapping(post, userId);
   }
 
   async getAllPostsByBlogId(
     blogId: string,
     pagination: PostQueryPagination,
+    userId: ReqUserId,
   ): Promise<WithPagination<PostViewDto>> {
     const filter = { blogId };
 
-    return await this._getPosts(filter, pagination);
+    return await this._getPosts(filter, pagination, userId);
   }
 
   private async _getPosts(
     filter: Record<string, unknown>,
     pagination: PostQueryPagination,
+    userId: ReqUserId,
   ) {
     const { pageNumber, pageSize, sortBy, sortDirection } = pagination;
 
@@ -64,11 +71,11 @@ export class PostsQueryRepo {
       pageSize,
       page: pageNumber,
       totalCount,
-      items: posts.map(post => this._postMapping(post)),
+      items: posts.map(post => this._postMapping(post, userId)),
     };
   }
 
-  private _postMapping(post: DbType<Post>, userId?: string): PostViewDto {
+  private _postMapping(post: DbType<Post>, userId: ReqUserId): PostViewDto {
     const {
       _id,
       blogId,
