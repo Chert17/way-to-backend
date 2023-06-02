@@ -1,4 +1,4 @@
-import { Model, Types, UpdateWriteOpResult } from 'mongoose';
+import { Model, UpdateWriteOpResult } from 'mongoose';
 
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
@@ -56,6 +56,17 @@ export class UsersRepo {
     return { ...result.emailInfo };
   }
 
+  async getUserByEmailOrLogin(loginOrEmail: string) {
+    const result = await this.userModel.findOne({
+      $or: [
+        { 'accountData.email': loginOrEmail },
+        { 'accountData.login': loginOrEmail },
+      ],
+    });
+
+    return result;
+  }
+
   async updateConfirmEmailStatus(code: string): Promise<UpdateWriteOpResult> {
     return await this.userModel.updateOne(
       { 'emailInfo.confirmationCode': code },
@@ -81,22 +92,14 @@ export class UsersRepo {
     );
   }
 
-  async checkUserByLoginOrEmail(loginOrEmail: string): Promise<{
-    userId: Types.ObjectId;
-    passwordHash: string;
-  } | null> {
-    const result = await this.userModel.findOne(
-      {
-        $or: [
-          { 'accountData.email': loginOrEmail },
-          { 'accountData.login': loginOrEmail },
-        ],
-      },
-      { 'accountData.passwordHash': true, _id: true },
-    );
+  async checkUserByLoginOrEmail(loginOrEmail: string): Promise<boolean> {
+    const result = await this.userModel.findOne({
+      $or: [
+        { 'accountData.email': loginOrEmail },
+        { 'accountData.login': loginOrEmail },
+      ],
+    });
 
-    return !result
-      ? null
-      : { userId: result._id, passwordHash: result.accountData.passwordHash };
+    return !!result;
   }
 }

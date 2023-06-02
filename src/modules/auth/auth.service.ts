@@ -50,15 +50,17 @@ export class AuthService {
     return;
   }
 
-  async login(dto: LoginDto): Promise<JwtTokensDto | null> {
-    const user = await this.usersRepo.checkUserByLoginOrEmail(dto.loginOrEmail);
+  async login(dto: LoginDto): Promise<null | JwtTokensDto> {
+    const user = await this.usersRepo.getUserByEmailOrLogin(dto.loginOrEmail);
 
     if (!user) return null;
 
-    const pass = await compare(dto.password, user.passwordHash);
+    const pass = await compare(dto.password, user.accountData.passwordHash);
 
     if (!pass) return null;
 
-    return this.jwtService.createJWT(String(user.userId));
+    if (!user.emailInfo.isConfirmed) return null; // if user is not confirmed unauth
+
+    return this.jwtService.createJWT(String(user._id));
   }
 }
