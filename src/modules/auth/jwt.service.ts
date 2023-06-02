@@ -53,4 +53,10 @@ export class JwtService {
       return null;
     }
   }
+
+  getTokenIat(token: string) {
+    const tokenIat: any = decode(token);
+
+    return new Date(tokenIat.iat);
+  }
 }

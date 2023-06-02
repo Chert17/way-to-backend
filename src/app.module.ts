@@ -25,6 +25,11 @@ import { CommentsQueryRepo } from './modules/comments/repositories/comments.quer
 import { CommentsRepo } from './modules/comments/repositories/comments.repo';
 import { MongoModule } from './modules/db-module/mongoose.module';
 import { DeleteAllController } from './modules/delete-all/delete-all.controller';
+import { DevicesController } from './modules/devices/devices.controller';
+import { Devices, DevicesSchema } from './modules/devices/devices.schema';
+import { DevicesService } from './modules/devices/devices.service';
+import { DevicesQueryRepo } from './modules/devices/repositories/devices.query.repo';
+import { DevicesRepo } from './modules/devices/repositories/devices.repo';
 import { EmailService } from './modules/email/email.service';
 import { PostsController } from './modules/posts/posts.controller';
 import { Post, PostSchema } from './modules/posts/posts.schema';
@@ -44,6 +49,7 @@ const controllers = [
   CommentsController,
   UsersController,
   AuthController,
+  DevicesController,
 ];
 
 const services = [
@@ -54,6 +60,7 @@ const services = [
   AuthService,
   EmailService,
   JwtService,
+  DevicesService,
 ];
 
 const queryRepo = [
@@ -61,9 +68,17 @@ const queryRepo = [
   PostsQueryRepo,
   CommentsQueryRepo,
   UsersQueryRepo,
+  DevicesQueryRepo,
 ];
 
-const repo = [BlogsRepo, PostsRepo, CommentsRepo, UsersRepo, ...queryRepo];
+const repo = [
+  BlogsRepo,
+  PostsRepo,
+  CommentsRepo,
+  UsersRepo,
+  DevicesRepo,
+  ...queryRepo,
+];
 
 const validators = [
   ConfirmCodeExist,
@@ -77,6 +92,7 @@ const mongooseModels = [
   { name: Post.name, schema: PostSchema },
   { name: Comment.name, schema: CommentSchema },
   { name: User.name, schema: UserSchema },
+  { name: Devices.name, schema: DevicesSchema },
 ];
 
 @Module({

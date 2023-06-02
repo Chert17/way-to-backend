@@ -4,12 +4,13 @@ import { randomUUID } from 'crypto';
 import { Injectable } from '@nestjs/common';
 
 import { addMinutesToCurrentDate } from '../../helpers/add.minutes.current.date';
+import { DevicesService } from '../devices/devices.service';
 import { EmailService } from '../email/email.service';
 import { UsersRepo } from '../users/repositories/users.repo';
 import { UsersService } from '../users/users.service';
 import { ConfirmRegisterDto } from './dto/input/confirm.register.dto';
 import { EmailResendingDto } from './dto/input/email.resending.dto';
-import { LoginDto } from './dto/input/login.dto';
+import { LoginServiceDto } from './dto/input/login.dto';
 import { RegisterDto } from './dto/input/register.dto';
 import { JwtTokensDto } from './dto/view/tokens.view.dto';
 import { JwtService } from './jwt.service';
@@ -21,6 +22,7 @@ export class AuthService {
     private emailService: EmailService,
     private usersRepo: UsersRepo,
     private jwtService: JwtService,
+    private devicesService: DevicesService,
   ) {}
 
   async register(dto: RegisterDto): Promise<void> {
@@ -50,17 +52,33 @@ export class AuthService {
     return;
   }
 
-  async login(dto: LoginDto): Promise<null | JwtTokensDto> {
-    const user = await this.usersRepo.getUserByEmailOrLogin(dto.loginOrEmail);
+  async login(dto: LoginServiceDto): Promise<null | JwtTokensDto> {
+    const { ip, loginOrEmail, password, userAgent } = dto;
+
+    const user = await this.usersRepo.getUserByEmailOrLogin(loginOrEmail);
 
     if (!user) return null;
 
-    const pass = await compare(dto.password, user.accountData.passwordHash);
+    const pass = await compare(password, user.accountData.passwordHash);
 
     if (!pass) return null;
 
     if (!user.emailInfo.isConfirmed) return null; // if user is not confirmed unauth
 
-    return this.jwtService.createJWT(String(user._id));
+    const tokens = this.jwtService.createJWT(String(user._id));
+
+    const lastActiveDate = this.jwtService.getTokenIat(tokens.refreshToken);
+
+    const deviceId = randomUUID();
+
+    await this.devicesService.createNewDevice({
+      userId: user._id.toString(),
+      deviceId,
+      deviceName: userAgent,
+      ip,
+      lastActiveDate,
+    });
+
+    return tokens;
   }
 }

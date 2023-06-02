@@ -6,6 +6,7 @@ import {
   Get,
   HttpCode,
   HttpStatus,
+  Ip,
   Post,
   Res,
   UnauthorizedException,
@@ -14,6 +15,7 @@ import {
 import { ConfigService } from '@nestjs/config';
 import { SkipThrottle, ThrottlerGuard } from '@nestjs/throttler';
 
+import { UserAgent } from '../../infra/decorators/param/req.user.agent.decorator';
 import { ReqUser } from '../../infra/decorators/param/req.user.decorator';
 import { JwtAuthGuard } from '../../infra/guards/auth/jwt.auth.guard';
 import { SETTINGS } from '../../utils/settings';
@@ -52,8 +54,10 @@ export class AuthController {
   async login(
     @Res({ passthrough: true }) res: Response,
     @Body() dto: LoginDto,
+    @Ip() ip: string,
+    @UserAgent() userAgent: string,
   ) {
-    const result = await this.authService.login(dto);
+    const result = await this.authService.login({ ...dto, ip, userAgent });
 
     if (!result) throw new UnauthorizedException();
 

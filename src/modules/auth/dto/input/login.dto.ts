@@ -12,3 +12,10 @@ export class LoginDto {
   @IsString()
   readonly password: string;
 }
+
+export class LoginServiceDto {
+  readonly loginOrEmail: string;
+  readonly password: string;
+  readonly ip: string;
+  readonly userAgent: string;
+}
