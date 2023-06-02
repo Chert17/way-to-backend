@@ -28,7 +28,7 @@ export class CommentsRepo {
     );
   }
 
-  async updateLikeInfo(dto: CommentsLikeStatusDbDto): Promise<void> {
+  async updateLikeInfo(dto: CommentsLikeStatusDbDto): Promise<boolean> {
     const { commentId, likeStatus, userId } = dto;
 
     const comment = await this.commentModel.findById(commentId);
@@ -40,6 +40,8 @@ export class CommentsRepo {
     } else likeInfo.status = likeStatus;
 
     comment.save();
+
+    return true;
   }
 
   async deleteComment(commentId: string) {
