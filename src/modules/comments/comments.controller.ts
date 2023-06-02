@@ -68,11 +68,15 @@ export class CommentsController {
     @Body() dto: LikeStatusDto,
     @ReqUser() user: UserViewDto,
   ) {
-    return await this.commentsService.updateLikeInfo({
+    const result = await this.commentsService.updateLikeInfo({
       commentId,
       likeStatus: dto.likeStatus,
       userId: user.id,
     });
+
+    if (!result) throw new NotFoundException();
+
+    return;
   }
 
   @Delete('/:id')

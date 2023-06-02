@@ -33,6 +33,10 @@ export class CommentsService {
   }
 
   async updateLikeInfo(dto: CommentsLikeStatusDbDto) {
+    const comment = await this.commentsRepo.checkCommentById(dto.commentId);
+
+    if (!comment) return false;
+
     return await this.commentsRepo.updateLikeInfo(dto);
   }
 
