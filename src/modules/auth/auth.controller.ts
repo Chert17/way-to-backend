@@ -14,7 +14,10 @@ import {
 import { ConfigService } from '@nestjs/config';
 import { SkipThrottle, ThrottlerGuard } from '@nestjs/throttler';
 
+import { ReqUser } from '../../infra/decorators/param/req.user.decorator';
+import { JwtAuthGuard } from '../../infra/guards/auth/jwt.auth.guard';
 import { SETTINGS } from '../../utils/settings';
+import { UserViewDto } from '../users/dto/view/user.view.dto';
 import { AuthService } from './auth.service';
 import { ConfirmRegisterDto } from './dto/input/confirm.register.dto';
 import { EmailResendingDto } from './dto/input/email.resending.dto';
@@ -31,9 +34,12 @@ export class AuthController {
     private configService: ConfigService,
   ) {}
 
-  @Get()
+  @Get('/me')
   @SkipThrottle()
-  async getMe() {}
+  @UseGuards(JwtAuthGuard)
+  async getMe(@ReqUser() user: UserViewDto) {
+    return { userId: user.id, login: user.login, email: user.email };
+  }
 
   @Post('/registration')
   @HttpCode(HttpStatus.NO_CONTENT)
