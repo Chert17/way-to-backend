@@ -25,6 +25,6 @@ export class DevicesService {
   }
 
   async deleteOneDevice(dto: DeleteDeviceDto) {
-    return await this.devicesRepo.deleteOneDeviceDto(dto);
+    return await this.devicesRepo.deleteOneDevice(dto);
   }
 }

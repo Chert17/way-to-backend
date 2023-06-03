@@ -24,11 +24,11 @@ export class RefreshTokenGuard implements CanActivate {
 
     if (!refreshToken) throw new UnauthorizedException();
 
-    const payload = this.jwtService.verify(refreshToken);
-
-    const { deviceId, userId } = payload;
+    const payload = this.jwtService.verifyToken(refreshToken);
 
     if (!payload) throw new UnauthorizedException(); // invalid refreshToken
+
+    const { deviceId, userId } = payload;
 
     const user = await this.usersRepo.checkUserById(userId);
 

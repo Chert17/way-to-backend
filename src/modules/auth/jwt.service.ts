@@ -34,9 +34,9 @@ export class JwtService {
     }
   }
 
-  verify(accessToken: string) {
+  verifyToken(token: string) {
     try {
-      const result = verify(accessToken, this._jwtSecret) as ReqUserType;
+      const result = verify(token, this._jwtSecret) as ReqUserType;
 
       return { userId: result.userId, deviceId: result.deviceId };
     } catch (error) {
