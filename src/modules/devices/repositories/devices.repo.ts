@@ -42,9 +42,11 @@ export class DevicesRepo {
     return await this.devicesModel.deleteOne({ userId, deviceId });
   }
 
-  async checkDevice(userId: string, deviceId: string) {
+  async checkDevice(userId: string, deviceId: string): Promise<boolean> {
     const result = await this.devicesModel.findOne({ userId, deviceId });
 
-    return result;
+    if (!result) return false;
+
+    return !!result;
   }
 }
