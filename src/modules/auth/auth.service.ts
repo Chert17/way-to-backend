@@ -99,4 +99,8 @@ export class AuthService {
 
     return tokens;
   }
+
+  async logout(dto: ReqUserType) {
+    return await this.devicesService.deleteOneDevice(dto);
+  }
 }

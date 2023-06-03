@@ -5,6 +5,7 @@ import { InjectModel } from '@nestjs/mongoose';
 
 import { Devices } from '../devices.schema';
 import { CreateDevicesDbDto } from '../dto/input/create.devices.dto';
+import { DeleteOneDeviceDto } from '../dto/input/delete.one.device.dto';
 import { UpdateDevicesDto } from '../dto/input/update.devices.dto';
 
 @Injectable()
@@ -26,6 +27,12 @@ export class DevicesRepo {
       ip,
       lastActiveDate,
     });
+  }
+
+  async deleteOneDeviceDto(dto: DeleteOneDeviceDto) {
+    const { userId, deviceId } = dto;
+
+    return await this.devicesModel.deleteOne({ userId, deviceId });
   }
 
   async checkDevice(userId: string, deviceId: string): Promise<boolean> {

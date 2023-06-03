@@ -29,7 +29,7 @@ import { EmailResendingDto } from './dto/input/email.resending.dto';
 import { LoginDto } from './dto/input/login.dto';
 import { RegisterDto } from './dto/input/register.dto';
 
-const { COOKIE_HTTP_ONLY, COOKIE_SECURE } = SETTINGS;
+const { COOKIE_HTTP_ONLY, COOKIE_SECURE, REFRESH_TOKEN_COOKIE_NAME } = SETTINGS;
 
 @Controller('auth')
 @UseGuards(ThrottlerGuard)
@@ -72,8 +72,16 @@ export class AuthController {
   }
 
   @Post('/logout')
+  @UseGuards(RefreshTokenGuard)
   @HttpCode(HttpStatus.NO_CONTENT)
-  async logout() {}
+  async logout(
+    @Res({ passthrough: true }) res: Response,
+    @refreshTokenPayload() refreshPayload: ReqUserType,
+  ) {
+    res.clearCookie(REFRESH_TOKEN_COOKIE_NAME);
+
+    return await this.authService.logout(refreshPayload);
+  }
 
   @Post('/refresh-token')
   @SkipThrottle()
@@ -114,7 +122,7 @@ export class AuthController {
   async newPassword() {}
 
   private _setRefreshTokenToCookie(res: Response, refreshToken: string) {
-    return res.cookie('refreshToken ', refreshToken, {
+    return res.cookie(REFRESH_TOKEN_COOKIE_NAME, refreshToken, {
       httpOnly: Boolean(this.configService.get(COOKIE_HTTP_ONLY)),
       secure: Boolean(this.configService.get(COOKIE_SECURE)),
     });
