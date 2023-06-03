@@ -15,7 +15,7 @@ import {
 import { ConfigService } from '@nestjs/config';
 import { SkipThrottle, ThrottlerGuard } from '@nestjs/throttler';
 
-import { refreshTokenPayload } from '../../infra/decorators/param/req.refresh.token.decorator';
+import { RefreshTokenPayload } from '../../infra/decorators/param/req.refresh.token.decorator';
 import { UserAgent } from '../../infra/decorators/param/req.user.agent.decorator';
 import { ReqUser } from '../../infra/decorators/param/req.user.decorator';
 import { JwtAuthGuard } from '../../infra/guards/auth/jwt.auth.guard';
@@ -78,7 +78,7 @@ export class AuthController {
   @HttpCode(HttpStatus.NO_CONTENT)
   async logout(
     @Res({ passthrough: true }) res: Response,
-    @refreshTokenPayload() refreshPayload: ReqUserType,
+    @RefreshTokenPayload() refreshPayload: ReqUserType,
   ) {
     res.clearCookie(REFRESH_TOKEN_COOKIE_NAME);
 
@@ -91,7 +91,7 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   async refreshToken(
     @Res({ passthrough: true }) res: Response,
-    @refreshTokenPayload() refreshPayload: ReqUserType,
+    @RefreshTokenPayload() refreshPayload: ReqUserType,
     @Ip() ip: string,
   ) {
     const result = await this.authService.refreshToken(refreshPayload, ip);

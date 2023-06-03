@@ -89,7 +89,7 @@ export class UsersService {
       passwordRecoveryInfo: {
         recoveryCode: null,
         isConfirmed: true,
-        expirationDate: null,
+        expirationDate: new Date(),
       },
     };
   }
