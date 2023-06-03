@@ -17,7 +17,7 @@ import { JwtAuthGuard } from '../../infra/guards/auth/jwt.auth.guard';
 import { UserIdFromToken } from '../../infra/guards/auth/userId.from.token.guard';
 import { CanUserWorkWithComment } from '../../infra/guards/comments/can.user.work.with.comment.guard';
 import { LikeStatusDto } from '../../types/like.info.interface';
-import { ReqUserId } from '../../types/req.user.interface';
+import { ReqUserIdType } from '../../types/req.user.interface';
 import { UserViewDto } from '../users/dto/view/user.view.dto';
 import { CommentsService } from './comments.service';
 import { updateCommentDto } from './dto/input/update.comment.dto';
@@ -34,7 +34,7 @@ export class CommentsController {
   @UseGuards(UserIdFromToken)
   async getCommentById(
     @Param() commentId: string,
-    @UserId() userId: ReqUserId,
+    @UserId() userId: ReqUserIdType,
   ) {
     const comment = await this.commentsQueryRepo.getCommentById(
       commentId,

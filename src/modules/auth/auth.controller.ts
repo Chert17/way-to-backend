@@ -15,9 +15,12 @@ import {
 import { ConfigService } from '@nestjs/config';
 import { SkipThrottle, ThrottlerGuard } from '@nestjs/throttler';
 
+import { refreshTokenPayload } from '../../infra/decorators/param/req.refresh.token.decorator';
 import { UserAgent } from '../../infra/decorators/param/req.user.agent.decorator';
 import { ReqUser } from '../../infra/decorators/param/req.user.decorator';
 import { JwtAuthGuard } from '../../infra/guards/auth/jwt.auth.guard';
+import { RefreshTokenGuard } from '../../infra/guards/auth/refresh.token.guard';
+import { ReqUserType } from '../../types/req.user.interface';
 import { SETTINGS } from '../../utils/settings';
 import { UserViewDto } from '../users/dto/view/user.view.dto';
 import { AuthService } from './auth.service';
@@ -74,8 +77,21 @@ export class AuthController {
 
   @Post('/refresh-token')
   @SkipThrottle()
-  @HttpCode(HttpStatus.NO_CONTENT)
-  async refreshToken() {}
+  @UseGuards(RefreshTokenGuard)
+  @HttpCode(HttpStatus.OK)
+  async refreshToken(
+    @Res({ passthrough: true }) res: Response,
+    @refreshTokenPayload() refreshPayload: ReqUserType,
+    @Ip() ip: string,
+  ) {
+    const result = await this.authService.refreshToken(refreshPayload, ip);
+
+    const { accessToken, refreshToken } = result;
+
+    this._setRefreshTokenToCookie(res, refreshToken);
+
+    return { accessToken };
+  }
 
   @Post('/registration-confirmation')
   @HttpCode(HttpStatus.NO_CONTENT)

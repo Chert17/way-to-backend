@@ -15,7 +15,7 @@ import {
 import { UserId } from '../../infra/decorators/param/req.userId.decorator';
 import { BasicAuthGuard } from '../../infra/guards/auth/basic.auth.guard';
 import { UserIdFromToken } from '../../infra/guards/auth/userId.from.token.guard';
-import { ReqUserId } from '../../types/req.user.interface';
+import { ReqUserIdType } from '../../types/req.user.interface';
 import {
   BlogQueryPagination,
   PostQueryPagination,
@@ -54,7 +54,7 @@ export class BlogsController {
   async getPostsByBlog(
     @Param('blogId') blogId: string,
     @Query() pagination: PostQueryPagination,
-    @UserId() userId: ReqUserId,
+    @UserId() userId: ReqUserIdType,
   ) {
     const blog = await this.blogsQueryRepo.getBlogById(blogId);
 
@@ -80,7 +80,7 @@ export class BlogsController {
   async createPostByBlog(
     @Param('blogId') blogId: string,
     @Body() dto: CreatePostByBlogDto,
-    @UserId() userId: ReqUserId,
+    @UserId() userId: ReqUserIdType,
   ) {
     const result = await this.blogsService.createPostByBlog({ ...dto, blogId });
 

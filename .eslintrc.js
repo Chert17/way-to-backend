@@ -26,5 +26,7 @@ module.exports = {
     '@typescript-eslint/no-unused-vars': 'error',
 
     'prettier/prettier': ['error', { endOfLine: 'auto' }],
+
+    'comma-dangle': ['error', 'always-multiline'],
   },
 };

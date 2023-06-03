@@ -18,7 +18,7 @@ import { BasicAuthGuard } from '../../infra/guards/auth/basic.auth.guard';
 import { JwtAuthGuard } from '../../infra/guards/auth/jwt.auth.guard';
 import { UserIdFromToken } from '../../infra/guards/auth/userId.from.token.guard';
 import { LikeStatusDto } from '../../types/like.info.interface';
-import { ReqUserId } from '../../types/req.user.interface';
+import { ReqUserIdType } from '../../types/req.user.interface';
 import {
   CommentQueryPagination,
   PostQueryPagination,
@@ -43,14 +43,14 @@ export class PostsController {
   @UseGuards(UserIdFromToken)
   async getAll(
     @Query() pagination: PostQueryPagination,
-    @UserId() userId: ReqUserId,
+    @UserId() userId: ReqUserIdType,
   ) {
     return await this.postsQueryRepo.getAllPosts(pagination, userId);
   }
 
   @Get('/:id')
   @UseGuards(UserIdFromToken)
-  async getPostById(@Param() postId: string, @UserId() userId: ReqUserId) {
+  async getPostById(@Param() postId: string, @UserId() userId: ReqUserIdType) {
     const result = await this.postsQueryRepo.getPostById(postId, userId);
 
     if (!result) throw new NotFoundException(); // If specified post doesn't exists
@@ -63,7 +63,7 @@ export class PostsController {
   async getCommnetsByPost(
     @Param('postId') postId: string,
     @Query() pagination: CommentQueryPagination,
-    @UserId() userId: ReqUserId,
+    @UserId() userId: ReqUserIdType,
   ) {
     const post = await this.postsQueryRepo.getPostById(postId, null);
 

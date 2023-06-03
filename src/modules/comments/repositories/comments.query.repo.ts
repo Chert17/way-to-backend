@@ -4,7 +4,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 
 import { DbType } from '../../../types/db.interface';
-import { ReqUserId } from '../../../types/req.user.interface';
+import { ReqUserIdType } from '../../../types/req.user.interface';
 import { tryConvertToObjectId } from '../../../utils/converter.object.id';
 import { LikeStatus } from '../../../utils/like.status';
 import { CommentQueryPagination } from '../../../utils/pagination/pagination';
@@ -20,7 +20,7 @@ export class CommentsQueryRepo {
   async getAllCommentsByPostId(
     postId: string,
     pagination: CommentQueryPagination,
-    userId: ReqUserId,
+    userId: ReqUserIdType,
   ) {
     const filter = { postId };
 
@@ -48,7 +48,7 @@ export class CommentsQueryRepo {
 
   async getCommentById(
     commentId: string,
-    userId: ReqUserId,
+    userId: ReqUserIdType,
   ): Promise<false | CommentViewDto> {
     const convertId = tryConvertToObjectId(commentId);
 
@@ -61,7 +61,7 @@ export class CommentsQueryRepo {
 
   private _commentMapping(
     comment: DbType<Comment>,
-    userId: ReqUserId,
+    userId: ReqUserIdType,
   ): CommentViewDto {
     const { _id, commentatorInfo, content, createdAt, likesInfo } = comment;
 

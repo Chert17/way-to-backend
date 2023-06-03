@@ -4,6 +4,7 @@ import { randomUUID } from 'crypto';
 import { Injectable } from '@nestjs/common';
 
 import { addMinutesToCurrentDate } from '../../helpers/add.minutes.current.date';
+import { ReqUserType } from '../../types/req.user.interface';
 import { DevicesService } from '../devices/devices.service';
 import { EmailService } from '../email/email.service';
 import { UsersRepo } from '../users/repositories/users.repo';
@@ -65,16 +66,33 @@ export class AuthService {
 
     if (!user.emailInfo.isConfirmed) return null; // if user is not confirmed unauth
 
-    const tokens = this.jwtService.createJWT(String(user._id));
+    const deviceId = randomUUID();
+
+    const tokens = this.jwtService.createJWT(String(user._id), deviceId);
 
     const lastActiveDate = this.jwtService.getTokenIat(tokens.refreshToken);
-
-    const deviceId = randomUUID();
 
     await this.devicesService.createNewDevice({
       userId: user._id.toString(),
       deviceId,
       deviceName: userAgent,
+      ip,
+      lastActiveDate,
+    });
+
+    return tokens;
+  }
+
+  async refreshToken(refreshPayload: ReqUserType, ip: string) {
+    const { userId, deviceId } = refreshPayload;
+
+    const tokens = this.jwtService.createJWT(userId, deviceId);
+
+    const lastActiveDate = this.jwtService.getTokenIat(tokens.refreshToken);
+
+    await this.devicesService.updateDevice({
+      userId,
+      deviceId,
       ip,
       lastActiveDate,
     });
