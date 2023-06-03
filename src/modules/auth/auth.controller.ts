@@ -27,6 +27,7 @@ import { AuthService } from './auth.service';
 import { ConfirmRegisterDto } from './dto/input/confirm.register.dto';
 import { EmailResendingDto } from './dto/input/email.resending.dto';
 import { LoginDto } from './dto/input/login.dto';
+import { RecoveryPasswordDto } from './dto/input/recovery.password.dto';
 import { RegisterDto } from './dto/input/register.dto';
 
 const { COOKIE_HTTP_ONLY, COOKIE_SECURE, REFRESH_TOKEN_COOKIE_NAME } = SETTINGS;
@@ -115,7 +116,9 @@ export class AuthController {
 
   @Post('/password-recovery')
   @HttpCode(HttpStatus.NO_CONTENT)
-  async recoveryPassword() {}
+  async recoveryPassword(@Body() dto: RecoveryPasswordDto) {
+    return await this.authService.passwordRecovery(dto.email);
+  }
 
   @Post('/new-password')
   @HttpCode(HttpStatus.NO_CONTENT)

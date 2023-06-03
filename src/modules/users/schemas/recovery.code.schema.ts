@@ -7,6 +7,9 @@ export class PasswordRecoveryInfo {
 
   @Prop({ type: String })
   recoveryCode: string;
+
+  @Prop({ required: true, type: Date })
+  expirationDate: Date;
 }
 
 export const PasswordRecoveryInfoSchema =

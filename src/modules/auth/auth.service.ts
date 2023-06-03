@@ -103,4 +103,18 @@ export class AuthService {
   async logout(dto: ReqUserType) {
     return await this.devicesService.deleteOneDevice(dto);
   }
+
+  async passwordRecovery(email: string) {
+    const user = await this.usersRepo.getUserByEmailOrLogin(email);
+
+    if (!user) return;
+
+    const recoveryCode = await this.usersService.updatePasswordRecovery(
+      user._id,
+    );
+
+    await this.emailService.sendPasswordRecoveryEmail(email, recoveryCode);
+
+    return;
+  }
 }

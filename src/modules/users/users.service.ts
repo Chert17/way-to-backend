@@ -1,5 +1,5 @@
 import { randomUUID } from 'crypto';
-import { UpdateWriteOpResult } from 'mongoose';
+import { Types, UpdateWriteOpResult } from 'mongoose';
 
 import { Injectable } from '@nestjs/common';
 
@@ -41,6 +41,19 @@ export class UsersService {
     return await this.usersRepo.updateConfirmEmailStatus(code); // maybe handle the failed ConfirmEmail status update error
   }
 
+  async updatePasswordRecovery(userId: Types.ObjectId) {
+    const recoveryCode = randomUUID();
+    const expDate = addMinutesToCurrentDate(2); // add 2 minutes to expirationDate
+
+    await this.usersRepo.updatePasswordRecoveryInfo(
+      userId,
+      recoveryCode,
+      expDate,
+    );
+
+    return recoveryCode;
+  }
+
   private async _userData(dto: CreateUserDto): Promise<User> {
     const { login, email, password } = dto;
 
@@ -59,6 +72,7 @@ export class UsersService {
       passwordRecoveryInfo: {
         recoveryCode: null,
         isConfirmed: true,
+        expirationDate: null,
       },
     };
   }

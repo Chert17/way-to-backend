@@ -1,4 +1,4 @@
-import { Model, UpdateWriteOpResult } from 'mongoose';
+import { Model, Types, UpdateWriteOpResult } from 'mongoose';
 
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
@@ -86,6 +86,24 @@ export class UsersRepo {
         $set: {
           'emailInfo.confirmationCode': newConfirmCode,
           'emailInfo.expirationDate': newExpirationDate,
+        },
+      },
+      { returnDocument: 'after' },
+    );
+  }
+
+  async updatePasswordRecoveryInfo(
+    userId: Types.ObjectId,
+    recoveryCode: string,
+    newExpirationDate: Date,
+  ) {
+    return await this.userModel.updateOne(
+      { _id: userId },
+      {
+        $set: {
+          'passwordRecoveryInfo.recoveryCode': recoveryCode,
+          'passwordRecoveryInfo.expirationDate': newExpirationDate,
+          'passwordRecoveryInfo.isConfirmed': false,
         },
       },
       { returnDocument: 'after' },
