@@ -54,6 +54,23 @@ export class UsersService {
     return recoveryCode;
   }
 
+  async newPassword(newPassword: string, recoveryCode: string) {
+    const userPasswordRecoveryInfo =
+      await this.usersRepo.getUserPasswordInfoByRecoveryPassword(recoveryCode);
+
+    const { userId, expirationDate, isConfirmed } = userPasswordRecoveryInfo;
+
+    if (!userPasswordRecoveryInfo) return null;
+
+    if (isConfirmed === true) return null;
+
+    if (expirationDate < new Date()) return null;
+
+    const passwordHash = await generateHash(newPassword);
+
+    return await this.usersRepo.createNewPasswordForUser(userId, passwordHash);
+  }
+
   private async _userData(dto: CreateUserDto): Promise<User> {
     const { login, email, password } = dto;
 

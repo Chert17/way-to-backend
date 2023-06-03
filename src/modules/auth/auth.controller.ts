@@ -27,6 +27,7 @@ import { AuthService } from './auth.service';
 import { ConfirmRegisterDto } from './dto/input/confirm.register.dto';
 import { EmailResendingDto } from './dto/input/email.resending.dto';
 import { LoginDto } from './dto/input/login.dto';
+import { newPasswordDto } from './dto/input/new.password.dto';
 import { RecoveryPasswordDto } from './dto/input/recovery.password.dto';
 import { RegisterDto } from './dto/input/register.dto';
 
@@ -122,7 +123,9 @@ export class AuthController {
 
   @Post('/new-password')
   @HttpCode(HttpStatus.NO_CONTENT)
-  async newPassword() {}
+  async newPassword(@Body() dto: newPasswordDto) {
+    return await this.authService.newPassword(dto);
+  }
 
   private _setRefreshTokenToCookie(res: Response, refreshToken: string) {
     return res.cookie(REFRESH_TOKEN_COOKIE_NAME, refreshToken, {

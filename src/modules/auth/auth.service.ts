@@ -12,6 +12,7 @@ import { UsersService } from '../users/users.service';
 import { ConfirmRegisterDto } from './dto/input/confirm.register.dto';
 import { EmailResendingDto } from './dto/input/email.resending.dto';
 import { LoginServiceDto } from './dto/input/login.dto';
+import { newPasswordDto } from './dto/input/new.password.dto';
 import { RegisterDto } from './dto/input/register.dto';
 import { JwtTokensDto } from './dto/view/tokens.view.dto';
 import { JwtService } from './jwt.service';
@@ -114,6 +115,19 @@ export class AuthService {
     );
 
     await this.emailService.sendPasswordRecoveryEmail(email, recoveryCode);
+
+    return;
+  }
+
+  async newPassword(dto: newPasswordDto) {
+    const { newPassword, recoveryCode } = dto;
+
+    const result = await this.usersService.newPassword(
+      newPassword,
+      recoveryCode,
+    );
+
+    if (!result) return null;
 
     return;
   }

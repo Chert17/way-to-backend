@@ -67,6 +67,17 @@ export class UsersRepo {
     return result;
   }
 
+  async getUserPasswordInfoByRecoveryPassword(recoveryCode: string) {
+    const result = await this.userModel.findOne(
+      {
+        'passwordRecoveryInfo.recoveryCode': recoveryCode,
+      },
+      { passwordRecoveryInfo: 1 },
+    );
+
+    return { userId: result._id, ...result.passwordRecoveryInfo };
+  }
+
   async updateConfirmEmailStatus(code: string): Promise<UpdateWriteOpResult> {
     return await this.userModel.updateOne(
       { 'emailInfo.confirmationCode': code },
@@ -107,6 +118,18 @@ export class UsersRepo {
         },
       },
       { returnDocument: 'after' },
+    );
+  }
+
+  async createNewPasswordForUser(userId: Types.ObjectId, passwordHash: string) {
+    return await this.userModel.updateOne(
+      { _id: userId },
+      {
+        $set: {
+          'passwordRecoveryInfo.isConfirmed': true,
+          'accountData.passwordHash': passwordHash,
+        },
+      },
     );
   }
 
