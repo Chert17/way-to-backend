@@ -19,6 +19,10 @@ export class DevicesQueryRepo {
     return devices.map(this._devicesMapping);
   }
 
+  async getDevicebyId(deviceId: string) {
+    return await this.devicesModel.findOne({ deviceId }).lean();
+  }
+
   private _devicesMapping(device: DbType<Devices>): DevicesViewDto {
     const { deviceId, ip, lastActiveDate, title } = device;
 

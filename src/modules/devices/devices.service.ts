@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 
 import { CreateDevicesServiceDto } from './dto/input/create.devices.dto';
-import { DeleteOneDeviceDto } from './dto/input/delete.one.device.dto';
+import { DeleteDeviceDto } from './dto/input/delete.device.dto';
 import { UpdateDevicesDto } from './dto/input/update.devices.dto';
 import { DevicesRepo } from './repositories/devices.repo';
 
@@ -20,7 +20,11 @@ export class DevicesService {
     return await this.devicesRepo.updateDevices(dto);
   }
 
-  async deleteOneDevice(dto: DeleteOneDeviceDto) {
+  async deleteAllDevicesExceptCurrent(dto: DeleteDeviceDto) {
+    return await this.devicesRepo.deleteAllDevicesExceptCurrent(dto);
+  }
+
+  async deleteOneDevice(dto: DeleteDeviceDto) {
     return await this.devicesRepo.deleteOneDeviceDto(dto);
   }
 }

@@ -1,4 +1,4 @@
-export class DeleteOneDeviceDto {
+export class DeleteDeviceDto {
   readonly userId: string;
   readonly deviceId: string;
 }

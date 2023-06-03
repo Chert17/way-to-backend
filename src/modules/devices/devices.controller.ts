@@ -1,4 +1,14 @@
-import { Controller, Get, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Delete,
+  ForbiddenException,
+  Get,
+  HttpCode,
+  HttpStatus,
+  NotFoundException,
+  Param,
+  UseGuards,
+} from '@nestjs/common';
 
 import { RefreshTokenPayload } from '../../infra/decorators/param/req.refresh.token.decorator';
 import { RefreshTokenGuard } from '../../infra/guards/auth/refresh.token.guard';
@@ -19,5 +29,32 @@ export class DevicesController {
     const { userId } = refreshPayload;
 
     return await this.devicesQueryRepo.getAllUserDevices(userId);
+  }
+
+  @Delete('/devices')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async deleteAllDevicesExceptCurrent(
+    @RefreshTokenPayload() refreshPayload: ReqUserType,
+  ) {
+    return await this.devicesService.deleteAllDevicesExceptCurrent(
+      refreshPayload,
+    );
+  }
+
+  @Delete('/devices/:deviceId')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async DeleteOneDeviceDto(
+    @Param('deviceId') deviceId: string,
+    @RefreshTokenPayload() refreshPayload: ReqUserType,
+  ) {
+    const { userId } = refreshPayload;
+
+    const device = await this.devicesQueryRepo.getDevicebyId(deviceId);
+
+    if (!device) throw new NotFoundException();
+
+    if (device.userId !== userId) throw new ForbiddenException();
+
+    return await this.devicesService.deleteOneDevice({ deviceId, userId });
   }
 }
