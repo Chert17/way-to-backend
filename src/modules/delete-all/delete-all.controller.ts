@@ -5,6 +5,7 @@ import { InjectModel } from '@nestjs/mongoose';
 
 import { Blog } from '../blogs/blogs.schema';
 import { Comment } from '../comments/comments.schema';
+import { Devices } from '../devices/devices.schema';
 import { Post } from '../posts/posts.schema';
 import { User } from '../users/schemas/users.schema';
 
@@ -15,6 +16,7 @@ export class DeleteAllController {
     @InjectModel(Post.name) private postModel: Model<Post>,
     @InjectModel(Comment.name) private commentModel: Model<Comment>,
     @InjectModel(User.name) private userModel: Model<User>,
+    @InjectModel(Devices.name) private devicesModel: Model<Devices>,
   ) {}
 
   @Delete()
@@ -24,5 +26,6 @@ export class DeleteAllController {
     await this.postModel.deleteMany();
     await this.commentModel.deleteMany();
     await this.userModel.deleteMany();
+    await this.devicesModel.deleteMany();
   }
 }

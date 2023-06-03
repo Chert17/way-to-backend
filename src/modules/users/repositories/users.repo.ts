@@ -56,6 +56,28 @@ export class UsersRepo {
     return { ...result.emailInfo };
   }
 
+  async getUserByEmailOrLogin(loginOrEmail: string) {
+    const result = await this.userModel.findOne({
+      $or: [
+        { 'accountData.email': loginOrEmail },
+        { 'accountData.login': loginOrEmail },
+      ],
+    });
+
+    return result;
+  }
+
+  async getUserPasswordInfoByRecoveryPassword(recoveryCode: string) {
+    const result = await this.userModel.findOne(
+      {
+        'passwordRecoveryInfo.recoveryCode': recoveryCode,
+      },
+      { passwordRecoveryInfo: 1 },
+    );
+
+    return { userId: result._id, ...result.passwordRecoveryInfo };
+  }
+
   async updateConfirmEmailStatus(code: string): Promise<UpdateWriteOpResult> {
     return await this.userModel.updateOne(
       { 'emailInfo.confirmationCode': code },
@@ -81,22 +103,44 @@ export class UsersRepo {
     );
   }
 
-  async checkUserByLoginOrEmail(loginOrEmail: string): Promise<{
-    userId: Types.ObjectId;
-    passwordHash: string;
-  } | null> {
-    const result = await this.userModel.findOne(
+  async updatePasswordRecoveryInfo(
+    userId: Types.ObjectId,
+    recoveryCode: string,
+    newExpirationDate: Date,
+  ) {
+    return await this.userModel.updateOne(
+      { _id: userId },
       {
-        $or: [
-          { 'accountData.email': loginOrEmail },
-          { 'accountData.login': loginOrEmail },
-        ],
+        $set: {
+          'passwordRecoveryInfo.recoveryCode': recoveryCode,
+          'passwordRecoveryInfo.expirationDate': newExpirationDate,
+          'passwordRecoveryInfo.isConfirmed': false,
+        },
       },
-      { 'accountData.passwordHash': true, _id: true },
+      { returnDocument: 'after' },
     );
+  }
 
-    return !result
-      ? null
-      : { userId: result._id, passwordHash: result.accountData.passwordHash };
+  async createNewPasswordForUser(userId: Types.ObjectId, passwordHash: string) {
+    return await this.userModel.updateOne(
+      { _id: userId },
+      {
+        $set: {
+          'passwordRecoveryInfo.isConfirmed': true,
+          'accountData.passwordHash': passwordHash,
+        },
+      },
+    );
+  }
+
+  async checkUserByLoginOrEmail(loginOrEmail: string): Promise<boolean> {
+    const result = await this.userModel.findOne({
+      $or: [
+        { 'accountData.email': loginOrEmail },
+        { 'accountData.login': loginOrEmail },
+      ],
+    });
+
+    return !!result;
   }
 }

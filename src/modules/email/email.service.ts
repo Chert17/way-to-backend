@@ -23,4 +23,22 @@ export class EmailService {
       return null;
     }
   }
+
+  async sendPasswordRecoveryEmail(email: string, code: string) {
+    try {
+      await this.mailerService.sendMail({
+        to: email,
+        subject: this._subject,
+        template: './password-recovery',
+        context: {
+          code,
+        },
+      });
+
+      return true;
+    } catch (error) {
+      console.log(error);
+      return null;
+    }
+  }
 }

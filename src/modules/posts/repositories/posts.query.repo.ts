@@ -5,7 +5,7 @@ import { InjectModel } from '@nestjs/mongoose';
 
 import { DbType } from '../../../types/db.interface';
 import { WithPagination } from '../../../types/pagination.interface';
-import { ReqUserId } from '../../../types/req.user.interface';
+import { ReqUserIdType } from '../../../types/req.user.interface';
 import { tryConvertToObjectId } from '../../../utils/converter.object.id';
 import { LikeStatus } from '../../../utils/like.status';
 import { PostQueryPagination } from '../../../utils/pagination/pagination';
@@ -18,7 +18,7 @@ export class PostsQueryRepo {
 
   async getAllPosts(
     pagination: PostQueryPagination,
-    userId: ReqUserId,
+    userId: ReqUserIdType,
   ): Promise<WithPagination<PostViewDto>> {
     const filter = {};
 
@@ -27,7 +27,7 @@ export class PostsQueryRepo {
 
   async getPostById(
     postId: string,
-    userId: ReqUserId,
+    userId: ReqUserIdType,
   ): Promise<PostViewDto | false> {
     const convertId = tryConvertToObjectId(postId);
 
@@ -41,7 +41,7 @@ export class PostsQueryRepo {
   async getAllPostsByBlogId(
     blogId: string,
     pagination: PostQueryPagination,
-    userId: ReqUserId,
+    userId: ReqUserIdType,
   ): Promise<WithPagination<PostViewDto>> {
     const filter = { blogId };
 
@@ -51,7 +51,7 @@ export class PostsQueryRepo {
   private async _getPosts(
     filter: Record<string, unknown>,
     pagination: PostQueryPagination,
-    userId: ReqUserId,
+    userId: ReqUserIdType,
   ) {
     const { pageNumber, pageSize, sortBy, sortDirection } = pagination;
 
@@ -75,7 +75,7 @@ export class PostsQueryRepo {
     };
   }
 
-  private _postMapping(post: DbType<Post>, userId: ReqUserId): PostViewDto {
+  private _postMapping(post: DbType<Post>, userId: ReqUserIdType): PostViewDto {
     const {
       _id,
       blogId,

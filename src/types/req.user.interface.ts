@@ -1,6 +1,6 @@
-export type ReqUserId = string | null;
+export type ReqUserIdType = string | null;
 
-export interface ReqUser {
+export interface ReqUserType {
   userId: string;
   deviceId: string;
 }
