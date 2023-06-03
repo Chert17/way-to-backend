@@ -21,12 +21,10 @@ export class DevicesRepo {
   async updateDevices(dto: UpdateDevicesDto) {
     const { userId, deviceId, ip, lastActiveDate } = dto;
 
-    return await this.devicesModel.updateOne({
-      userId,
-      deviceId,
-      ip,
-      lastActiveDate,
-    });
+    return await this.devicesModel.updateOne(
+      { userId, deviceId, ip },
+      { $set: { lastActiveDate } },
+    );
   }
 
   async deleteAllDevicesExceptCurrent(dto: DeleteDeviceDto) {
@@ -38,17 +36,15 @@ export class DevicesRepo {
     });
   }
 
-  async deleteOneDeviceDto(dto: DeleteDeviceDto) {
+  async deleteOneDevice(dto: DeleteDeviceDto) {
     const { userId, deviceId } = dto;
 
     return await this.devicesModel.deleteOne({ userId, deviceId });
   }
 
-  async checkDevice(userId: string, deviceId: string): Promise<boolean> {
+  async checkDevice(userId: string, deviceId: string) {
     const result = await this.devicesModel.findOne({ userId, deviceId });
 
-    if (!result) return false;
-
-    return !!result;
+    return result;
   }
 }

@@ -24,7 +24,7 @@ export class JwtAuthGuard implements CanActivate {
 
     if (type !== 'Bearer') throw new UnauthorizedException(); // incorrect verification by type
 
-    const payload = this.jwtService.verify(accessToken);
+    const payload = this.jwtService.verifyToken(accessToken);
 
     if (!payload) throw new UnauthorizedException(); // invalid accessToken
 
