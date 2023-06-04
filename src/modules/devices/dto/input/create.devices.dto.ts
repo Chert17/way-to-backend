@@ -3,7 +3,7 @@ export class CreateDevicesServiceDto {
   readonly ip: string;
   readonly deviceName: string;
   readonly deviceId: string;
-  readonly lastActiveDate: Date;
+  readonly lastActiveDate: string;
 }
 
 export class CreateDevicesDbDto {
@@ -11,5 +11,5 @@ export class CreateDevicesDbDto {
   readonly ip: string;
   readonly title: string;
   readonly deviceId: string;
-  readonly lastActiveDate: Date;
+  readonly lastActiveDate: string;
 }

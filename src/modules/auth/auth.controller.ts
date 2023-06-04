@@ -80,9 +80,10 @@ export class AuthController {
     @Res({ passthrough: true }) res: Response,
     @RefreshTokenPayload() refreshPayload: ReqUserType,
   ) {
+    const result = await this.authService.logout(refreshPayload);
+    if (!result) throw new UnauthorizedException();
     res.clearCookie(REFRESH_TOKEN_COOKIE_NAME);
-
-    return await this.authService.logout(refreshPayload);
+    return;
   }
 
   @Post('/refresh-token')
@@ -95,6 +96,8 @@ export class AuthController {
     @Ip() ip: string,
   ) {
     const result = await this.authService.refreshToken(refreshPayload, ip);
+
+    if (!result) throw new UnauthorizedException();
 
     const { accessToken, refreshToken } = result;
 

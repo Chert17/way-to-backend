@@ -1,3 +1,4 @@
+import { log } from 'console';
 import { Response } from 'express';
 
 import {
@@ -14,20 +15,17 @@ export class HttpExceptionFilter implements ExceptionFilter {
     const res = ctx.getResponse<Response>();
     const status = exception.getStatus();
 
-    if (status === 401) return res.sendStatus(401);
-
-    if (status === 403) return res.sendStatus(403);
-
-    if (status === 404) return res.sendStatus(404);
-
-    if (status === 429) return res.sendStatus(429);
-
     if (status === 400) {
       const errRes: any = exception.getResponse();
 
       return res.status(status).json({
         errorsMessages: errRes.message,
       });
+    } else {
+      if (status === 500) {
+        log(exception.getResponse());
+      }
+      return res.sendStatus(status);
     }
   }
 }

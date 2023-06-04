@@ -14,6 +14,10 @@ export class DevicesRepo {
     @InjectModel(Devices.name) private devicesModel: Model<Devices>,
   ) {}
 
+  async getDeviceById(deviceId: string) {
+    return this.devicesModel.findOne({ deviceId }).lean();
+  }
+
   async createDevices(dto: CreateDevicesDbDto) {
     return await this.devicesModel.create(dto);
   }
@@ -22,8 +26,8 @@ export class DevicesRepo {
     const { userId, deviceId, ip, lastActiveDate } = dto;
 
     return await this.devicesModel.updateOne(
-      { userId, deviceId, ip },
-      { $set: { lastActiveDate } },
+      { userId, deviceId },
+      { $set: { lastActiveDate, ip } },
     );
   }
 
@@ -43,10 +47,6 @@ export class DevicesRepo {
   }
 
   async checkDevice(userId: string, deviceId: string) {
-    const result = await this.devicesModel.findOne({ userId, deviceId });
-
-    if (!result) return false;
-
-    return result;
+    return await this.devicesModel.findOne({ userId, deviceId }).lean();
   }
 }

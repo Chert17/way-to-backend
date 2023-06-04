@@ -14,8 +14,8 @@ export class Devices {
   @Prop({ required: true, type: String })
   title: string;
 
-  @Prop({ required: true, type: Date })
-  lastActiveDate: Date;
+  @Prop({ required: true, type: String })
+  lastActiveDate: string;
 }
 
 export const DevicesSchema = SchemaFactory.createForClass(Devices);
