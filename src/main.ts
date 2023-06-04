@@ -9,6 +9,8 @@ async function bootstrap() {
 
   const app = initApp(rawApp);
 
-  await app.listen(SETTINGS.PORT);
+  await app.listen(SETTINGS.PORT, () => {
+    console.log(`App started at: ${SETTINGS.PORT} port`);
+  });
 }
 bootstrap();

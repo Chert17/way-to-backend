@@ -55,13 +55,8 @@ export class JwtService {
   }
 
   getTokenIat(token: string) {
-    try {
-      const tokenIat: any = decode(token);
+    const tokenIat: any = decode(token);
 
-      return new Date(tokenIat.iat);
-    } catch (error) {
-      console.log(error);
-      return null;
-    }
+    return new Date(tokenIat.iat * 1000);
   }
 }

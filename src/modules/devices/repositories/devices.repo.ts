@@ -45,6 +45,8 @@ export class DevicesRepo {
   async checkDevice(userId: string, deviceId: string) {
     const result = await this.devicesModel.findOne({ userId, deviceId });
 
+    if (!result) return false;
+
     return result;
   }
 }
