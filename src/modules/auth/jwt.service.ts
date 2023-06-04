@@ -3,7 +3,6 @@ import { decode, sign, verify } from 'jsonwebtoken';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 
-import { ReqUserType } from '../../types/req.user.interface';
 import { SETTINGS } from '../../utils/settings';
 import { JwtTokensDto } from './dto/view/tokens.view.dto';
 
@@ -36,9 +35,13 @@ export class JwtService {
 
   verifyToken(token: string) {
     try {
-      const result = verify(token, this._jwtSecret) as ReqUserType;
+      const result = verify(token, this._jwtSecret) as any;
 
-      return { userId: result.userId, deviceId: result.deviceId };
+      return {
+        userId: result.userId,
+        deviceId: result.deviceId,
+        iat: result.iat,
+      };
     } catch (error) {
       console.log(error);
       return null;
@@ -54,9 +57,9 @@ export class JwtService {
     }
   }
 
-  getTokenIat(token: string) {
+  getTokenIat(token: string): string {
     const tokenIat: any = decode(token);
 
-    return new Date(tokenIat.iat * 1000);
+    return new Date(tokenIat.iat * 1000).toISOString();
   }
 }

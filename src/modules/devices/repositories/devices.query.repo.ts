@@ -29,7 +29,7 @@ export class DevicesQueryRepo {
     return {
       deviceId,
       ip,
-      lastActiveDate: lastActiveDate.toISOString(),
+      lastActiveDate,
       title,
     };
   }
