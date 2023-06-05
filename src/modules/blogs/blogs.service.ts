@@ -1,11 +1,9 @@
 import { Injectable } from '@nestjs/common';
 
-import { DbType } from '../../types/db.interface';
 import { MongoId } from '../../types/mongo._id.interface';
-import { createPostDto } from '../posts/dto/input/create.post.dto';
-import { Post } from '../posts/posts.schema';
 import { PostsService } from '../posts/posts.service';
 import { CreateBlogServiceDto } from './dto/input/create.blog.dto';
+import { CreatePostByBlogServiceDto } from './dto/input/create.post.by.blog.dto';
 import { UpdateBlogServiceDto } from './dto/input/update.blog.dto';
 import { BlogsRepo } from './repositories/blogs.repo';
 
@@ -20,8 +18,10 @@ export class BlogsService {
     return await this.blogsRepo.createBlog(dto);
   }
 
-  async createPostByBlog(dto: createPostDto): Promise<false | DbType<Post>> {
-    return await this.postsService.createPost(dto);
+  async createPostByBlog(dto: CreatePostByBlogServiceDto): Promise<MongoId> {
+    const blogName = await this.blogsRepo.getBlogName(dto.blogId);
+
+    return await this.postsService.createPost({ ...dto, blogName });
   }
 
   async updateBlog(dto: UpdateBlogServiceDto): Promise<boolean> {

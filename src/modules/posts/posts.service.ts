@@ -1,30 +1,24 @@
 import { Injectable } from '@nestjs/common';
 
 import { DbType } from '../../types/db.interface';
-import { BlogsRepo } from '../blogs/repositories/blogs.repo';
+import { MongoId } from '../../types/mongo._id.interface';
 import { Comment } from '../comments/comments.schema';
 import { CommentsService } from '../comments/comments.service';
 import { CreateCommentServiceDto } from '../comments/dto/input/create.comment.dto';
 import { PostsLikeStatusDbDto } from './dto/db/like.status.db.dto';
-import { createPostDto } from './dto/input/create.post.dto';
+import { createPostServiceDto } from './dto/input/create.post.dto';
 import { updatePostDto } from './dto/input/update.post.dto';
-import { Post } from './posts.schema';
 import { PostsRepo } from './repositories/posts.repo';
 
 @Injectable()
 export class PostsService {
   constructor(
     private postsRepo: PostsRepo,
-    private blogsRepo: BlogsRepo,
     private commentsService: CommentsService,
   ) {}
 
-  async createPost(dto: createPostDto): Promise<false | DbType<Post>> {
-    const blogName = await this.blogsRepo.getAndCheckBlogName(dto.blogId);
-
-    if (!blogName) return false;
-
-    return await this.postsRepo.createPost({ ...dto, blogName });
+  async createPost(dto: createPostServiceDto): Promise<MongoId> {
+    return await this.postsRepo.createPost(dto);
   }
 
   async createCommentByPost(

@@ -17,7 +17,7 @@ export class CanUserWorkWithBlog implements CanActivate {
 
     const currentUserId = request.user._id.toString();
 
-    const blogId = request.params.id;
+    const blogId = request.params.id || request.params.blogId;
 
     const blog = await this.blogsRepo.checkBlogById(blogId);
 

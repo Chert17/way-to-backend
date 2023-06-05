@@ -4,7 +4,6 @@ import {
   Delete,
   Get,
   HttpCode,
-  NotFoundException,
   Param,
   Post,
   Put,
@@ -13,12 +12,9 @@ import {
 } from '@nestjs/common';
 
 import { ReqUser } from '../../../infra/decorators/param/req.user.decorator';
-import { UserId } from '../../../infra/decorators/param/req.userId.decorator';
 import { JwtAuthGuard } from '../../../infra/guards/auth/jwt.auth.guard';
-import { UserIdFromToken } from '../../../infra/guards/auth/userId.from.token.guard';
 import { CanUserWorkWithBlog } from '../../../infra/guards/blogs/can.user.work.with.blog.guard';
 import { DbType } from '../../../types/db.interface';
-import { ReqUserIdType } from '../../../types/req.user.interface';
 import { BlogQueryPagination } from '../../../utils/pagination/pagination';
 import { PostsQueryRepo } from '../../posts/repositories/posts.query.repo';
 import { User } from '../../users/schemas/users.schema';
@@ -56,18 +52,18 @@ export class BlogsBloggerController {
   }
 
   @Post('/:blogId/posts')
-  @UseGuards(UserIdFromToken)
-
+  @UseGuards(CanUserWorkWithBlog) //!можно ли через новый конструктор передавать аргумент id или как я сделал в самом гварде на 20 строке, можно ли вообще так делать / blogId  //? спросить можно ли с useCase выкидывать Exception ?
   async createPostByBlog(
+    @ReqUser() user: DbType<User>,
     @Param('blogId') blogId: string,
     @Body() dto: CreatePostByBlogDto,
-    @UserId() userId: ReqUserIdType,
   ) {
     const result = await this.blogsService.createPostByBlog({ ...dto, blogId });
 
-    if (!result) throw new NotFoundException(); // If specified blog doesn't exists
-
-    return await this.postsQueryRepo.getPostById(result._id.toString(), userId);
+    return await this.postsQueryRepo.getPostById(
+      result._id.toString(),
+      user._id.toString(),
+    );
   }
 
   @Put('/:id')
