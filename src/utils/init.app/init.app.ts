@@ -8,7 +8,7 @@ import { HttpExceptionFilter } from '../../infra/exception-filters/http.exceptio
 import { GlobalValidationPipe } from '../../infra/pipe/global.validation.pipe';
 
 export const initApp = (app: INestApplication): INestApplication => {
-  app.setGlobalPrefix('/api/');
+  app.setGlobalPrefix('/api');
 
   app.enableCors();
 

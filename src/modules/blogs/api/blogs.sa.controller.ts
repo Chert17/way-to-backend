@@ -1,12 +1,16 @@
-import { Controller, Get, Put } from '@nestjs/common';
+import { Controller, Get, Query, UseGuards } from '@nestjs/common';
 
-@Controller('blogs')
+import { BasicAuthGuard } from '../../../infra/guards/auth/basic.auth.guard';
+import { BlogQueryPagination } from '../../../utils/pagination/pagination';
+import { BlogsQueryRepo } from '../repositories/blogs.query.repo';
+
+@Controller('sa')
+@UseGuards(BasicAuthGuard)
 export class BlogsSAController {
-  constructor() {}
+  constructor(private blogsQueryRepo: BlogsQueryRepo) {}
 
   @Get()
-  async getAllBlogs() {}
-
-  @Put()
-  async bindBlogToUserId() {}
+  async getAllBlogs(@Query() pagination: BlogQueryPagination) {
+    return await this.blogsQueryRepo.getAllBlogs(pagination);
+  }
 }
