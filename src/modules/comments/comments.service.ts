@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 
+import { MongoId } from '../../types/mongo._id.interface';
 import { Comment } from './comments.schema';
 import { CommentsLikeStatusDbDto } from './dto/input/comment.like.status.db';
 import { CreateCommentServiceDto } from './dto/input/create.comment.dto';
@@ -10,7 +11,7 @@ import { CommentsRepo } from './repositories/comments.repo';
 export class CommentsService {
   constructor(private commentsRepo: CommentsRepo) {}
 
-  async createComment(dto: CreateCommentServiceDto) {
+  async createComment(dto: CreateCommentServiceDto): Promise<MongoId> {
     const { postId, content, userId, userLogin } = dto;
 
     const newComment: Comment = {

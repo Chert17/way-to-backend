@@ -1,8 +1,6 @@
 import { Injectable } from '@nestjs/common';
 
-import { DbType } from '../../types/db.interface';
 import { MongoId } from '../../types/mongo._id.interface';
-import { Comment } from '../comments/comments.schema';
 import { CommentsService } from '../comments/comments.service';
 import { CreateCommentServiceDto } from '../comments/dto/input/create.comment.dto';
 import { PostsLikeStatusDbDto } from './dto/db/like.status.db.dto';
@@ -21,13 +19,7 @@ export class PostsService {
     return await this.postsRepo.createPost(dto);
   }
 
-  async createCommentByPost(
-    dto: CreateCommentServiceDto,
-  ): Promise<false | DbType<Comment>> {
-    const post = await this.postsRepo.checkPostById(dto.postId);
-
-    if (!post) return false; // not found post by post id
-
+  async createCommentByPost(dto: CreateCommentServiceDto): Promise<MongoId> {
     return await this.commentsService.createComment(dto);
   }
 
@@ -40,10 +32,6 @@ export class PostsService {
   }
 
   async deletePost(postId: string): Promise<boolean> {
-    const post = await this.postsRepo.checkPostById(postId);
-
-    if (!post) return false; // not found post by post id
-
     return await this.postsRepo.deletePost(postId);
   }
 }

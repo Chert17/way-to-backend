@@ -3,7 +3,7 @@ import { Model, Types, UpdateWriteOpResult } from 'mongoose';
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 
-import { DbType } from '../../../types/db.interface';
+import { MongoId } from '../../../types/mongo._id.interface';
 import { tryConvertToObjectId } from '../../../utils/converter.object.id';
 import { Comment } from '../comments.schema';
 import { CommentsLikeStatusDbDto } from '../dto/input/comment.like.status.db';
@@ -14,8 +14,10 @@ export class CommentsRepo {
     @InjectModel(Comment.name) private commentModel: Model<Comment>,
   ) {}
 
-  async createComment(newComment: Comment): Promise<DbType<Comment>> {
-    return await this.commentModel.create(newComment);
+  async createComment(newComment: Comment): Promise<MongoId> {
+    const result = await this.commentModel.create(newComment);
+
+    return result._id;
   }
 
   async updateComment(

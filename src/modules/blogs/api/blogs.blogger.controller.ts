@@ -4,6 +4,7 @@ import {
   Delete,
   Get,
   HttpCode,
+  NotFoundException,
   Param,
   Post,
   Put,
@@ -53,7 +54,7 @@ export class BlogsBloggerController {
   }
 
   @Post('/:blogId/posts')
-  @UseGuards(CanUserWorkWithBlog) //!можно ли через новый конструктор передавать аргумент id или как я сделал в самом гварде на 20 строке, можно ли вообще так делать / blogId  //? спросить можно ли с useCase выкидывать Exception ?
+  @UseGuards(CanUserWorkWithBlog)
   async createPostByBlog(
     @ReqUser() user: DbType<User>,
     @Param('blogId') blogId: string,
@@ -96,6 +97,14 @@ export class BlogsBloggerController {
     return await this.blogsService.deleteBlog(blogId);
   }
 
-  @Delete()
-  async deletePostByBlog() {}
+  @Delete(':blogId/posts/:postId')
+  @UseGuards(CanUserWorkWithBlog)
+  @HttpCode(204)
+  async deletePostByBlog(@Param('postId') postId: string) {
+    const post = await this.postsQueryRepo.getPostById(postId, null);
+
+    if (!post) throw new NotFoundException();
+
+    return await this.blogsService.deletePostByBlog(postId);
+  }
 }
