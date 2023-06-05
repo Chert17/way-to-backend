@@ -91,6 +91,11 @@ export class UsersService {
         isConfirmed: true,
         expirationDate: new Date(),
       },
+      banInfo: {
+        banReason: null,
+        banDate: null,
+        isBanned: false,
+      },
     };
   }
 }
