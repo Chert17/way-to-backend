@@ -34,14 +34,6 @@ export class RefreshTokenGuard implements CanActivate {
 
     if (!user) throw new UnauthorizedException(); // not found user by jwt payload or user deleted
 
-    // const device = await this.devicesRepo.checkDevice(userId, deviceId);
-
-    // if (!device) throw new UnauthorizedException(); // not that kind of device in DB
-
-    const iatToken = this.jwtService.getTokenIat(refreshToken);
-
-    if (device.lastActiveDate !== iatToken) throw new UnauthorizedException();
-
     request.refreshTokenPayload = payload;
 
     return true;
