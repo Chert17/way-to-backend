@@ -1,7 +1,6 @@
 import { IsDefined, IsString, Length, Matches } from 'class-validator';
 
 import { Trim } from '../../../../infra/decorators/validation/trim.decorator';
-import { MongoId } from '../../../../types/mongo._id.interface';
 
 export class CreateBlogDto {
   @IsString()
@@ -23,7 +22,7 @@ export class CreateBlogDto {
 
 export class CreateBlogServiceDto {
   @IsDefined()
-  userId: MongoId;
+  readonly userId: string;
 
   readonly name: string;
   readonly description: string;
@@ -31,9 +30,7 @@ export class CreateBlogServiceDto {
 }
 
 export class CreateBlogDbDto {
-  @IsDefined()
-  userId: MongoId;
-
+  readonly userId: string;
   readonly name: string;
   readonly description: string;
   readonly websiteUrl: string;

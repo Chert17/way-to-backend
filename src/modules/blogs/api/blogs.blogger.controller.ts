@@ -16,6 +16,7 @@ import { ReqUser } from '../../../infra/decorators/param/req.user.decorator';
 import { UserId } from '../../../infra/decorators/param/req.userId.decorator';
 import { JwtAuthGuard } from '../../../infra/guards/auth/jwt.auth.guard';
 import { UserIdFromToken } from '../../../infra/guards/auth/userId.from.token.guard';
+import { CanUserWorkWithBlog } from '../../../infra/guards/blogs/can.user.work.with.blog.guard';
 import { DbType } from '../../../types/db.interface';
 import { ReqUserIdType } from '../../../types/req.user.interface';
 import { BlogQueryPagination } from '../../../utils/pagination/pagination';
@@ -47,7 +48,7 @@ export class BlogsBloggerController {
   @Post()
   async createBlog(@ReqUser() user: DbType<User>, @Body() dto: CreateBlogDto) {
     const blogId = await this.blogsService.createBlog({
-      userId: user._id,
+      userId: user._id.toString(),
       ...dto,
     });
 
@@ -69,13 +70,10 @@ export class BlogsBloggerController {
   }
 
   @Put('/:id')
+  @UseGuards(CanUserWorkWithBlog)
   @HttpCode(204)
   async updateBlog(@Param() blogId: string, @Body() dto: UpdateBlogDto) {
-    const result = await this.blogsService.updateBlog(dto, blogId);
-
-    if (!result) throw new NotFoundException();
-
-    return;
+    return await this.blogsService.updateBlog({ ...dto, blogId });
   }
 
   @Put()

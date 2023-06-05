@@ -3,11 +3,12 @@ import { Model } from 'mongoose';
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 
+import { DbType } from '../../../types/db.interface';
 import { MongoId } from '../../../types/mongo._id.interface';
 import { tryConvertToObjectId } from '../../../utils/converter.object.id';
 import { Blog } from '../blogs.schema';
 import { CreateBlogDbDto } from '../dto/input/create.blog.dto';
-import { UpdateBlogDto } from '../dto/input/update.blog.dto';
+import { UpdateBlogDbDto } from '../dto/input/update.blog.dto';
 
 @Injectable()
 export class BlogsRepo {
@@ -19,8 +20,8 @@ export class BlogsRepo {
     return result._id;
   }
 
-  async updateBlog(dto: UpdateBlogDto, blogId: string): Promise<boolean> {
-    const { description, name, websiteUrl } = dto;
+  async updateBlog(dto: UpdateBlogDbDto): Promise<boolean> {
+    const { description, name, websiteUrl, blogId } = dto;
 
     const convertId = tryConvertToObjectId(blogId);
 
@@ -29,7 +30,6 @@ export class BlogsRepo {
     const blog = await this.blogModel.updateOne(
       { _id: convertId },
       { description, name, websiteUrl },
-      { returnDocument: 'after' },
     );
 
     return blog.matchedCount === 1;
@@ -57,13 +57,13 @@ export class BlogsRepo {
     return !blog ? false : blog.name;
   }
 
-  async checkBlogById(blogId: string): Promise<boolean> {
+  async checkBlogById(blogId: string): Promise<DbType<Blog> | false> {
     const convertId = tryConvertToObjectId(blogId);
 
     if (!convertId) return false;
 
-    const blog = await this.blogModel.countDocuments({ _id: convertId });
+    const blog = await this.blogModel.findById({ _id: convertId });
 
-    return !!blog;
+    return blog;
   }
 }
