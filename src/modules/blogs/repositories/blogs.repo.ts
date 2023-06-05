@@ -1,4 +1,4 @@
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
@@ -45,16 +45,16 @@ export class BlogsRepo {
     return blog.deletedCount === 1;
   }
 
-  async getAndCheckBlogName(blogId: string): Promise<string | false> {
-    const convertId = tryConvertToObjectId(blogId);
-
-    if (!convertId) return false;
-
+  async getBlogName(blogId: string): Promise<string> {
     const blog = await this.blogModel
-      .findById({ _id: convertId }, {}, { projection: { name: true } })
+      .findById(
+        { _id: new Types.ObjectId(blogId) },
+        {},
+        { projection: { name: true } },
+      )
       .lean();
 
-    return !blog ? false : blog.name;
+    return blog.name;
   }
 
   async checkBlogById(blogId: string): Promise<DbType<Blog> | false> {

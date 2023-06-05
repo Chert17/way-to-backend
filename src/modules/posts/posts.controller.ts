@@ -26,7 +26,6 @@ import {
 import { createCommentDto } from '../comments/dto/input/create.comment.dto';
 import { CommentsQueryRepo } from '../comments/repositories/comments.query.repo';
 import { UserViewDto } from '../users/dto/view/user.view.dto';
-import { createPostDto } from './dto/input/create.post.dto';
 import { updatePostDto } from './dto/input/update.post.dto';
 import { PostsService } from './posts.service';
 import { PostsQueryRepo } from './repositories/posts.query.repo';
@@ -74,21 +73,6 @@ export class PostsController {
       pagination,
       userId,
     );
-  }
-
-  @Post()
-  @UseGuards(BasicAuthGuard)
-  async createPost(@Body() postDto: createPostDto) {
-    const result = await this.postsService.createPost(postDto);
-
-    if (!result) throw new NotFoundException();
-
-    const post = await this.postsQueryRepo.getPostById(
-      result._id.toString(),
-      null,
-    );
-
-    return post;
   }
 
   @Post('/:postId/comments')
