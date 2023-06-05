@@ -3,6 +3,7 @@ import {
   Controller,
   Get,
   HttpCode,
+  HttpStatus,
   NotFoundException,
   Param,
   Post,
@@ -98,7 +99,7 @@ export class PostsController {
 
   @Put('/:postId/like-status')
   @UseGuards(JwtAuthGuard)
-  @HttpCode(204)
+  @HttpCode(HttpStatus.NO_CONTENT)
   async updatePostLikeInfo(
     @Param('postId') postId: string,
     @Body() dto: LikeStatusDto,

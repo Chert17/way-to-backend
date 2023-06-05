@@ -4,6 +4,7 @@ import {
   Delete,
   Get,
   HttpCode,
+  HttpStatus,
   NotFoundException,
   Param,
   Post,
@@ -70,14 +71,14 @@ export class BlogsBloggerController {
 
   @Put('/:id')
   @UseGuards(CanUserWorkWithBlog)
-  @HttpCode(204)
+  @HttpCode(HttpStatus.NO_CONTENT)
   async updateBlog(@Param() blogId: string, @Body() dto: UpdateBlogDto) {
     return await this.blogsService.updateBlog({ ...dto, blogId });
   }
 
   @Put(':blogId/posts/:postId')
   @UseGuards(CanUserWorkWithBlog)
-  @HttpCode(204)
+  @HttpCode(HttpStatus.NO_CONTENT)
   async updatePostByBlog(
     @Param('blogId') blogId: string,
     @Param('postId') postId: string,
@@ -92,14 +93,14 @@ export class BlogsBloggerController {
 
   @Delete('/:id')
   @UseGuards(CanUserWorkWithBlog)
-  @HttpCode(204)
+  @HttpCode(HttpStatus.NO_CONTENT)
   async deleteBlog(@Param() blogId: string) {
     return await this.blogsService.deleteBlog(blogId);
   }
 
   @Delete(':blogId/posts/:postId')
   @UseGuards(CanUserWorkWithBlog)
-  @HttpCode(204)
+  @HttpCode(HttpStatus.NO_CONTENT)
   async deletePostByBlog(@Param('postId') postId: string) {
     const post = await this.postsQueryRepo.getPostById(postId, null);
 
