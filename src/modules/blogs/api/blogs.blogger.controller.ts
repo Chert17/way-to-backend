@@ -97,6 +97,10 @@ export class BlogsBloggerController {
     return await this.blogsService.deleteBlog(blogId);
   }
 
-  @Delete()
-  async deletePostByBlog() {}
+  @Delete(':blogId/posts/:postId')
+  @UseGuards(CanUserWorkWithBlog)
+  @HttpCode(204)
+  async deletePostByBlog(@Param('postId') postId: string) {
+    return await this.blogsService.deletePostByBlog(postId);
+  }
 }
