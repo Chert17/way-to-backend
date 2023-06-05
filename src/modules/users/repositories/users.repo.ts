@@ -5,6 +5,7 @@ import { InjectModel } from '@nestjs/mongoose';
 
 import { DbType } from '../../../types/db.interface';
 import { tryConvertToObjectId } from '../../../utils/converter.object.id';
+import { BanUserDbDto } from '../dto/input/ban.user.dto';
 import { EmailInfo } from '../schemas/email.info.schema';
 import { User } from '../schemas/users.schema';
 
@@ -139,6 +140,23 @@ export class UsersRepo {
         },
       },
     );
+  }
+
+  async updateIsBanUser(dto: BanUserDbDto): Promise<boolean> {
+    const { userId, banReason, isBanned } = dto;
+
+    const convertId = tryConvertToObjectId(userId);
+
+    if (!convertId) return false;
+
+    const result = await this.userModel.updateOne(
+      { _id: convertId },
+      {
+        $set: { 'banInfo.isBanned': isBanned, 'banInfo.banReason': banReason },
+      },
+    );
+
+    return result.matchedCount === 1;
   }
 
   async checkUserByLoginOrEmail(loginOrEmail: string): Promise<boolean> {

@@ -6,16 +6,11 @@ import {
 } from '@nestjs/common';
 
 import { JwtService } from '../../../modules/auth/jwt.service';
-import { DevicesRepo } from '../../../modules/devices/repositories/devices.repo';
 import { UsersRepo } from '../../../modules/users/repositories/users.repo';
 
 @Injectable()
 export class RefreshTokenGuard implements CanActivate {
-  constructor(
-    private jwtService: JwtService,
-    private usersRepo: UsersRepo,
-    private devicesRepo: DevicesRepo,
-  ) {}
+  constructor(private jwtService: JwtService, private usersRepo: UsersRepo) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
