@@ -4,6 +4,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 
 import { DbType } from '../../../types/db.interface';
+import { MongoId } from '../../../types/mongo._id.interface';
 import { WithPagination } from '../../../types/pagination.interface';
 import { tryConvertToObjectId } from '../../../utils/converter.object.id';
 import { BlogQueryPagination } from '../../../utils/pagination/pagination';
@@ -20,12 +21,39 @@ export class BlogsQueryRepo {
     const { pageNumber, pageSize, searchNameTerm, sortBy, sortDirection } =
       pagination;
 
-    const filter = {
-      name: { $regex: searchNameTerm, $options: 'i' },
-    };
+    const filter = { name: { $regex: searchNameTerm, $options: 'i' } };
 
     const blogs = await this.blogModel
       .find(filter)
+      .sort({ [sortBy]: sortDirection })
+      .skip(pagination.skip())
+      .limit(pageSize)
+      .lean();
+
+    const totalCount = await this.blogModel.countDocuments(filter);
+
+    const pageCount = Math.ceil(totalCount / pageSize);
+
+    return {
+      pagesCount: pageCount === 0 ? 1 : pageCount,
+      pageSize: pageSize,
+      page: pageNumber,
+      totalCount,
+      items: blogs.map(this._blogMapping),
+    };
+  }
+
+  async getAllBlogsByUserId(
+    userId: MongoId,
+    pagination: BlogQueryPagination,
+  ): Promise<WithPagination<BlogViewDto>> {
+    const { pageNumber, pageSize, searchNameTerm, sortBy, sortDirection } =
+      pagination;
+
+    const filter = { name: { $regex: searchNameTerm, $options: 'i' }, userId };
+
+    const blogs = await this.blogModel
+      .find({ name: { $regex: searchNameTerm, $options: 'i' }, userId: userId })
       .sort({ [sortBy]: sortDirection })
       .skip(pagination.skip())
       .limit(pageSize)

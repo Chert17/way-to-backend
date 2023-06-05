@@ -18,7 +18,7 @@ import { CreateUserDto } from '../dto/input/create.user.dto';
 import { UsersQueryRepo } from '../repositories/users.query.repo';
 import { UsersService } from '../users.service';
 
-@Controller('users')
+@Controller('sa/users')
 @UseGuards(BasicAuthGuard)
 export class UsersSAController {
   constructor(

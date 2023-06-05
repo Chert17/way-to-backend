@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Delete,
+  Get,
   HttpCode,
   NotFoundException,
   Param,
@@ -11,19 +12,24 @@ import {
   UseGuards,
 } from '@nestjs/common';
 
+import { ReqUser } from '../../../infra/decorators/param/req.user.decorator';
 import { UserId } from '../../../infra/decorators/param/req.userId.decorator';
-import { BasicAuthGuard } from '../../../infra/guards/auth/basic.auth.guard';
+import { JwtAuthGuard } from '../../../infra/guards/auth/jwt.auth.guard';
 import { UserIdFromToken } from '../../../infra/guards/auth/userId.from.token.guard';
+import { CanUserWorkWithBlog } from '../../../infra/guards/blogs/can.user.work.with.blog.guard';
+import { DbType } from '../../../types/db.interface';
 import { ReqUserIdType } from '../../../types/req.user.interface';
 import { BlogQueryPagination } from '../../../utils/pagination/pagination';
 import { PostsQueryRepo } from '../../posts/repositories/posts.query.repo';
+import { User } from '../../users/schemas/users.schema';
 import { BlogsService } from '../blogs.service';
 import { CreateBlogDto } from '../dto/input/create.blog.dto';
 import { CreatePostByBlogDto } from '../dto/input/create.post.by.blog.dto';
 import { UpdateBlogDto } from '../dto/input/update.blog.dto';
 import { BlogsQueryRepo } from '../repositories/blogs.query.repo';
 
-@Controller('blogs')
+@Controller('blogger/blogs')
+@UseGuards(JwtAuthGuard)
 export class BlogsBloggerController {
   constructor(
     private blogsQueryRepo: BlogsQueryRepo,
@@ -31,20 +37,27 @@ export class BlogsBloggerController {
     private postsQueryRepo: PostsQueryRepo,
   ) {}
 
-  async getAllBlogs(@Query() pagination: BlogQueryPagination) {
-    return await this.blogsQueryRepo.getAllBlogs(pagination);
+  @Get()
+  async getAllBlogsByBlogger(
+    @ReqUser() user: DbType<User>,
+    @Query() pagination: BlogQueryPagination,
+  ) {
+    return await this.blogsQueryRepo.getAllBlogsByUserId(user._id, pagination);
   }
 
   @Post()
-  @UseGuards(BasicAuthGuard)
-  async createBlog(@Body() dto: CreateBlogDto) {
-    const result = await this.blogsService.createBlog(dto);
+  async createBlog(@ReqUser() user: DbType<User>, @Body() dto: CreateBlogDto) {
+    const blogId = await this.blogsService.createBlog({
+      userId: user._id.toString(),
+      ...dto,
+    });
 
-    return await this.blogsQueryRepo.getBlogById(result._id.toString());
+    return await this.blogsQueryRepo.getBlogById(blogId.toString());
   }
 
   @Post('/:blogId/posts')
-  @UseGuards(BasicAuthGuard, UserIdFromToken)
+  @UseGuards(UserIdFromToken)
+
   async createPostByBlog(
     @Param('blogId') blogId: string,
     @Body() dto: CreatePostByBlogDto,
@@ -58,21 +71,16 @@ export class BlogsBloggerController {
   }
 
   @Put('/:id')
-  @UseGuards(BasicAuthGuard)
+  @UseGuards(CanUserWorkWithBlog)
   @HttpCode(204)
   async updateBlog(@Param() blogId: string, @Body() dto: UpdateBlogDto) {
-    const result = await this.blogsService.updateBlog(dto, blogId);
-
-    if (!result) throw new NotFoundException();
-
-    return;
+    return await this.blogsService.updateBlog({ ...dto, blogId });
   }
 
   @Put()
   async updatePostByBlog() {}
 
   @Delete('/:id')
-  @UseGuards(BasicAuthGuard)
   @HttpCode(204)
   async deleteBlog(@Param() blogId: string) {
     const result = await this.blogsService.deleteBlog(blogId);

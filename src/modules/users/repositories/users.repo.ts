@@ -36,6 +36,14 @@ export class UsersRepo {
     return !!user;
   }
 
+  async checkAndGetUserById(userId: string): Promise<DbType<User> | false> {
+    const convertId = tryConvertToObjectId(userId);
+
+    if (!convertId) return false;
+
+    return await this.userModel.findById(convertId).lean();
+  }
+
   async getConfirmEmailByCode(code: string): Promise<EmailInfo | null> {
     const result = await this.userModel
       .findOne({ 'emailInfo.confirmationCode': code }, { emailInfo: 1, _id: 0 })
