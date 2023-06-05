@@ -1,7 +1,6 @@
 import {
   Body,
   Controller,
-  Delete,
   Get,
   HttpCode,
   NotFoundException,
@@ -14,7 +13,6 @@ import {
 
 import { ReqUser } from '../../infra/decorators/param/req.user.decorator';
 import { UserId } from '../../infra/decorators/param/req.userId.decorator';
-import { BasicAuthGuard } from '../../infra/guards/auth/basic.auth.guard';
 import { JwtAuthGuard } from '../../infra/guards/auth/jwt.auth.guard';
 import { UserIdFromToken } from '../../infra/guards/auth/userId.from.token.guard';
 import { LikeStatusDto } from '../../types/like.info.interface';
@@ -81,17 +79,19 @@ export class PostsController {
     @Body() dto: createCommentDto,
     @ReqUser() user: UserViewDto,
   ) {
-    const result = await this.postsService.createCommentByPost({
+    const post = await this.postsQueryRepo.getPostById(postId, null);
+
+    if (!post) throw new NotFoundException();
+
+    const commentId = await this.postsService.createCommentByPost({
       content: dto.content,
       postId,
       userId: user.id,
       userLogin: user.login,
     });
 
-    if (!result) throw new NotFoundException(); // If specified post doesn't exists
-
     return await this.commentsQueryRepo.getCommentById(
-      result._id.toString(),
+      commentId.toString(),
       user.id,
     );
   }
@@ -114,16 +114,5 @@ export class PostsController {
       userId: user.id,
       userLogin: user.login,
     });
-  }
-
-  @Delete('/:id')
-  @UseGuards(BasicAuthGuard)
-  @HttpCode(204)
-  async deleteBlog(@Param() postId: string) {
-    const result = await this.postsService.deletePost(postId);
-
-    if (!result) throw new NotFoundException();
-
-    return;
   }
 }
