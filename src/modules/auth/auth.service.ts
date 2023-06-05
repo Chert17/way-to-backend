@@ -5,6 +5,7 @@ import { Injectable } from '@nestjs/common';
 
 import { addMinutesToCurrentDate } from '../../helpers/add.minutes.current.date';
 import { ReqUserType } from '../../types/req.user.interface';
+import { Devices } from '../devices/devices.schema';
 import { DevicesService } from '../devices/devices.service';
 import { DevicesRepo } from '../devices/repositories/devices.repo';
 import { EmailService } from '../email/email.service';
@@ -90,10 +91,8 @@ export class AuthService {
     const { userId, deviceId, iat } = refreshPayload;
 
     const device = await this.devicesRepo.getDeviceById(deviceId);
-    if (!device) return null;
-    if (device.userId !== userId) return null;
-    if (device.lastActiveDate !== new Date(iat * 1000).toISOString())
-      return null;
+
+    this._checkValidDevice(device, userId, iat);
 
     const tokens = this.jwtService.createJWT(userId, deviceId);
 
@@ -111,10 +110,9 @@ export class AuthService {
 
   async logout(dto: ReqUserType) {
     const device = await this.devicesRepo.getDeviceById(dto.deviceId);
-    if (!device) return null;
-    if (device.userId !== dto.userId) return null;
-    if (device.lastActiveDate !== new Date(dto.iat * 1000).toISOString())
-      return null;
+
+    this._checkValidDevice(device, dto.userId, dto.iat);
+
     return await this.devicesService.deleteOneDevice(dto);
   }
 
@@ -143,5 +141,14 @@ export class AuthService {
     if (!result) return null;
 
     return;
+  }
+
+  private _checkValidDevice(device: Devices, userId: string, iat: number) {
+    if (!device) return null;
+
+    if (device.userId !== userId) return null;
+
+    if (device.lastActiveDate !== new Date(iat * 1000).toISOString())
+      return null;
   }
 }

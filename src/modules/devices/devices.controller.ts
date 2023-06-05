@@ -14,6 +14,7 @@ import {
 import { RefreshTokenPayload } from '../../infra/decorators/param/req.refresh.token.decorator';
 import { RefreshTokenGuard } from '../../infra/guards/auth/refresh.token.guard';
 import { ReqUserType } from '../../types/req.user.interface';
+import { Devices } from './devices.schema';
 import { DevicesService } from './devices.service';
 import { DevicesQueryRepo } from './repositories/devices.query.repo';
 import { DevicesRepo } from './repositories/devices.repo';
@@ -32,10 +33,9 @@ export class DevicesController {
     const { userId, deviceId, iat } = refreshPayload;
 
     const device = await this.devicesRepo.getDeviceById(deviceId);
-    if (!device) throw new UnauthorizedException();
-    if (device.userId !== userId) throw new UnauthorizedException();
-    if (device.lastActiveDate !== new Date(iat * 1000).toISOString())
-      throw new UnauthorizedException();
+
+    this._checkValidDevice(device, userId, iat);
+
     return await this.devicesQueryRepo.getAllUserDevices(userId);
   }
 
@@ -47,10 +47,9 @@ export class DevicesController {
     const { userId, deviceId, iat } = refreshPayload;
 
     const device = await this.devicesRepo.getDeviceById(deviceId);
-    if (!device) throw new UnauthorizedException();
-    if (device.userId !== userId) throw new UnauthorizedException();
-    if (device.lastActiveDate !== new Date(iat * 1000).toISOString())
-      throw new UnauthorizedException();
+
+    this._checkValidDevice(device, userId, iat);
+
     return await this.devicesService.deleteAllDevicesExceptCurrent(
       refreshPayload,
     );
@@ -65,11 +64,20 @@ export class DevicesController {
     const { userId } = refreshPayload;
 
     const device = await this.devicesRepo.getDeviceById(deviceId);
+
     if (!device) throw new NotFoundException();
+
     if (device.userId !== userId) throw new ForbiddenException();
-    // if (device.lastActiveDate !== new Date(iat * 1000).toISOString())
-    //   throw new UnauthorizedException();
 
     return await this.devicesService.deleteOneDevice({ deviceId, userId });
+  }
+
+  private _checkValidDevice(device: Devices, userId: string, iat: number) {
+    if (!device) throw new UnauthorizedException();
+
+    if (device.userId !== userId) throw new UnauthorizedException();
+
+    if (device.lastActiveDate !== new Date(iat * 1000).toISOString())
+      throw new UnauthorizedException();
   }
 }
