@@ -29,10 +29,6 @@ export class BlogsService {
   }
 
   async deleteBlog(blogId: string): Promise<boolean> {
-    const blog = await this.blogsRepo.checkBlogById(blogId);
-
-    if (!blog) return false; // not found blog by blog id
-
     return await this.blogsRepo.deleteBlog(blogId);
   }
 }
