@@ -5,6 +5,7 @@ import { PostsService } from '../posts/posts.service';
 import { CreateBlogServiceDto } from './dto/input/create.blog.dto';
 import { CreatePostByBlogServiceDto } from './dto/input/create.post.by.blog.dto';
 import { UpdateBlogServiceDto } from './dto/input/update.blog.dto';
+import { UpdatePostByBlogServiceDto } from './dto/input/update.post.by.blog';
 import { BlogsRepo } from './repositories/blogs.repo';
 
 @Injectable()
@@ -26,6 +27,10 @@ export class BlogsService {
 
   async updateBlog(dto: UpdateBlogServiceDto): Promise<boolean> {
     return await this.blogsRepo.updateBlog(dto);
+  }
+
+  async updatePostByBlog(dto: UpdatePostByBlogServiceDto) {
+    return await this.postsService.updatePost(dto);
   }
 
   async deleteBlog(blogId: string): Promise<boolean> {

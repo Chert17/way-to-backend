@@ -26,7 +26,6 @@ import {
 import { createCommentDto } from '../comments/dto/input/create.comment.dto';
 import { CommentsQueryRepo } from '../comments/repositories/comments.query.repo';
 import { UserViewDto } from '../users/dto/view/user.view.dto';
-import { updatePostDto } from './dto/input/update.post.dto';
 import { PostsService } from './posts.service';
 import { PostsQueryRepo } from './repositories/posts.query.repo';
 
@@ -95,17 +94,6 @@ export class PostsController {
       result._id.toString(),
       user.id,
     );
-  }
-
-  @Put('/:id')
-  @UseGuards(BasicAuthGuard)
-  @HttpCode(204)
-  async updatePost(@Param() postId: string, @Body() dto: updatePostDto) {
-    const result = await this.postsService.updatePost(dto, postId);
-
-    if (!result) throw new NotFoundException();
-
-    return;
   }
 
   @Put('/:postId/like-status')
