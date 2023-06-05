@@ -7,19 +7,20 @@ import {
   NotFoundException,
   Param,
   Post,
+  Put,
   Query,
   UseGuards,
 } from '@nestjs/common';
 
-import { BasicAuthGuard } from '../../infra/guards/auth/basic.auth.guard';
-import { UserQueryPagination } from '../../utils/pagination/pagination';
-import { CreateUserDto } from './dto/input/create.user.dto';
-import { UsersQueryRepo } from './repositories/users.query.repo';
-import { UsersService } from './users.service';
+import { BasicAuthGuard } from '../../../infra/guards/auth/basic.auth.guard';
+import { UserQueryPagination } from '../../../utils/pagination/pagination';
+import { CreateUserDto } from '../dto/input/create.user.dto';
+import { UsersQueryRepo } from '../repositories/users.query.repo';
+import { UsersService } from '../users.service';
 
 @Controller('users')
 @UseGuards(BasicAuthGuard)
-export class UsersController {
+export class UsersSAController {
   constructor(
     private usersQueryRepo: UsersQueryRepo,
     private usersService: UsersService,
@@ -36,6 +37,9 @@ export class UsersController {
 
     return await this.usersQueryRepo.getUserById(result._id.toString());
   }
+
+  @Put()
+  async banUser() {}
 
   @Delete('/:id')
   @HttpCode(204)

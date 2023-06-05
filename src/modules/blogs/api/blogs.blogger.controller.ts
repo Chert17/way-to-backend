@@ -2,7 +2,6 @@ import {
   Body,
   Controller,
   Delete,
-  Get,
   HttpCode,
   NotFoundException,
   Param,
@@ -12,59 +11,28 @@ import {
   UseGuards,
 } from '@nestjs/common';
 
-import { UserId } from '../../infra/decorators/param/req.userId.decorator';
-import { BasicAuthGuard } from '../../infra/guards/auth/basic.auth.guard';
-import { UserIdFromToken } from '../../infra/guards/auth/userId.from.token.guard';
-import { ReqUserIdType } from '../../types/req.user.interface';
-import {
-  BlogQueryPagination,
-  PostQueryPagination,
-} from '../../utils/pagination/pagination';
-import { PostsQueryRepo } from '../posts/repositories/posts.query.repo';
-import { BlogsService } from './blogs.service';
-import { CreateBlogDto } from './dto/input/create.blog.dto';
-import { CreatePostByBlogDto } from './dto/input/create.post.by.blog.dto';
-import { UpdateBlogDto } from './dto/input/update.blog.dto';
-import { BlogsQueryRepo } from './repositories/blogs.query.repo';
+import { UserId } from '../../../infra/decorators/param/req.userId.decorator';
+import { BasicAuthGuard } from '../../../infra/guards/auth/basic.auth.guard';
+import { UserIdFromToken } from '../../../infra/guards/auth/userId.from.token.guard';
+import { ReqUserIdType } from '../../../types/req.user.interface';
+import { BlogQueryPagination } from '../../../utils/pagination/pagination';
+import { PostsQueryRepo } from '../../posts/repositories/posts.query.repo';
+import { BlogsService } from '../blogs.service';
+import { CreateBlogDto } from '../dto/input/create.blog.dto';
+import { CreatePostByBlogDto } from '../dto/input/create.post.by.blog.dto';
+import { UpdateBlogDto } from '../dto/input/update.blog.dto';
+import { BlogsQueryRepo } from '../repositories/blogs.query.repo';
 
 @Controller('blogs')
-export class BlogsController {
+export class BlogsBloggerController {
   constructor(
     private blogsQueryRepo: BlogsQueryRepo,
     private blogsService: BlogsService,
     private postsQueryRepo: PostsQueryRepo,
   ) {}
 
-  @Get()
-  async getAll(@Query() pagination: BlogQueryPagination) {
+  async getAllBlogs(@Query() pagination: BlogQueryPagination) {
     return await this.blogsQueryRepo.getAllBlogs(pagination);
-  }
-
-  @Get('/:id')
-  async getBlogById(@Param() blogId: string) {
-    const result = await this.blogsQueryRepo.getBlogById(blogId);
-
-    if (!result) throw new NotFoundException();
-
-    return result;
-  }
-
-  @Get('/:blogId/posts')
-  @UseGuards(UserIdFromToken)
-  async getPostsByBlog(
-    @Param('blogId') blogId: string,
-    @Query() pagination: PostQueryPagination,
-    @UserId() userId: ReqUserIdType,
-  ) {
-    const blog = await this.blogsQueryRepo.getBlogById(blogId);
-
-    if (!blog) throw new NotFoundException(); // If specified blog doesn't exists
-
-    return await this.postsQueryRepo.getAllPostsByBlogId(
-      blogId,
-      pagination,
-      userId,
-    );
   }
 
   @Post()
@@ -100,6 +68,9 @@ export class BlogsController {
     return;
   }
 
+  @Put()
+  async updatePostByBlog() {}
+
   @Delete('/:id')
   @UseGuards(BasicAuthGuard)
   @HttpCode(204)
@@ -110,4 +81,7 @@ export class BlogsController {
 
     return;
   }
+
+  @Delete()
+  async deletePostByBlog() {}
 }
