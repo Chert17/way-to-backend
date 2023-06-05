@@ -80,6 +80,7 @@ export class UsersQueryRepo {
     const {
       _id,
       accountData: { login, email, createdAt },
+      banInfo: { banDate, banReason, isBanned },
     } = user;
 
     return {
@@ -87,6 +88,11 @@ export class UsersQueryRepo {
       login,
       email,
       createdAt: createdAt.toISOString(),
+      banInfo: {
+        isBanned,
+        banDate: banDate?.toISOString() ?? null,
+        banReason,
+      },
     };
   }
 }
