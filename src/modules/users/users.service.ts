@@ -6,6 +6,7 @@ import { Injectable } from '@nestjs/common';
 import { addMinutesToCurrentDate } from '../../helpers/add.minutes.current.date';
 import { generateHash } from '../../helpers/generate.hash';
 import { DbType } from '../../types/db.interface';
+import { BanUserServiceDto } from './dto/input/ban.user.dto';
 import { CreateUserDto } from './dto/input/create.user.dto';
 import { UsersRepo } from './repositories/users.repo';
 import { User } from './schemas/users.schema';
@@ -69,6 +70,10 @@ export class UsersService {
     const passwordHash = await generateHash(newPassword);
 
     return await this.usersRepo.createNewPasswordForUser(userId, passwordHash);
+  }
+
+  async banUser(dto: BanUserServiceDto) {
+    return await this.usersRepo.updateIsBanUser(dto);
   }
 
   private async _userData(dto: CreateUserDto): Promise<User> {

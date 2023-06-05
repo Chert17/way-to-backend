@@ -14,6 +14,7 @@ import {
 
 import { BasicAuthGuard } from '../../../infra/guards/auth/basic.auth.guard';
 import { UserQueryPagination } from '../../../utils/pagination/pagination';
+import { BanUserDto } from '../dto/input/ban.user.dto';
 import { CreateUserDto } from '../dto/input/create.user.dto';
 import { UsersQueryRepo } from '../repositories/users.query.repo';
 import { UsersService } from '../users.service';
@@ -38,8 +39,10 @@ export class UsersSAController {
     return await this.usersQueryRepo.getUserById(result._id.toString());
   }
 
-  @Put()
-  async banUser() {}
+  @Put('/:userId/ban')
+  async banUser(@Param() userId: string, @Body() dto: BanUserDto) {
+    return await this.usersService.banUser({ userId, ...dto });
+  }
 
   @Delete('/:id')
   @HttpCode(204)
