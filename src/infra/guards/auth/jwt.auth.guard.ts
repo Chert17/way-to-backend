@@ -6,14 +6,11 @@ import {
 } from '@nestjs/common';
 
 import { JwtService } from '../../../modules/auth/jwt.service';
-import { UsersQueryRepo } from '../../../modules/users/repositories/users.query.repo';
+import { UsersRepo } from '../../../modules/users/repositories/users.repo';
 
 @Injectable()
 export class JwtAuthGuard implements CanActivate {
-  constructor(
-    private jwtService: JwtService,
-    private usersQueryRepo: UsersQueryRepo,
-  ) {}
+  constructor(private jwtService: JwtService, private usersRepo: UsersRepo) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
@@ -28,7 +25,7 @@ export class JwtAuthGuard implements CanActivate {
 
     if (!payload) throw new UnauthorizedException(); // invalid accessToken
 
-    const user = await this.usersQueryRepo.getUserById(payload.userId);
+    const user = await this.usersRepo.checkAndGetUserById(payload.userId);
 
     if (!user) throw new UnauthorizedException(); // not found user by jwt payload or user deleted
 

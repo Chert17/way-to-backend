@@ -3,18 +3,20 @@ import { Model } from 'mongoose';
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 
-import { DbType } from '../../../types/db.interface';
+import { MongoId } from '../../../types/mongo._id.interface';
 import { tryConvertToObjectId } from '../../../utils/converter.object.id';
 import { Blog } from '../blogs.schema';
-import { CreateBlogDto } from '../dto/input/create.blog.dto';
+import { CreateBlogDbDto } from '../dto/input/create.blog.dto';
 import { UpdateBlogDto } from '../dto/input/update.blog.dto';
 
 @Injectable()
 export class BlogsRepo {
   constructor(@InjectModel(Blog.name) private blogModel: Model<Blog>) {}
 
-  async createBlog(dto: CreateBlogDto): Promise<DbType<Blog>> {
-    return await this.blogModel.create(dto);
+  async createBlog(dto: CreateBlogDbDto): Promise<MongoId> {
+    const result = await this.blogModel.create(dto);
+
+    return result._id;
   }
 
   async updateBlog(dto: UpdateBlogDto, blogId: string): Promise<boolean> {

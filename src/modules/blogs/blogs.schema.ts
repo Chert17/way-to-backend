@@ -8,6 +8,9 @@ export type BlogDocument = HydratedDocument<Blog>;
 
 @Schema()
 export class Blog {
+  @Prop({ type: String, required: true })
+  userId: string;
+
   @Prop({ type: String, required: true, length: { max: 15 } })
   name: string;
 

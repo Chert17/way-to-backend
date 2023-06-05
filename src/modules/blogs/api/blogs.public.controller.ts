@@ -15,14 +15,12 @@ import {
   PostQueryPagination,
 } from '../../../utils/pagination/pagination';
 import { PostsQueryRepo } from '../../posts/repositories/posts.query.repo';
-import { BlogsService } from '../blogs.service';
 import { BlogsQueryRepo } from '../repositories/blogs.query.repo';
 
 @Controller('blogs')
 export class BlogsController {
   constructor(
     private blogsQueryRepo: BlogsQueryRepo,
-    private blogsService: BlogsService,
     private postsQueryRepo: PostsQueryRepo,
   ) {}
 
