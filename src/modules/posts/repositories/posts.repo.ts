@@ -7,7 +7,7 @@ import { MongoId } from '../../../types/mongo._id.interface';
 import { tryConvertToObjectId } from '../../../utils/converter.object.id';
 import { PostsLikeStatusDbDto } from '../dto/db/like.status.db.dto';
 import { createPostDbDto } from '../dto/input/create.post.dto';
-import { updatePostDto } from '../dto/input/update.post.dto';
+import { updatePostDbDto } from '../dto/input/update.post.dto';
 import { Post } from '../posts.schema';
 
 @Injectable()
@@ -20,8 +20,8 @@ export class PostsRepo {
     return result._id;
   }
 
-  async updatePost(dto: updatePostDto, postId: string): Promise<boolean> {
-    const { blogId, content, shortDescription, title } = dto;
+  async updatePost(dto: updatePostDbDto): Promise<boolean> {
+    const { blogId, content, shortDescription, title, postId } = dto;
 
     const convertId = tryConvertToObjectId(postId);
 
@@ -30,7 +30,6 @@ export class PostsRepo {
     const post = await this.postModel.updateOne(
       { _id: convertId },
       { blogId, content, shortDescription, title },
-      { returnDocument: 'after' },
     );
 
     return post.matchedCount === 1;

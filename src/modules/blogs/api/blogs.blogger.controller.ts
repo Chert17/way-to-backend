@@ -22,6 +22,7 @@ import { BlogsService } from '../blogs.service';
 import { CreateBlogDto } from '../dto/input/create.blog.dto';
 import { CreatePostByBlogDto } from '../dto/input/create.post.by.blog.dto';
 import { UpdateBlogDto } from '../dto/input/update.blog.dto';
+import { UpdatePostByBlogDto } from '../dto/input/update.post.by.blog';
 import { BlogsQueryRepo } from '../repositories/blogs.query.repo';
 
 @Controller('blogger/blogs')
@@ -73,8 +74,20 @@ export class BlogsBloggerController {
     return await this.blogsService.updateBlog({ ...dto, blogId });
   }
 
-  @Put()
-  async updatePostByBlog() {}
+  @Put(':blogId/posts/:postId')
+  @UseGuards(CanUserWorkWithBlog)
+  @HttpCode(204)
+  async updatePostByBlog(
+    @Param('blogId') blogId: string,
+    @Param('postId') postId: string,
+    @Body() dto: UpdatePostByBlogDto,
+  ) {
+    const post = await this.postsQueryRepo.getPostById(postId, null);
+
+    if (!post) throw new NotFoundException();
+
+    return await this.blogsService.updatePostByBlog({ ...dto, blogId, postId });
+  }
 
   @Delete('/:id')
   @UseGuards(CanUserWorkWithBlog)

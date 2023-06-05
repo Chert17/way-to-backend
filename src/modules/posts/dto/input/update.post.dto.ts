@@ -1,25 +1,15 @@
-import { IsString, Length, Validate } from 'class-validator';
-
-import { ExistBlog } from '../../../../infra/decorators/blogs/exist.blog';
-import { Trim } from '../../../../infra/decorators/validation/trim.decorator';
-
-export class updatePostDto {
-  @Validate(ExistBlog)
-  @IsString()
+export class updatePostServiceDto {
+  readonly postId: string;
   readonly blogId: string;
-
-  @Length(1, 30)
-  @Trim()
-  @IsString()
   readonly title: string;
-
-  @Length(1, 100)
-  @Trim()
-  @IsString()
   readonly shortDescription: string;
+  readonly content: string;
+}
 
-  @Length(1, 1000)
-  @Trim()
-  @IsString()
+export class updatePostDbDto {
+  readonly postId: string;
+  readonly blogId: string;
+  readonly title: string;
+  readonly shortDescription: string;
   readonly content: string;
 }
