@@ -43,10 +43,24 @@ export class PostsRepo {
     const likeInfo = post.extendedLikesInfo.find(i => i.userId === userId);
 
     if (!likeInfo) {
-      post.extendedLikesInfo.push({ userId, userLogin, status: likeStatus });
+      post.extendedLikesInfo.push({
+        userId,
+        userLogin,
+        status: likeStatus,
+        isBanned: false,
+      });
     } else likeInfo.status = likeStatus;
 
     post.save();
+  }
+
+  async updateBanUserInfoForPostLike(userId: string, isBanned: boolean) {
+    return await this.postModel.updateOne(
+      {
+        'extendedLikesInfo.userId': userId,
+      },
+      { $set: { 'extendedLikesInfo.$.isBanned': isBanned } },
+    );
   }
 
   async deletePost(postId: string): Promise<boolean> {

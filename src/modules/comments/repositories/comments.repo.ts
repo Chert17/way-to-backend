@@ -47,7 +47,7 @@ export class CommentsRepo {
   }
 
   async updateBanUserInfo(userId: string, isBanned: boolean) {
-    await this.commentModel.updateMany(
+    return await this.commentModel.updateMany(
       {
         $and: [
           { 'commentatorInfo.userId': userId },
@@ -61,8 +61,6 @@ export class CommentsRepo {
         },
       },
     );
-
-    return;
   }
 
   async deleteComment(commentId: string) {
