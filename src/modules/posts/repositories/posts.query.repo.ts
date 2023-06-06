@@ -102,7 +102,7 @@ export class PostsQueryRepo {
     });
 
     const newestLikes = extendedLikesInfo
-      .filter(i => i.status === LikeStatus.Like && !i.isBanned)
+      .filter(i => i.status === LikeStatus.Like && !i.isBanned) //check is banned not user
       .sort(
         (a, b) =>
           new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime(),
