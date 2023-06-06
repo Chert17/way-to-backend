@@ -27,16 +27,6 @@ export class UsersRepo {
     return user.deletedCount === 1;
   }
 
-  async checkUserById(userId: string): Promise<boolean> {
-    const convertId = tryConvertToObjectId(userId);
-
-    if (!convertId) return false;
-
-    const user = await this.userModel.countDocuments({ _id: convertId });
-
-    return !!user;
-  }
-
   async checkAndGetUserById(userId: string): Promise<DbType<User> | false> {
     const convertId = tryConvertToObjectId(userId);
 
@@ -143,7 +133,7 @@ export class UsersRepo {
   }
 
   async updateIsBanUser(dto: BanUserDbDto): Promise<boolean> {
-    const { userId, banReason, isBanned } = dto;
+    const { userId, ...banInfo } = dto;
 
     const convertId = tryConvertToObjectId(userId);
 
@@ -151,9 +141,7 @@ export class UsersRepo {
 
     const result = await this.userModel.updateOne(
       { _id: convertId },
-      {
-        $set: { 'banInfo.isBanned': isBanned, 'banInfo.banReason': banReason },
-      },
+      { $set: { banInfo } },
     );
 
     return result.matchedCount === 1;

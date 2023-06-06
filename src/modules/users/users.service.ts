@@ -22,7 +22,7 @@ export class UsersService {
   }
 
   async deleteUser(userId: string) {
-    const user = this.usersRepo.checkUserById(userId);
+    const user = this.usersRepo.checkAndGetUserById(userId);
 
     if (!user) return false;
 
@@ -73,7 +73,10 @@ export class UsersService {
   }
 
   async banUser(dto: BanUserServiceDto) {
-    return await this.usersRepo.updateIsBanUser(dto);
+    const banDate = dto.isBanned ? new Date() : null;
+    const banReason = dto.isBanned ? dto.banReason : null;
+
+    return await this.usersRepo.updateIsBanUser({ ...dto, banDate, banReason });
   }
 
   private async _userData(dto: CreateUserDto): Promise<User> {

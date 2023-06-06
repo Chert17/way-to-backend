@@ -24,4 +24,5 @@ export class BanUserDbDto {
   readonly userId: string;
   readonly isBanned: boolean;
   readonly banReason: string;
+  readonly banDate: Date | null;
 }

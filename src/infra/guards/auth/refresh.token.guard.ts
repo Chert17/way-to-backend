@@ -25,9 +25,11 @@ export class RefreshTokenGuard implements CanActivate {
 
     const { userId } = payload;
 
-    const user = await this.usersRepo.checkUserById(userId);
+    const user = await this.usersRepo.checkAndGetUserById(userId);
 
     if (!user) throw new UnauthorizedException(); // not found user by jwt payload or user deleted
+
+    if (user.banInfo.isBanned) throw new UnauthorizedException(); // banned user
 
     request.refreshTokenPayload = payload;
 
