@@ -29,6 +29,8 @@ export class JwtAuthGuard implements CanActivate {
 
     if (!user) throw new UnauthorizedException(); // not found user by jwt payload or user deleted
 
+    if (user.banInfo.isBanned) throw new UnauthorizedException(); // banned user
+
     request.user = user;
 
     return true;

@@ -40,8 +40,9 @@ export class UsersSAController {
   }
 
   @Put('/:userId/ban')
-  async banUser(@Param() userId: string, @Body() dto: BanUserDto) {
-    return await this.usersService.banUser({ userId, ...dto });
+  @HttpCode(204)
+  async banUser(@Param('userId') userId: string, @Body() dto: BanUserDto) {
+    return await this.usersService.banUser({ ...dto, userId });
   }
 
   @Delete('/:id')

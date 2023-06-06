@@ -46,6 +46,10 @@ export class DevicesRepo {
     return await this.devicesModel.deleteOne({ userId, deviceId });
   }
 
+  async deleteAllDevicesByBanUser(userId: string) {
+    return await this.devicesModel.deleteMany({ userId });
+  }
+
   async checkDevice(userId: string, deviceId: string) {
     return await this.devicesModel.findOne({ userId, deviceId }).lean();
   }
