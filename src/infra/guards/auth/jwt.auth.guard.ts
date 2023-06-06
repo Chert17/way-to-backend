@@ -1,6 +1,7 @@
 import {
   CanActivate,
   ExecutionContext,
+  ForbiddenException,
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
@@ -29,7 +30,7 @@ export class JwtAuthGuard implements CanActivate {
 
     if (!user) throw new UnauthorizedException(); // not found user by jwt payload or user deleted
 
-    if (user.banInfo.isBanned) throw new UnauthorizedException(); // banned user
+    if (user.banInfo.isBanned) throw new ForbiddenException(); // banned user
 
     request.user = user;
 

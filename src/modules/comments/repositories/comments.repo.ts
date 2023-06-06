@@ -38,12 +38,31 @@ export class CommentsRepo {
     const likeInfo = comment.likesInfo.find(i => i.userId === userId);
 
     if (!likeInfo) {
-      comment.likesInfo.push({ userId, status: likeStatus });
+      comment.likesInfo.push({ userId, status: likeStatus, isBanned: false });
     } else likeInfo.status = likeStatus;
 
     comment.save();
 
     return true;
+  }
+
+  async updateBanUserInfo(userId: string, isBanned: boolean) {
+    await this.commentModel.updateMany(
+      {
+        $and: [
+          { 'commentatorInfo.userId': userId },
+          { likesInfo: { $elemMatch: { userId } } },
+        ],
+      },
+      {
+        $set: {
+          'commentatorInfo.isBanned': isBanned,
+          'likesInfo.$.isBanned': isBanned,
+        },
+      },
+    );
+
+    return;
   }
 
   async deleteComment(commentId: string) {

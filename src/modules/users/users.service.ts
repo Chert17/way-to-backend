@@ -6,6 +6,7 @@ import { Injectable } from '@nestjs/common';
 import { addMinutesToCurrentDate } from '../../helpers/add.minutes.current.date';
 import { generateHash } from '../../helpers/generate.hash';
 import { DbType } from '../../types/db.interface';
+import { CommentsService } from '../comments/comments.service';
 import { DevicesService } from '../devices/devices.service';
 import { BanUserServiceDto } from './dto/input/ban.user.dto';
 import { CreateUserDto } from './dto/input/create.user.dto';
@@ -17,6 +18,7 @@ export class UsersService {
   constructor(
     private usersRepo: UsersRepo,
     private devicesService: DevicesService,
+    private commentsService: CommentsService,
   ) {}
 
   async createUser(dto: CreateUserDto): Promise<DbType<User>> {
@@ -83,7 +85,11 @@ export class UsersService {
     const banReason = isBan ? dto.banReason : null;
 
     await this.usersRepo.updateIsBanUser({ ...dto, banDate, banReason }); // add ban user info to user
-
+    
+    await this.commentsService.updateBanUserInfoForCommnetsAndLikes(
+      dto.userId,
+      dto.isBanned,
+    );
     if (isBan) await this.devicesService.deleteAllDevicesByBanUser(dto.userId);
 
     return;

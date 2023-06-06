@@ -6,22 +6,28 @@ import { LikeStatus } from '../../utils/like.status';
 
 export type BlogDocument = HydratedDocument<Comment>;
 
-@Schema()
+@Schema({ _id: false, id: false, versionKey: false })
 class CommentatorInfo {
   @Prop({ type: String, require: true })
   userId: string;
 
   @Prop({ type: String, require: true })
   userLogin: string;
+
+  @Prop({ required: true, type: Boolean })
+  isBanned: boolean;
 }
 
 export const CommentatorInfoSchema =
   SchemaFactory.createForClass(CommentatorInfo);
 
-@Schema({ timestamps: true })
+@Schema({ timestamps: true, _id: false, id: false, versionKey: false })
 class LikesInfo {
   @Prop({ type: String, require: true })
   userId: string;
+
+  @Prop({ required: true, type: Boolean })
+  isBanned: boolean;
 
   @Prop({ type: String, enum: LikeStatus, require: true })
   status: LikeStatus;

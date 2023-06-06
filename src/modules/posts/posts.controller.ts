@@ -16,6 +16,7 @@ import { ReqUser } from '../../infra/decorators/param/req.user.decorator';
 import { UserId } from '../../infra/decorators/param/req.userId.decorator';
 import { JwtAuthGuard } from '../../infra/guards/auth/jwt.auth.guard';
 import { UserIdFromToken } from '../../infra/guards/auth/userId.from.token.guard';
+import { DbType } from '../../types/db.interface';
 import { LikeStatusDto } from '../../types/like.info.interface';
 import { ReqUserIdType } from '../../types/req.user.interface';
 import {
@@ -24,7 +25,7 @@ import {
 } from '../../utils/pagination/pagination';
 import { createCommentDto } from '../comments/dto/input/create.comment.dto';
 import { CommentsQueryRepo } from '../comments/repositories/comments.query.repo';
-import { UserViewDto } from '../users/dto/view/user.view.dto';
+import { User } from '../users/schemas/users.schema';
 import { PostsService } from './posts.service';
 import { PostsQueryRepo } from './repositories/posts.query.repo';
 
@@ -78,8 +79,10 @@ export class PostsController {
   async createCommentByPost(
     @Param('postId') postId: string,
     @Body() dto: createCommentDto,
-    @ReqUser() user: UserViewDto,
+    @ReqUser() user: DbType<User>,
   ) {
+    const userId = user._id.toString();
+
     const post = await this.postsQueryRepo.getPostById(postId, null);
 
     if (!post) throw new NotFoundException();
@@ -87,13 +90,13 @@ export class PostsController {
     const commentId = await this.postsService.createCommentByPost({
       content: dto.content,
       postId,
-      userId: user.id,
-      userLogin: user.login,
+      userId,
+      userLogin: user.accountData.login,
     });
 
     return await this.commentsQueryRepo.getCommentById(
       commentId.toString(),
-      user.id,
+      userId,
     );
   }
 
@@ -103,17 +106,19 @@ export class PostsController {
   async updatePostLikeInfo(
     @Param('postId') postId: string,
     @Body() dto: LikeStatusDto,
-    @ReqUser() user: UserViewDto,
+    @ReqUser() user: DbType<User>,
   ) {
-    const post = await this.postsQueryRepo.getPostById(postId, user.id);
+    const userId = user._id.toString();
+
+    const post = await this.postsQueryRepo.getPostById(postId, userId);
 
     if (!post) throw new NotFoundException(); // If specified post doesn't exists
 
     return await this.postsService.updateLikeStatus({
       postId,
       likeStatus: dto.likeStatus,
-      userId: user.id,
-      userLogin: user.login,
+      userId,
+      userLogin: user.accountData.login,
     });
   }
 }

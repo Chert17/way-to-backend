@@ -17,7 +17,7 @@ export class CommentsService {
     const newComment: Comment = {
       postId,
       content,
-      commentatorInfo: { userId, userLogin },
+      commentatorInfo: { userId, userLogin, isBanned: false },
       createdAt: new Date().toISOString(),
       likesInfo: [],
     };
@@ -39,6 +39,13 @@ export class CommentsService {
     if (!comment) return false;
 
     return await this.commentsRepo.updateLikeInfo(dto);
+  }
+
+  async updateBanUserInfoForCommnetsAndLikes(
+    userId: string,
+    isBanned: boolean,
+  ) {
+    return await this.commentsRepo.updateBanUserInfo(userId, isBanned);
   }
 
   async deleteComment(commentId: string) {
