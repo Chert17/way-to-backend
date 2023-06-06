@@ -16,9 +16,10 @@ import { UserId } from '../../infra/decorators/param/req.userId.decorator';
 import { JwtAuthGuard } from '../../infra/guards/auth/jwt.auth.guard';
 import { UserIdFromToken } from '../../infra/guards/auth/userId.from.token.guard';
 import { CanUserWorkWithComment } from '../../infra/guards/comments/can.user.work.with.comment.guard';
+import { DbType } from '../../types/db.interface';
 import { LikeStatusDto } from '../../types/like.info.interface';
 import { ReqUserIdType } from '../../types/req.user.interface';
-import { UserViewDto } from '../users/dto/view/user.view.dto';
+import { User } from '../users/schemas/users.schema';
 import { CommentsService } from './comments.service';
 import { updateCommentDto } from './dto/input/update.comment.dto';
 import { CommentsQueryRepo } from './repositories/comments.query.repo';
@@ -66,12 +67,12 @@ export class CommentsController {
   async updateCommentLikeInfo(
     @Param('commentId') commentId: string,
     @Body() dto: LikeStatusDto,
-    @ReqUser() user: UserViewDto,
+    @ReqUser() user: DbType<User>,
   ) {
     const result = await this.commentsService.updateLikeInfo({
       commentId,
       likeStatus: dto.likeStatus,
-      userId: user.id,
+      userId: user._id.toString(),
     });
 
     if (!result) throw new NotFoundException();

@@ -8,7 +8,7 @@ export class BanInfo {
   @Prop({ type: String, default: null })
   banReason: string | null;
 
-  @Prop({ type: Date, default: null })
+  @Prop({ type: Date, default: null, required: false })
   banDate: Date | null;
 }
 
