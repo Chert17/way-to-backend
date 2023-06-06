@@ -85,7 +85,7 @@ export class UsersService {
     const banReason = isBan ? dto.banReason : null;
 
     await this.usersRepo.updateIsBanUser({ ...dto, banDate, banReason }); // add ban user info to user
-
+    
     await this.commentsService.updateBanUserInfoForCommnetsAndLikes(
       dto.userId,
       dto.isBanned,
