@@ -92,6 +92,8 @@ export class PostsQueryRepo {
     let myStatus = LikeStatus.None;
 
     extendedLikesInfo.forEach(i => {
+      if (i.isBanned) return;
+
       if (userId && i.userId === userId) myStatus = i.status;
 
       if (i.status === LikeStatus.Like) likesCount += 1;
@@ -100,7 +102,7 @@ export class PostsQueryRepo {
     });
 
     const newestLikes = extendedLikesInfo
-      .filter(i => i.status === LikeStatus.Like)
+      .filter(i => i.status === LikeStatus.Like && !i.isBanned) //check is banned not user
       .sort(
         (a, b) =>
           new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime(),

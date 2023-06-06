@@ -8,6 +8,7 @@ import { generateHash } from '../../helpers/generate.hash';
 import { DbType } from '../../types/db.interface';
 import { CommentsService } from '../comments/comments.service';
 import { DevicesService } from '../devices/devices.service';
+import { PostsService } from '../posts/posts.service';
 import { BanUserServiceDto } from './dto/input/ban.user.dto';
 import { CreateUserDto } from './dto/input/create.user.dto';
 import { UsersRepo } from './repositories/users.repo';
@@ -19,6 +20,7 @@ export class UsersService {
     private usersRepo: UsersRepo,
     private devicesService: DevicesService,
     private commentsService: CommentsService,
+    private postsService: PostsService,
   ) {}
 
   async createUser(dto: CreateUserDto): Promise<DbType<User>> {
@@ -85,7 +87,12 @@ export class UsersService {
     const banReason = isBan ? dto.banReason : null;
 
     await this.usersRepo.updateIsBanUser({ ...dto, banDate, banReason }); // add ban user info to user
-    
+
+    await this.postsService.updateBanUserInfoForPostLike(
+      dto.userId,
+      dto.isBanned,
+    );
+
     await this.commentsService.updateBanUserInfoForCommnetsAndLikes(
       dto.userId,
       dto.isBanned,

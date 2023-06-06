@@ -11,6 +11,9 @@ export class PostLikeInfo {
   @Prop({ type: String, require: true })
   userId: string;
 
+  @Prop({ required: true, type: Boolean, default: false })
+  isBanned: boolean;
+
   @Prop({ type: String, enum: LikeStatus, require: true })
   status: LikeStatus;
 
