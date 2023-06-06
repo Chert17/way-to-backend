@@ -54,7 +54,9 @@ export class CommentsQueryRepo {
 
     if (!convertId) return false;
 
-    const comment = await this.commentModel.findById(convertId).lean();
+    const comment = await this.commentModel
+      .findById({ _id: convertId }, { 'commentatorInfo.isBanned': false })
+      .lean();
 
     return !comment ? false : this._commentMapping(comment, userId);
   }
@@ -70,6 +72,8 @@ export class CommentsQueryRepo {
     let myStatus = LikeStatus.None;
 
     likesInfo.forEach(i => {
+      if (i.isBanned) return;
+
       if (userId && i.userId === userId) myStatus = i.status;
 
       if (i.status === LikeStatus.Like) likesCount += 1;
