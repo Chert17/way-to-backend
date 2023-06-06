@@ -27,4 +27,8 @@ export class DevicesService {
   async deleteOneDevice(dto: DeleteDeviceDto) {
     return await this.devicesRepo.deleteOneDevice(dto);
   }
+
+  async deleteAllDevicesByBanUser(userId: string) {
+    return await this.devicesRepo.deleteAllDevicesByBanUser(userId);
+  }
 }
