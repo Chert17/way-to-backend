@@ -66,4 +66,10 @@ export class UserQueryPagination extends DefaultPagination {
   @Transform(({ value }) => value ?? '')
   @IsOptional()
   searchLoginTerm = '';
+
+  @Transform(({ value }) =>
+    value === 'banned' ? true : value === 'notBanned' ? false : null,
+  )
+  @IsOptional()
+  banStatus: null | true | false = null;
 }

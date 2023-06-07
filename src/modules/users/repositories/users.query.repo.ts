@@ -20,6 +20,7 @@ export class UsersQueryRepo {
     const {
       searchEmailTerm,
       searchLoginTerm,
+      banStatus,
       pageNumber,
       pageSize,
       sortBy,
@@ -40,7 +41,12 @@ export class UsersQueryRepo {
       });
     }
 
-    const filter = { $or: query.length ? query : [{}] };
+    const filter = {
+      $and: [
+        { $or: query.length ? query : [{}] },
+        banStatus ? { 'banInfo.isBanned': banStatus } : {},
+      ],
+    };
 
     const users = await this.userModel
       .find(filter)
