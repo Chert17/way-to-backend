@@ -9,8 +9,8 @@ import { BlogsQueryRepo } from '../repositories/blogs.query.repo';
 export class BlogsSAController {
   constructor(private blogsQueryRepo: BlogsQueryRepo) {}
 
-  @Get()
+  @Get('/blogs')
   async getAllBlogs(@Query() pagination: BlogQueryPagination) {
-    return await this.blogsQueryRepo.getAllBlogs(pagination);
+    return await this.blogsQueryRepo.getAllBlogsBySA(pagination);
   }
 }
