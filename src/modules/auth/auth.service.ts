@@ -64,6 +64,8 @@ export class AuthService {
 
     if (!user) return null;
 
+    if (user.banInfo.isBanned) return null;
+
     const pass = await compare(password, user.accountData.passwordHash);
 
     if (!pass) return null;

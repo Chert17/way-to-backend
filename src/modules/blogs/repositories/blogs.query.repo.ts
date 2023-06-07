@@ -18,10 +18,39 @@ export class BlogsQueryRepo {
   async getAllBlogs(
     pagination: BlogQueryPagination,
   ): Promise<WithPagination<BlogViewDto>> {
-    const { pageNumber, pageSize, searchNameTerm, sortBy, sortDirection } =
-      pagination;
+    const { searchNameTerm } = pagination;
 
     const filter = { name: { $regex: searchNameTerm, $options: 'i' } };
+
+    return await this._getBlogs(filter, pagination);
+  }
+
+  async getAllBlogsByUserId(
+    userId: MongoId,
+    pagination: BlogQueryPagination,
+  ): Promise<WithPagination<BlogViewDto>> {
+    const { searchNameTerm } = pagination;
+
+    const filter = { name: { $regex: searchNameTerm, $options: 'i' }, userId };
+
+    return await this._getBlogs(filter, pagination);
+  }
+
+  async getBlogById(blogId: string): Promise<BlogViewDto | false> {
+    const convertId = tryConvertToObjectId(blogId);
+
+    if (!convertId) return false;
+
+    const blog = await this.blogModel.findById(convertId).lean();
+
+    return !blog ? false : this._blogMapping(blog);
+  }
+
+  private async _getBlogs(
+    filter: Record<string, unknown>,
+    pagination: BlogQueryPagination,
+  ) {
+    const { pageNumber, pageSize, sortBy, sortDirection } = pagination;
 
     const blogs = await this.blogModel
       .find(filter)
@@ -41,45 +70,6 @@ export class BlogsQueryRepo {
       totalCount,
       items: blogs.map(this._blogMapping),
     };
-  }
-
-  async getAllBlogsByUserId(
-    userId: MongoId,
-    pagination: BlogQueryPagination,
-  ): Promise<WithPagination<BlogViewDto>> {
-    const { pageNumber, pageSize, searchNameTerm, sortBy, sortDirection } =
-      pagination;
-
-    const filter = { name: { $regex: searchNameTerm, $options: 'i' }, userId };
-
-    const blogs = await this.blogModel
-      .find({ name: { $regex: searchNameTerm, $options: 'i' }, userId: userId })
-      .sort({ [sortBy]: sortDirection })
-      .skip(pagination.skip())
-      .limit(pageSize)
-      .lean();
-
-    const totalCount = await this.blogModel.countDocuments(filter);
-
-    const pageCount = Math.ceil(totalCount / pageSize);
-
-    return {
-      pagesCount: pageCount === 0 ? 1 : pageCount,
-      pageSize: pageSize,
-      page: pageNumber,
-      totalCount,
-      items: blogs.map(this._blogMapping),
-    };
-  }
-
-  async getBlogById(blogId: string): Promise<BlogViewDto | false> {
-    const convertId = tryConvertToObjectId(blogId);
-
-    if (!convertId) return false;
-
-    const blog = await this.blogModel.findById(convertId).lean();
-
-    return !blog ? false : this._blogMapping(blog);
   }
 
   private _blogMapping(blog: DbType<Blog>): BlogViewDto {
