@@ -47,19 +47,14 @@ export class CommentsRepo {
   }
 
   async updateBanUserInfo(userId: string, isBanned: boolean) {
-    return await this.commentModel.updateMany(
-      {
-        $and: [
-          { 'commentatorInfo.userId': userId },
-          { likesInfo: { $elemMatch: { userId } } },
-        ],
-      },
-      {
-        $set: {
-          'commentatorInfo.isBanned': isBanned,
-          'likesInfo.$.isBanned': isBanned,
-        },
-      },
+    await this.commentModel.updateMany(
+      { 'commentatorInfo.userId': userId },
+      { $set: { 'commentatorInfo.isBanned': isBanned } },
+    );
+
+    await this.commentModel.updateOne(
+      { likesInfo: { $elemMatch: { userId } } },
+      { $set: { 'likesInfo.$.isBanned': isBanned } },
     );
   }
 

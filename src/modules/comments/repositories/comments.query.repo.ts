@@ -54,9 +54,9 @@ export class CommentsQueryRepo {
 
     if (!convertId) return false;
 
-    const comment = await this.commentModel
-      .findById({ _id: convertId }, { 'commentatorInfo.isBanned': false })
-      .lean();
+    const comment = await this.commentModel.findById({ _id: convertId }).lean();
+
+    if (comment.commentatorInfo.isBanned) return false;
 
     return !comment ? false : this._commentMapping(comment, userId);
   }
