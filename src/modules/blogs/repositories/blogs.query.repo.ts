@@ -111,6 +111,25 @@ export class BlogsQueryRepo {
   ): Promise<WithPagination<BlogViewDto>> {
     const { pageNumber, pageSize, sortBy, sortDirection } = pagination;
 
+    return await this._getBlogs(filter, pagination);
+  }
+
+  async getBlogById(blogId: string): Promise<BlogViewDto | false> {
+    const convertId = tryConvertToObjectId(blogId);
+
+    if (!convertId) return false;
+
+    const blog = await this.blogModel.findById(convertId).lean();
+
+    return !blog ? false : this._blogMapping(blog);
+  }
+
+  private async _getBlogs(
+    filter: Record<string, unknown>,
+    pagination: BlogQueryPagination,
+  ) {
+    const { pageNumber, pageSize, sortBy, sortDirection } = pagination;
+
     const blogs = await this.blogModel
       .find(filter)
       .sort({ [sortBy]: sortDirection })
