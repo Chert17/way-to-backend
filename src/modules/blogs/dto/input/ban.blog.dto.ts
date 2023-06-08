@@ -17,4 +17,5 @@ export class BanBlogServiceDto {
 export class BanBlogDbDto {
   readonly blogId: string;
   readonly isBanned: boolean;
+  readonly banDate: string;
 }

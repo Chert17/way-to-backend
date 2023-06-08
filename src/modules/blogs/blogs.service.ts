@@ -48,8 +48,14 @@ export class BlogsService {
     });
   }
 
-  async banBlog(dto: BanBlogServiceDto) {
-    return await this.blogsRepo.updateBanBlogStatus(dto);
+  async banBlogBySA(dto: BanBlogServiceDto) {
+    const isBan = dto.isBanned;
+
+    const banDate = isBan ? new Date().toISOString() : null;
+
+    await this.postsService.updateBlogBanInfo(dto.blogId, dto.isBanned);
+
+    return await this.blogsRepo.updateBanBlogStatus({ ...dto, banDate });
   }
 
   async deleteBlog(blogId: string): Promise<boolean> {

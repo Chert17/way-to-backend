@@ -35,6 +35,8 @@ export class PostsQueryRepo {
 
     const post = await this.postModel.findById(convertId).lean();
 
+    if (post.isBannedBlog) return false;
+
     return !post ? false : this._postMapping(post, userId);
   }
 

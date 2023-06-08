@@ -77,7 +77,7 @@ export class BlogsQueryRepo {
         },
         { $replaceRoot: { newRoot: '$doc' } },
         { $set: { id: '$_id' } },
-        { $project: { __v: 0, user: 0, userId: 0, _id: 0 } },
+        { $project: { __v: 0, user: 0, userId: 0, _id: 0, bannedUsers: 0 } },
       ])
       .sort({ [sortBy]: sortDirection })
       .skip(pagination.skip())
@@ -102,7 +102,7 @@ export class BlogsQueryRepo {
 
     const blog = await this.blogModel.findById(convertId).lean();
 
-    if (blog.isBanned) return false;
+    if (blog.banInfo.isBanned) return false;
 
     return !blog ? false : this._blogMapping(blog);
   }
@@ -114,7 +114,7 @@ export class BlogsQueryRepo {
     const { pageNumber, pageSize, sortBy, sortDirection } = pagination;
 
     const blogs = await this.blogModel
-      .find({ ...filter, isBanned: false })
+      .find({ ...filter, 'banInfo.isBanned': false })
       .sort({ [sortBy]: sortDirection })
       .skip(pagination.skip())
       .limit(pageSize)

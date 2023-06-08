@@ -33,7 +33,7 @@ export class BlogsSAController {
   @Put('/blogs/:blogId/ban')
   @HttpCode(HttpStatus.NO_CONTENT)
   async banBlog(@Param('blogId') blogId: string, @Body() dto: BanBlogDto) {
-    const result = await this.blogsService.banBlog({ ...dto, blogId });
+    const result = await this.blogsService.banBlogBySA({ ...dto, blogId });
 
     if (!result) throw new NotFoundException();
 

@@ -44,6 +44,9 @@ export class Post {
   @Prop({ type: String, require: true })
   blogName: string;
 
+  @Prop({ required: true, type: Boolean, default: false })
+  isBannedBlog: boolean;
+
   @Prop({ type: Date, require: true, default: Date.now })
   createdAt: Date;
 

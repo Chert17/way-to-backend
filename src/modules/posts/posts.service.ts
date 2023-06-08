@@ -35,6 +35,10 @@ export class PostsService {
     return await this.postsRepo.updateBanUserInfoForPostLike(userId, isBanned);
   }
 
+  async updateBlogBanInfo(blogId: string, isBannedBlog: boolean) {
+    return await this.postsRepo.updateBlogBanInfo(blogId, isBannedBlog);
+  }
+
   async deletePost(postId: string): Promise<boolean> {
     return await this.postsRepo.deletePost(postId);
   }

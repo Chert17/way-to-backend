@@ -21,6 +21,17 @@ class BannedUsers {
 
 export const BannedUsersSchema = SchemaFactory.createForClass(BannedUsers);
 
+@Schema({ _id: false, versionKey: false })
+class BanInfo {
+  @Prop({ required: true, type: Boolean, default: false })
+  isBanned: boolean;
+
+  @Prop({ type: String, default: null, required: false })
+  banDate: string | null;
+}
+
+export const BanInfoSchema = SchemaFactory.createForClass(BanInfo);
+
 export type BlogDocument = HydratedDocument<Blog>;
 
 @Schema()
@@ -43,8 +54,8 @@ export class Blog {
   @Prop({ type: Boolean, require: true, default: false })
   isMembership: boolean;
 
-  @Prop({ required: true, type: Boolean, default: false })
-  isBanned: boolean;
+  @Prop({ required: true, type: BanInfoSchema, default: {} })
+  banInfo: BanInfo;
 
   @Prop({ type: [BannedUsersSchema], default: [], required: true })
   bannedUsers: BannedUsers[];
