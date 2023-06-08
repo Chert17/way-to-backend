@@ -21,7 +21,7 @@ import { BlogQueryPagination } from '../../../utils/pagination/pagination';
 import { PostsQueryRepo } from '../../posts/repositories/posts.query.repo';
 import { User } from '../../users/schemas/users.schema';
 import { BlogsService } from '../blogs.service';
-import { BanUserByBloggerBlogDbDto } from '../dto/input/ban.user.by.blogger.blog.dto';
+import { BanUserByBloggerBlogDto } from '../dto/input/ban.user.by.blogger.blog.dto';
 import { CreateBlogDto } from '../dto/input/create.blog.dto';
 import { CreatePostByBlogDto } from '../dto/input/create.post.by.blog.dto';
 import { UpdateBlogDto } from '../dto/input/update.blog.dto';
@@ -99,7 +99,7 @@ export class BlogsBloggerController {
   async banUserByBlog(
     @ReqUser() user: DbType<User>,
     @Param('userId') userId: string,
-    @Body() dto: BanUserByBloggerBlogDbDto,
+    @Body() dto: BanUserByBloggerBlogDto,
   ) {
     return await this.blogsService.banUserByBloggerBlog({
       bloggerId: user._id.toString(),

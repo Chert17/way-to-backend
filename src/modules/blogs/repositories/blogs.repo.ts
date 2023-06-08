@@ -38,7 +38,7 @@ export class BlogsRepo {
   }
 
   async updateBanBlogStatus(dto: BanBlogDbDto): Promise<boolean> {
-    const { blogId, isBanned } = dto;
+    const { blogId, ...banInfo } = dto;
 
     const convertId = tryConvertToObjectId(blogId);
 
@@ -46,7 +46,7 @@ export class BlogsRepo {
 
     const result = await this.blogModel.updateOne(
       { _id: convertId },
-      { $set: { isBanned } },
+      { $set: { banInfo } },
     );
 
     return result.matchedCount === 1;
@@ -62,8 +62,7 @@ export class BlogsRepo {
     if (!convertId) return false;
 
     const blog = await this.blogModel.findOne({
-      _id: convertId,
-      userId: bloggerId,
+      $and: [{ _id: convertId }, { userId: bloggerId }],
     });
 
     const existBanUser = blog.bannedUsers.find(i => i.banUserId === userId);

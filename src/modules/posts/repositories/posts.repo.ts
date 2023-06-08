@@ -63,6 +63,13 @@ export class PostsRepo {
     );
   }
 
+  async updateBlogBanInfo(blogId: string, isBannedBlog: boolean) {
+    return await this.postModel.updateMany(
+      { blogId },
+      { $set: { isBannedBlog } },
+    );
+  }
+
   async deletePost(postId: string): Promise<boolean> {
     const convertId = tryConvertToObjectId(postId);
 
