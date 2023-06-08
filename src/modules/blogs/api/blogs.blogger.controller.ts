@@ -21,13 +21,14 @@ import { BlogQueryPagination } from '../../../utils/pagination/pagination';
 import { PostsQueryRepo } from '../../posts/repositories/posts.query.repo';
 import { User } from '../../users/schemas/users.schema';
 import { BlogsService } from '../blogs.service';
+import { BanUserByBloggerBlogDbDto } from '../dto/input/ban.user.by.blogger.blog.dto';
 import { CreateBlogDto } from '../dto/input/create.blog.dto';
 import { CreatePostByBlogDto } from '../dto/input/create.post.by.blog.dto';
 import { UpdateBlogDto } from '../dto/input/update.blog.dto';
 import { UpdatePostByBlogDto } from '../dto/input/update.post.by.blog';
 import { BlogsQueryRepo } from '../repositories/blogs.query.repo';
 
-@Controller('blogger/blogs')
+@Controller('blogger')
 @UseGuards(JwtAuthGuard)
 export class BlogsBloggerController {
   constructor(
@@ -36,7 +37,7 @@ export class BlogsBloggerController {
     private postsQueryRepo: PostsQueryRepo,
   ) {}
 
-  @Get()
+  @Get('/blogs')
   async getAllBlogsByBlogger(
     @ReqUser() user: DbType<User>,
     @Query() pagination: BlogQueryPagination,
@@ -44,7 +45,7 @@ export class BlogsBloggerController {
     return await this.blogsQueryRepo.getAllBlogsByUserId(user._id, pagination);
   }
 
-  @Post()
+  @Post('/blogs')
   async createBlog(@ReqUser() user: DbType<User>, @Body() dto: CreateBlogDto) {
     const blogId = await this.blogsService.createBlog({
       userId: user._id.toString(),
@@ -54,7 +55,7 @@ export class BlogsBloggerController {
     return await this.blogsQueryRepo.getBlogById(blogId.toString());
   }
 
-  @Post('/:blogId/posts')
+  @Post('/blogs/:blogId/posts')
   @UseGuards(CanUserWorkWithBlog)
   async createPostByBlog(
     @ReqUser() user: DbType<User>,
@@ -69,14 +70,17 @@ export class BlogsBloggerController {
     );
   }
 
-  @Put('/:id')
+  @Put('/blogs/:blogId')
   @UseGuards(CanUserWorkWithBlog)
   @HttpCode(HttpStatus.NO_CONTENT)
-  async updateBlog(@Param() blogId: string, @Body() dto: UpdateBlogDto) {
+  async updateBlog(
+    @Param('blogId') blogId: string,
+    @Body() dto: UpdateBlogDto,
+  ) {
     return await this.blogsService.updateBlog({ ...dto, blogId });
   }
 
-  @Put(':blogId/posts/:postId')
+  @Put('/blogs/:blogId/posts/:postId')
   @UseGuards(CanUserWorkWithBlog)
   @HttpCode(HttpStatus.NO_CONTENT)
   async updatePostByBlog(
@@ -91,6 +95,19 @@ export class BlogsBloggerController {
     return await this.blogsService.updatePostByBlog({ ...dto, blogId, postId });
   }
 
+  @Put('/users/:userId/ban')
+  async banUserByBlog(
+    @ReqUser() user: DbType<User>,
+    @Param('userId') userId: string,
+    @Body() dto: BanUserByBloggerBlogDbDto,
+  ) {
+    return await this.blogsService.banUserByBloggerBlog({
+      bloggerId: user._id.toString(),
+      userId,
+      ...dto,
+    });
+  }
+
   @Delete('/:id')
   @UseGuards(CanUserWorkWithBlog)
   @HttpCode(HttpStatus.NO_CONTENT)
@@ -98,7 +115,7 @@ export class BlogsBloggerController {
     return await this.blogsService.deleteBlog(blogId);
   }
 
-  @Delete(':blogId/posts/:postId')
+  @Delete('/blogs/:blogId/posts/:postId')
   @UseGuards(CanUserWorkWithBlog)
   @HttpCode(HttpStatus.NO_CONTENT)
   async deletePostByBlog(@Param('postId') postId: string) {

@@ -3,6 +3,7 @@ import { Injectable } from '@nestjs/common';
 import { MongoId } from '../../types/mongo._id.interface';
 import { PostsService } from '../posts/posts.service';
 import { BanBlogServiceDto } from './dto/input/ban.blog.dto';
+import { BanUserByBloggerBlogServiceDto } from './dto/input/ban.user.by.blogger.blog.dto';
 import { CreateBlogServiceDto } from './dto/input/create.blog.dto';
 import { CreatePostByBlogServiceDto } from './dto/input/create.post.by.blog.dto';
 import { UpdateBlogServiceDto } from './dto/input/update.blog.dto';
@@ -32,6 +33,19 @@ export class BlogsService {
 
   async updatePostByBlog(dto: UpdatePostByBlogServiceDto) {
     return await this.postsService.updatePost(dto);
+  }
+
+  async banUserByBloggerBlog(dto: BanUserByBloggerBlogServiceDto) {
+    const isBan = dto.isBanned;
+
+    const banDate = isBan ? new Date() : null;
+    const banReason = isBan ? dto.banReason : null;
+
+    return await this.blogsRepo.updateBanUserByBloggerBlogStatus({
+      ...dto,
+      banDate,
+      banReason,
+    });
   }
 
   async banBlog(dto: BanBlogServiceDto) {
