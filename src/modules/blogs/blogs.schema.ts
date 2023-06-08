@@ -4,6 +4,23 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 
 import { CreateBlogDto } from './dto/input/create.blog.dto';
 
+@Schema({ _id: false, versionKey: false })
+class BannedUsers {
+  @Prop({ required: true, type: String })
+  banUserId: string;
+
+  @Prop({ required: true, type: Boolean, default: false })
+  isBanned: boolean;
+
+  @Prop({ type: String, default: null })
+  banReason: string | null;
+
+  @Prop({ type: Date, default: null, required: false })
+  banDate: Date | null;
+}
+
+export const BannedUsersSchema = SchemaFactory.createForClass(BannedUsers);
+
 export type BlogDocument = HydratedDocument<Blog>;
 
 @Schema()
@@ -28,6 +45,9 @@ export class Blog {
 
   @Prop({ required: true, type: Boolean, default: false })
   isBanned: boolean;
+
+  @Prop({ type: [BannedUsersSchema], default: [], required: true })
+  bannedUsers: BannedUsers[];
 
   // можно создавать статик методы чтоб сразу выдавать на клиент готовый обьект без дополнительных запросов в базу
   static create(dto: CreateBlogDto) {

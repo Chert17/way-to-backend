@@ -8,6 +8,7 @@ import { MongoId } from '../../../types/mongo._id.interface';
 import { tryConvertToObjectId } from '../../../utils/converter.object.id';
 import { Blog } from '../blogs.schema';
 import { BanBlogDbDto } from '../dto/input/ban.blog.dto';
+import { BanUserByBloggerBlogDbDto } from '../dto/input/ban.user.by.blogger.blog.dto';
 import { CreateBlogDbDto } from '../dto/input/create.blog.dto';
 import { UpdateBlogDbDto } from '../dto/input/update.blog.dto';
 
@@ -49,6 +50,34 @@ export class BlogsRepo {
     );
 
     return result.matchedCount === 1;
+  }
+
+  async updateBanUserByBloggerBlogStatus(
+    dto: BanUserByBloggerBlogDbDto,
+  ): Promise<boolean> {
+    const { bloggerId, userId, blogId, ...banInfo } = dto;
+
+    const convertId = tryConvertToObjectId(blogId);
+
+    if (!convertId) return false;
+
+    const blog = await this.blogModel.findOne({
+      _id: convertId,
+      userId: bloggerId,
+    });
+
+    const existBanUser = blog.bannedUsers.find(i => i.banUserId === userId);
+
+    if (!existBanUser) blog.bannedUsers.push({ banUserId: userId, ...banInfo });
+    else {
+      existBanUser.isBanned = banInfo.isBanned;
+      existBanUser.banDate = banInfo.banDate;
+      existBanUser.banReason = banInfo.banReason;
+    }
+
+    blog.save();
+
+    return true;
   }
 
   async deleteBlog(blogId: string): Promise<boolean> {
