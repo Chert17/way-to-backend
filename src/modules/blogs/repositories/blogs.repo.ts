@@ -7,6 +7,7 @@ import { DbType } from '../../../types/db.interface';
 import { MongoId } from '../../../types/mongo._id.interface';
 import { tryConvertToObjectId } from '../../../utils/converter.object.id';
 import { Blog } from '../blogs.schema';
+import { BanBlogDbDto } from '../dto/input/ban.blog.dto';
 import { CreateBlogDbDto } from '../dto/input/create.blog.dto';
 import { UpdateBlogDbDto } from '../dto/input/update.blog.dto';
 
@@ -33,6 +34,21 @@ export class BlogsRepo {
     );
 
     return blog.matchedCount === 1;
+  }
+
+  async updateBanBlogStatus(dto: BanBlogDbDto): Promise<boolean> {
+    const { blogId, isBanned } = dto;
+
+    const convertId = tryConvertToObjectId(blogId);
+
+    if (!convertId) return false;
+
+    const result = await this.blogModel.updateOne(
+      { _id: convertId },
+      { $set: { isBanned } },
+    );
+
+    return result.matchedCount === 1;
   }
 
   async deleteBlog(blogId: string): Promise<boolean> {
