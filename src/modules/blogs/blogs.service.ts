@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 
 import { MongoId } from '../../types/mongo._id.interface';
 import { PostsService } from '../posts/posts.service';
+import { BanBlogServiceDto } from './dto/input/ban.blog.dto';
 import { CreateBlogServiceDto } from './dto/input/create.blog.dto';
 import { CreatePostByBlogServiceDto } from './dto/input/create.post.by.blog.dto';
 import { UpdateBlogServiceDto } from './dto/input/update.blog.dto';
@@ -31,6 +32,10 @@ export class BlogsService {
 
   async updatePostByBlog(dto: UpdatePostByBlogServiceDto) {
     return await this.postsService.updatePost(dto);
+  }
+
+  async banBlog(dto: BanBlogServiceDto) {
+    return await this.blogsRepo.updateBanBlogStatus(dto);
   }
 
   async deleteBlog(blogId: string): Promise<boolean> {

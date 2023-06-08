@@ -102,6 +102,8 @@ export class BlogsQueryRepo {
 
     const blog = await this.blogModel.findById(convertId).lean();
 
+    if (blog.isBanned) return false;
+
     return !blog ? false : this._blogMapping(blog);
   }
 
@@ -112,7 +114,7 @@ export class BlogsQueryRepo {
     const { pageNumber, pageSize, sortBy, sortDirection } = pagination;
 
     const blogs = await this.blogModel
-      .find(filter)
+      .find({ ...filter, isBanned: false })
       .sort({ [sortBy]: sortDirection })
       .skip(pagination.skip())
       .limit(pageSize)

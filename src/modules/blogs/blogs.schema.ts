@@ -26,6 +26,9 @@ export class Blog {
   @Prop({ type: Boolean, require: true, default: false })
   isMembership: boolean;
 
+  @Prop({ required: true, type: Boolean, default: false })
+  isBanned: boolean;
+
   // можно создавать статик методы чтоб сразу выдавать на клиент готовый обьект без дополнительных запросов в базу
   static create(dto: CreateBlogDto) {
     const newBlog = new Blog();
