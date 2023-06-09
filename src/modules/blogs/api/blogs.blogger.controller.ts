@@ -19,7 +19,10 @@ import { ReqUser } from '../../../infra/decorators/param/req.user.decorator';
 import { JwtAuthGuard } from '../../../infra/guards/auth/jwt.auth.guard';
 import { CanUserWorkWithBlog } from '../../../infra/guards/blogs/can.user.work.with.blog.guard';
 import { DbType } from '../../../types/db.interface';
-import { BlogQueryPagination } from '../../../utils/pagination/pagination';
+import {
+  BlogQueryPagination,
+  DefaultPagination,
+} from '../../../utils/pagination/pagination';
 import { PostsQueryRepo } from '../../posts/repositories/posts.query.repo';
 import { UsersRepo } from '../../users/repositories/users.repo';
 import { User } from '../../users/schemas/users.schema';
@@ -72,6 +75,17 @@ export class BlogsBloggerController {
     return await this.blogsQueryRepo.getAllBanUsersByBloggerBlog(
       user._id.toString(),
       blogId,
+      pagination,
+    );
+  }
+
+  @Get('/blogs/comments')
+  async getAllCommentsByBloggerBlog(
+    @ReqUser() user: DbType<User>,
+    pagination: DefaultPagination,
+  ) {
+    return await this.blogsQueryRepo.getAllCommentsByBloggerBlog(
+      user._id,
       pagination,
     );
   }
