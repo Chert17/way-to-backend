@@ -193,9 +193,9 @@ export class BlogsQueryRepo {
         {
           $project: {
             _id: 0,
-            totalCount: { $sum: 1 },
             id: { $toString: '$comment._id' },
             content: '$comment.content',
+            likesInfo: { dislikesCount: 0, likesCount: 0, myStatus: 'None' },
             commentatorInfo: {
               userId: '$comment.commentatorInfo.userId',
               userLogin: '$comment.commentatorInfo.userLogin',
@@ -244,14 +244,7 @@ export class BlogsQueryRepo {
       pageSize: pageSize,
       page: pageNumber,
       totalCount: totalCount[0].totalCount,
-      items: result.map(item => ({
-        id: item.id,
-        content: item.content,
-        commentatorInfo: item.commentatorInfo,
-        likesInfo: { dislikesCount: 0, likesCount: 0, myStatus: 'None' },
-        createdAt: item.createdAt,
-        postInfo: item.postInfo,
-      })),
+      items: result,
     };
   }
 
