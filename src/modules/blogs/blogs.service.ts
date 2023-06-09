@@ -18,7 +18,10 @@ export class BlogsService {
   ) {}
 
   async createBlog(dto: CreateBlogServiceDto): Promise<MongoId> {
-    return await this.blogsRepo.createBlog(dto);
+    return await this.blogsRepo.createBlog({
+      ...dto,
+      banInfo: { isBanned: false, banDate: null },
+    });
   }
 
   async createPostByBlog(dto: CreatePostByBlogServiceDto): Promise<MongoId> {

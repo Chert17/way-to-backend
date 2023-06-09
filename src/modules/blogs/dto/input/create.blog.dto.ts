@@ -34,4 +34,5 @@ export class CreateBlogDbDto {
   readonly name: string;
   readonly description: string;
   readonly websiteUrl: string;
+  readonly banInfo: { isBanned: boolean; banDate: null };
 }

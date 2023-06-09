@@ -13,4 +13,5 @@ async function bootstrap() {
     console.log(`App started at: ${SETTINGS.PORT} port`);
   });
 }
+
 bootstrap();

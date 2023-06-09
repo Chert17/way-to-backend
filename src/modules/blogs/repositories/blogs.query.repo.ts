@@ -95,6 +95,72 @@ export class BlogsQueryRepo {
     };
   }
 
+  async getAllBanUsersByBloggerBlog(
+    userId: string,
+    blogId: string,
+    pagination: BlogQueryPagination,
+  ) {
+    const { pageNumber, pageSize, searchNameTerm, sortBy, sortDirection } =
+      pagination;
+
+    const convertId = tryConvertToObjectId(blogId);
+
+    if (!convertId) return false;
+
+    const filter = {
+      _id: convertId,
+      name: { $regex: searchNameTerm, $options: 'i' },
+    };
+
+    const result = await this.blogModel
+      .aggregate([
+        { $match: filter },
+        { $unwind: '$bannedUsers' },
+        {
+          $lookup: {
+            from: 'users',
+            let: { id: { $toObjectId: '$bannedUsers.banUserId' } },
+            pipeline: [
+              { $match: { $expr: { $eq: ['$_id', '$$id'] } } },
+              { $project: { login: '$accountData.login' } },
+            ],
+            as: 'user',
+          },
+        },
+        { $unwind: '$user' },
+        {
+          $project: {
+            _id: 0,
+            id: { $toString: '$bannedUsers.banUserId' },
+            login: '$user.login',
+            banInfo: {
+              isBanned: '$bannedUsers.isBanned',
+              banDate: '$bannedUsers.banDate',
+              banReason: '$bannedUsers.banReason',
+            },
+          },
+        },
+      ])
+      .sort({ [sortBy]: sortDirection })
+      .skip(pagination.skip())
+      .limit(pageSize);
+
+    const blog = await this.blogModel.findOne(filter);
+
+    if (!blog) return false;
+
+    const totalCount = blog.bannedUsers.length;
+    const pageCount = Math.ceil(totalCount / pageSize);
+
+    return {
+      pagesCount: pageCount === 0 ? 1 : pageCount,
+      pageSize: pageSize,
+      page: pageNumber,
+      totalCount: totalCount,
+      items: result,
+    };
+  }
+
   async getBlogById(blogId: string): Promise<BlogViewDto | false> {
     const convertId = tryConvertToObjectId(blogId);
 
@@ -102,9 +168,11 @@ export class BlogsQueryRepo {
 
     const blog = await this.blogModel.findById(convertId).lean();
 
+    if (!blog) return false;
+
     if (blog.banInfo.isBanned) return false;
 
-    return !blog ? false : this._blogMapping(blog);
+    return this._blogMapping(blog);
   }
 
   private async _getBlogs(

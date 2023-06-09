@@ -15,4 +15,5 @@ export class BlogViewBySADto {
   readonly createdAt: string;
   readonly isMembership: boolean;
   readonly blogOwnerInfo: { userId: string; userLogin: string };
+  readonly banInfo: { isBanned: boolean; banDate: string | null };
 }
