@@ -7,7 +7,10 @@ import { DbType } from '../../../types/db.interface';
 import { MongoId } from '../../../types/mongo._id.interface';
 import { WithPagination } from '../../../types/pagination.interface';
 import { tryConvertToObjectId } from '../../../utils/converter.object.id';
-import { BlogQueryPagination } from '../../../utils/pagination/pagination';
+import {
+  BlogQueryPagination,
+  DefaultPagination,
+} from '../../../utils/pagination/pagination';
 import { Blog } from '../blogs.schema';
 import { BlogViewBySADto, BlogViewDto } from '../dto/view/blog.view.dto';
 
@@ -161,6 +164,73 @@ export class BlogsQueryRepo {
     };
   }
 
+  async getAllCommentsByBloggerBlog(
+    userId: MongoId,
+    pagination: DefaultPagination,
+  ) {
+    const { pageNumber, pageSize, sortBy, sortDirection } = pagination;
+
+    const result = await this.blogModel
+      .aggregate([
+        { $match: { userId } },
+        {
+          $lookup: {
+            from: 'posts',
+            let: { id: { $toString: '$_id' } },
+            pipeline: [{ $match: { $expr: { $eq: ['$blogId', '$$id'] } } }],
+            as: 'post',
+          },
+        },
+        { $unwind: '$post' },
+        {
+          $lookup: {
+            from: 'comments',
+            let: { postId: { $toString: '$post._id' } },
+            pipeline: [{ $match: { $expr: { $eq: ['$postId', '$$postId'] } } }],
+            as: 'comment',
+          },
+        },
+        { $unwind: '$comment' },
+        {
+          $project: {
+            id: { $toString: '$commnet._id' },
+            content: '$comment.content',
+            commentatorInfo: {
+              userId: '$comment.commentatorInfo.userId',
+              userLogin: '$comment.commentatorInfo.userLogin',
+            },
+            createdAt: '$comment.createdAt',
+            postInfo: {
+              id: { $toString: '$post._id' },
+              title: '$post.title',
+              blogId: '$post.blogId',
+              blogName: '$post.blogName',
+            },
+            commentCount: { $size: '$comment' },
+          },
+        },
+      ])
+      .sort({ [sortBy]: sortDirection })
+      .skip(pagination.skip())
+      .limit(pageSize);
+
+    const pageCount = Math.ceil(result[0].commentCount / pageSize);
+
+    return {
+      pagesCount: pageCount === 0 ? 1 : pageCount,
+      pageSize: pageSize,
+      page: pageNumber,
+      totalCount: result[0].commentCount,
+      items: result.map(item => ({
+        id: item.id,
+        content: item.content,
+        commentatorInfo: item.commentatorInfo,
+        createdAt: item.createdAt,
+        postInfo: item.postInfo,
+      })),
+    };
+  }
+
   async getBlogById(blogId: string): Promise<BlogViewDto | false> {
     const convertId = tryConvertToObjectId(blogId);
 
@@ -169,7 +239,7 @@ export class BlogsQueryRepo {
     const blog = await this.blogModel.findById(convertId).lean();
 
     if (!blog) return false;
-    
+
     if (blog.banInfo.isBanned) return false;
 
     return this._blogMapping(blog);
