@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  ForbiddenException,
   Get,
   HttpCode,
   HttpStatus,
@@ -23,6 +24,7 @@ import {
   CommentQueryPagination,
   PostQueryPagination,
 } from '../../utils/pagination/pagination';
+import { BlogsRepo } from '../blogs/repositories/blogs.repo';
 import { createCommentDto } from '../comments/dto/input/create.comment.dto';
 import { CommentsQueryRepo } from '../comments/repositories/comments.query.repo';
 import { User } from '../users/schemas/users.schema';
@@ -35,6 +37,7 @@ export class PostsController {
     private postsQueryRepo: PostsQueryRepo,
     private postsService: PostsService,
     private commentsQueryRepo: CommentsQueryRepo,
+    private blogsRepo: BlogsRepo,
   ) {}
 
   @Get()
@@ -82,6 +85,10 @@ export class PostsController {
     @ReqUser() user: DbType<User>,
   ) {
     const userId = user._id.toString();
+
+    const isBanUser = await this.blogsRepo.isBanUserByBlog(userId, postId);
+
+    if (isBanUser) throw new ForbiddenException();
 
     const post = await this.postsQueryRepo.getPostById(postId, null);
 

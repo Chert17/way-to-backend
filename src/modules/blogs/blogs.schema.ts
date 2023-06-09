@@ -73,3 +73,23 @@ export class Blog {
 }
 
 export const BlogSchema = SchemaFactory.createForClass(Blog);
+
+// db = {
+//   blogs: [
+//     {
+//       id: 123,
+//       userId: 1,
+//       bannedUsers: [],
+//     },
+//     {
+//       id: 456,
+//       userId: 1,
+//       bannedUsers: [{ banUserId: 2 }],
+//     },
+//   ],
+
+//   users: [
+//     { _id: 1, accauntData: { login: 'qwe' } },
+//     { _id: 2, accauntData: { login: 'asd' } },
+//   ],
+// };

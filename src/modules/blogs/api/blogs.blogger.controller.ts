@@ -1,7 +1,9 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Delete,
+  ForbiddenException,
   Get,
   HttpCode,
   HttpStatus,
@@ -19,6 +21,7 @@ import { CanUserWorkWithBlog } from '../../../infra/guards/blogs/can.user.work.w
 import { DbType } from '../../../types/db.interface';
 import { BlogQueryPagination } from '../../../utils/pagination/pagination';
 import { PostsQueryRepo } from '../../posts/repositories/posts.query.repo';
+import { UsersRepo } from '../../users/repositories/users.repo';
 import { User } from '../../users/schemas/users.schema';
 import { BlogsService } from '../blogs.service';
 import { BanUserByBloggerBlogDto } from '../dto/input/ban.user.by.blogger.blog.dto';
@@ -27,6 +30,7 @@ import { CreatePostByBlogDto } from '../dto/input/create.post.by.blog.dto';
 import { UpdateBlogDto } from '../dto/input/update.blog.dto';
 import { UpdatePostByBlogDto } from '../dto/input/update.post.by.blog';
 import { BlogsQueryRepo } from '../repositories/blogs.query.repo';
+import { BlogsRepo } from '../repositories/blogs.repo';
 
 @Controller('blogger')
 @UseGuards(JwtAuthGuard)
@@ -35,6 +39,8 @@ export class BlogsBloggerController {
     private blogsQueryRepo: BlogsQueryRepo,
     private blogsService: BlogsService,
     private postsQueryRepo: PostsQueryRepo,
+    private usersRepo: UsersRepo,
+    private blogsRepo: BlogsRepo,
   ) {}
 
   @Get('/blogs')
@@ -43,6 +49,31 @@ export class BlogsBloggerController {
     @Query() pagination: BlogQueryPagination,
   ) {
     return await this.blogsQueryRepo.getAllBlogsByUserId(user._id, pagination);
+  }
+
+  @Get('/users/blog/:blogId')
+  async getAllBanUsersByBloggerBlog(
+    @ReqUser() user: DbType<User>,
+    @Query() pagination: BlogQueryPagination,
+    @Param('blogId') blogId: string,
+  ) {
+    const blog = await this.blogsRepo.checkBlogById(blogId);
+
+    if (!blog) throw new NotFoundException();
+
+    const result = await this.usersRepo.checkAndGetUserById(
+      user._id.toHexString(),
+    );
+
+    if (!result) throw new NotFoundException();
+
+    if (blog.userId !== user._id.toHexString()) throw new ForbiddenException();
+
+    return await this.blogsQueryRepo.getAllBanUsersByBloggerBlog(
+      user._id.toString(),
+      blogId,
+      pagination,
+    );
   }
 
   @Post('/blogs')
@@ -96,16 +127,28 @@ export class BlogsBloggerController {
   }
 
   @Put('/users/:userId/ban')
+  @HttpCode(HttpStatus.NO_CONTENT)
   async banUserByBlog(
     @ReqUser() user: DbType<User>,
     @Param('userId') userId: string,
     @Body() dto: BanUserByBloggerBlogDto,
   ) {
-    return await this.blogsService.banUserByBloggerBlog({
-      bloggerId: user._id.toString(),
+    const result = await this.usersRepo.checkAndGetUserById(userId);
+
+    if (!result) throw new NotFoundException();
+
+    const blog = await this.blogsRepo.checkBlogById(dto.blogId);
+
+    if (!blog) throw new BadRequestException();
+
+    if (blog.userId !== user._id.toHexString()) throw new ForbiddenException();
+
+    await this.blogsService.banUserByBloggerBlog({
       userId,
       ...dto,
     });
+
+    return;
   }
 
   @Delete('/:id')
