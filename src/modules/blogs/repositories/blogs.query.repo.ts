@@ -169,7 +169,7 @@ export class BlogsQueryRepo {
     const blog = await this.blogModel.findById(convertId).lean();
 
     if (!blog) return false;
-
+    
     if (blog.banInfo.isBanned) return false;
 
     return this._blogMapping(blog);
