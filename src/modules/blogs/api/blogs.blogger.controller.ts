@@ -21,7 +21,7 @@ import { CanUserWorkWithBlog } from '../../../infra/guards/blogs/can.user.work.w
 import { DbType } from '../../../types/db.interface';
 import {
   BlogQueryPagination,
-  DefaultPagination,
+  CommentQueryPagination,
 } from '../../../utils/pagination/pagination';
 import { PostsQueryRepo } from '../../posts/repositories/posts.query.repo';
 import { UsersRepo } from '../../users/repositories/users.repo';
@@ -73,7 +73,6 @@ export class BlogsBloggerController {
     if (blog.userId !== user._id.toHexString()) throw new ForbiddenException();
 
     return await this.blogsQueryRepo.getAllBanUsersByBloggerBlog(
-      user._id.toString(),
       blogId,
       pagination,
     );
@@ -82,7 +81,7 @@ export class BlogsBloggerController {
   @Get('/blogs/comments')
   async getAllCommentsByBloggerBlog(
     @ReqUser() user: DbType<User>,
-    pagination: DefaultPagination,
+    @Query() pagination: CommentQueryPagination,
   ) {
     return await this.blogsQueryRepo.getAllCommentsByBloggerBlog(
       user._id,

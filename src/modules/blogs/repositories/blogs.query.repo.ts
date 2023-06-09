@@ -9,7 +9,7 @@ import { WithPagination } from '../../../types/pagination.interface';
 import { tryConvertToObjectId } from '../../../utils/converter.object.id';
 import {
   BlogQueryPagination,
-  DefaultPagination,
+  CommentQueryPagination,
 } from '../../../utils/pagination/pagination';
 import { Blog } from '../blogs.schema';
 import { BlogViewBySADto, BlogViewDto } from '../dto/view/blog.view.dto';
@@ -99,7 +99,6 @@ export class BlogsQueryRepo {
   }
 
   async getAllBanUsersByBloggerBlog(
-    userId: string,
     blogId: string,
     pagination: BlogQueryPagination,
   ) {
@@ -166,13 +165,13 @@ export class BlogsQueryRepo {
 
   async getAllCommentsByBloggerBlog(
     userId: MongoId,
-    pagination: DefaultPagination,
+    pagination: CommentQueryPagination,
   ) {
     const { pageNumber, pageSize, sortBy, sortDirection } = pagination;
 
     const result = await this.blogModel
       .aggregate([
-        { $match: { userId } },
+        { $match: { userId: userId.toString() } },
         {
           $lookup: {
             from: 'posts',
@@ -185,15 +184,17 @@ export class BlogsQueryRepo {
         {
           $lookup: {
             from: 'comments',
-            let: { postId: { $toString: '$post._id' } },
-            pipeline: [{ $match: { $expr: { $eq: ['$postId', '$$postId'] } } }],
+            let: { id: { $toString: '$post._id' } },
+            pipeline: [{ $match: { $expr: { $eq: ['$postId', '$$id'] } } }],
             as: 'comment',
           },
         },
         { $unwind: '$comment' },
         {
           $project: {
-            id: { $toString: '$commnet._id' },
+            _id: 0,
+            totalCount: { $sum: 1 },
+            id: { $toString: '$comment._id' },
             content: '$comment.content',
             commentatorInfo: {
               userId: '$comment.commentatorInfo.userId',
@@ -206,7 +207,6 @@ export class BlogsQueryRepo {
               blogId: '$post.blogId',
               blogName: '$post.blogName',
             },
-            commentCount: { $size: '$comment' },
           },
         },
       ])
@@ -214,17 +214,41 @@ export class BlogsQueryRepo {
       .skip(pagination.skip())
       .limit(pageSize);
 
-    const pageCount = Math.ceil(result[0].commentCount / pageSize);
+    const totalCount = await this.blogModel.aggregate([
+      { $match: { userId: userId.toString() } },
+      {
+        $lookup: {
+          from: 'posts',
+          let: { id: { $toString: '$_id' } },
+          pipeline: [{ $match: { $expr: { $eq: ['$blogId', '$$id'] } } }],
+          as: 'post',
+        },
+      },
+      { $unwind: '$post' },
+      {
+        $lookup: {
+          from: 'comments',
+          let: { id: { $toString: '$post._id' } },
+          pipeline: [{ $match: { $expr: { $eq: ['$postId', '$$id'] } } }],
+          as: 'comment',
+        },
+      },
+      { $unwind: '$comment' },
+      { $count: 'totalCount' },
+    ]);
+
+    const pageCount = Math.ceil(totalCount[0].totalCount / pageSize);
 
     return {
       pagesCount: pageCount === 0 ? 1 : pageCount,
       pageSize: pageSize,
       page: pageNumber,
-      totalCount: result[0].commentCount,
+      totalCount: totalCount[0].totalCount,
       items: result.map(item => ({
         id: item.id,
         content: item.content,
         commentatorInfo: item.commentatorInfo,
+        likesInfo: { dislikesCount: 0, likesCount: 0, myStatus: 'None' },
         createdAt: item.createdAt,
         postInfo: item.postInfo,
       })),
