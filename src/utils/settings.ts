@@ -1,6 +1,11 @@
 export enum SETTINGS {
   PORT = '3000',
 
+  PG_PORT = 'PG_PORT',
+  PG_DB_NAME = 'PG_DB_NAME',
+  PG_USER_NAME = 'PG_USER_NAME',
+  PG_PASS = 'PG_PASS',
+
   MONGO_URL = 'MONGO_URL',
   DB_NAME = 'DB_NAME',
 
