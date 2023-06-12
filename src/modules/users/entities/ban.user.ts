@@ -16,6 +16,6 @@ export class BanUser {
   @Column({ type: 'date' })
   expr_date: Date;
 
-  @OneToOne(() => User)
+  @OneToOne(() => User, user => user.banUser)
   user: User;
 }

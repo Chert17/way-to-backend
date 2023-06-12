@@ -1,11 +1,22 @@
-import { Repository } from 'typeorm';
+import { DataSource } from 'typeorm';
 
 import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
+import { InjectDataSource } from '@nestjs/typeorm';
 
-import { User } from '../entities/user.entity';
+import { CreateUserDbDto } from '../dto/create-user.dto';
 
 @Injectable()
 export class UsersRepo {
-  constructor(@InjectRepository(User) private userRepo: Repository<User>) {}
+  constructor(@InjectDataSource() private dataSource: DataSource) {}
+
+  async createUser(dto: CreateUserDbDto): Promise<{ userId: string }> {
+    const { email, login, pass_hash, createdAt } = dto;
+
+    const result = await this.dataSource.query(`
+    INSERT INTO users ("login", "email", "pass_hash", "created_at")
+    VALUES ('${login}', '${email}', '${pass_hash}', '${createdAt}')
+    RETURNING id`);
+
+    return { userId: result[0].id };
+  }
 }

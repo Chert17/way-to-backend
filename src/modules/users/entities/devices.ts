@@ -19,6 +19,6 @@ export class Device {
   @Column({ type: 'date' })
   last_active_date: Date;
 
-  @OneToOne(() => User)
+  @OneToOne(() => User, user => user.device)
   user: User;
 }

@@ -16,14 +16,17 @@ export class User {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column({ type: 'string', length: 10, unique: true })
+  @Column({ type: 'text', unique: true })
   login: string;
 
-  @Column({ type: 'varchar', unique: true })
+  @Column({ type: 'text', unique: true })
   email: string;
 
-  @Column({ type: 'varchar', unique: true })
+  @Column({ type: 'text', unique: true })
   pass_hash: string;
+
+  @Column({ type: 'date' })
+  created_at: string;
 
   @OneToOne(() => ConfirmEmail, confirmEmail => confirmEmail.user)
   @JoinColumn()
