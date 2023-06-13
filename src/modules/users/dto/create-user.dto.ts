@@ -22,3 +22,16 @@ export class CreateUserDto {
   @IsString()
   readonly email: string;
 }
+
+export class CreateUserServiceDto {
+  readonly login: string;
+  readonly password: string;
+  readonly email: string;
+}
+
+export class CreateUserDbDto {
+  readonly login: string;
+  readonly pass_hash: string;
+  readonly email: string;
+  readonly createdAt: string;
+}

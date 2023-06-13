@@ -1,10 +1,20 @@
 import { Injectable } from '@nestjs/common';
 
-import { CreateUserDto } from './dto/create-user.dto';
+import { generateHash } from '../../helpers/generate.hash';
+import { CreateUserServiceDto } from './dto/create-user.dto';
+import { UsersRepo } from './repositories/users.repo';
 
 @Injectable()
 export class UsersService {
-  create(createUserDto: CreateUserDto) {}
+  constructor(private usersRepo: UsersRepo) {}
 
-  remove(id: string) {}
+  async create(dto: CreateUserServiceDto): Promise<{ userId: string }> {
+    return this.usersRepo.createUser({
+      ...dto,
+      createdAt: new Date().toISOString(),
+      pass_hash: await generateHash(dto.password),
+    });
+  }
+
+  // remove(id: string) {}
 }
