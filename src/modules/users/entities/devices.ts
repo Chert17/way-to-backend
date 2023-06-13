@@ -1,4 +1,10 @@
-import { Column, Entity, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 
 import { User } from './user.entity';
 
@@ -19,6 +25,7 @@ export class Device {
   @Column({ type: 'date' })
   last_active_date: Date;
 
-  @OneToOne(() => User, user => user.device)
+  @ManyToOne(() => User, user => user.devices)
+  @JoinColumn({ name: 'user_id' })
   user: User;
 }

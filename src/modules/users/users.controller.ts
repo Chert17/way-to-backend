@@ -14,18 +14,24 @@ import {
 import { BasicAuthGuard } from '../../infra/guards/basic.auth.guard';
 import { BanUserDto } from './dto/ban.user.dto';
 import { CreateUserDto } from './dto/create-user.dto';
+import { UsersQueryRepo } from './repositories/users.query.repo';
 import { UsersService } from './users.service';
 
 @Controller('sa/users')
 @UseGuards(BasicAuthGuard)
 export class UsersController {
-  constructor(private readonly usersService: UsersService) {}
+  constructor(
+    private readonly usersQueryRepo: UsersQueryRepo,
+    private readonly usersService: UsersService,
+  ) {}
   @Get()
   findAll() {}
 
   @Post()
   async create(@Body() dto: CreateUserDto) {
-    return await this.usersService.create(dto);
+    const { userId } = await this.usersService.create(dto);
+
+    return await this.usersQueryRepo.getUserById(userId);
   }
 
   @Put(':userId/ban')

@@ -21,9 +21,9 @@ export class TypeOrmConfig {
       username: this.configService.get(SETTINGS.PG_USER_NAME),
       password: this.configService.get(SETTINGS.PG_PASS),
       database: this.configService.get(SETTINGS.PG_DB_NAME),
-      // entities: [join(__dirname, '**', '*.entity.{ts,js}')],
-      entities: [User, ConfirmEmail, RecoveryPassword, Device, BanUser],
-      autoLoadEntities: true,
+      entities: [User, BanUser, ConfirmEmail, RecoveryPassword, Device],
+      // entities: ['src/modules/**/entity/*.ts'],
+      // autoLoadEntities: true,
       synchronize: true,
     };
   }

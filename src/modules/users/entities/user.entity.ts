@@ -2,6 +2,7 @@ import {
   Column,
   Entity,
   JoinColumn,
+  OneToMany,
   OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
@@ -29,18 +30,17 @@ export class User {
   created_at: string;
 
   @OneToOne(() => ConfirmEmail, confirmEmail => confirmEmail.user)
-  @JoinColumn()
+  @JoinColumn({ name: 'confirm_email_id' })
   confirmEmail: ConfirmEmail;
 
   @OneToOne(() => RecoveryPassword, recoveryPassword => recoveryPassword.user)
-  @JoinColumn()
+  @JoinColumn({ name: 'recovery_password_id' })
   recoveryPassword: RecoveryPassword;
 
   @OneToOne(() => BanUser, banUser => banUser.user)
-  @JoinColumn()
+  @JoinColumn({ name: 'ban_info_id' })
   banUser: BanUser;
 
-  @OneToOne(() => Device, device => device.user)
-  @JoinColumn()
-  device: Device;
+  @OneToMany(() => Device, device => device.user)
+  devices: Device[];
 }

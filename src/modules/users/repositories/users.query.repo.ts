@@ -1,13 +1,34 @@
-import { Repository } from 'typeorm';
+import { DataSource } from 'typeorm';
 
 import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
+import { InjectDataSource } from '@nestjs/typeorm';
 
-import { User } from '../entities/user.entity';
+import { UserViewDto } from '../dto/user.view.dto';
 
 @Injectable()
 export class UsersQueryRepo {
-  constructor(
-    @InjectRepository(User) private userQueryRepo: Repository<User>,
-  ) {}
+  constructor(@InjectDataSource() private dataSource: DataSource) {}
+
+  async getUserById(userId: string): Promise<UserViewDto> {
+    const user = await this.dataSource.query(
+      `SELECT
+        u.id,
+        u.login,
+        u.email,
+        u.created_at AS "createdAt",
+      JSON_BUILD_OBJECT(
+        'isBanned', b.is_banned,
+        'banDate', b.ban_date,
+        'banReason', b.ban_reason
+    ) AS "banInfo"
+      FROM
+        users u
+      LEFT JOIN
+        users_ban_info b ON u.ban_info_id = b.id
+      WHERE
+        u.id = '${userId}'`,
+    );
+
+    return user[0];
+  }
 }

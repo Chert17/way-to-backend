@@ -7,6 +7,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { MailerConfigService } from './configs/mailer.config';
 import { ThrottleConfigService } from './configs/throttle.config';
 import { TypeOrmConfig } from './configs/typeorm.config';
+import { TestingModule } from './modules/testing/testing.module';
 import { UsersModule } from './modules/users/users.module';
 
 @Module({
@@ -16,6 +17,7 @@ import { UsersModule } from './modules/users/users.module';
     MailerModule.forRootAsync({ useClass: MailerConfigService }),
     ThrottlerModule.forRootAsync({ useClass: ThrottleConfigService }),
 
+    TestingModule,
     UsersModule,
   ],
 })
