@@ -1,4 +1,10 @@
-import { Column, Entity, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  OneToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 
 import { User } from './user.entity';
 
@@ -7,15 +13,16 @@ export class BanUser {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column({ type: 'boolean', default: false })
+  @Column({ type: 'boolean' })
   is_banned: boolean;
 
   @Column({ type: 'varchar', default: null, nullable: true })
   ban_reason: string;
 
-  @Column({ type: 'date', default: null, nullable: true })
+  @Column({ type: 'date' })
   ban_date: Date;
 
-  @OneToOne(() => User, user => user.banUser)
+  @OneToOne(() => User, { cascade: true })
+  @JoinColumn({ name: 'user_id' })
   user: User;
 }

@@ -7,15 +7,16 @@ export class RecoveryPassword {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column({ type: 'boolean', default: false })
+  @Column({ type: 'boolean' })
   is_confirmed: boolean;
 
-  @Column({ type: 'uuid', unique: true, default: null, nullable: true })
+  @Column({ type: 'uuid', unique: true })
   recovery_code: string;
 
   @Column({ type: 'date', default: null, nullable: true })
   expr_date: Date;
 
-  @OneToOne(() => User, user => user.recoveryPassword)
+  @OneToOne(() => User, { cascade: true })
+  @JoinColumn({ name: 'user_id' })
   user: User;
 }

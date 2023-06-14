@@ -11,24 +11,18 @@ export class UsersQueryRepo {
 
   async getUserById(userId: string): Promise<UserViewDto> {
     const user = await this.dataSource.query(
-      `SELECT
-        u.id,
-        u.login,
-        u.email,
-        u.created_at AS "createdAt",
-      JSON_BUILD_OBJECT(
-        'isBanned', b.is_banned,
-        'banDate', b.ban_date,
-        'banReason', b.ban_reason
-    ) AS "banInfo"
-      FROM
-        users u
-      LEFT JOIN
-        users_ban_info b ON u.ban_info_id = b.id
-      WHERE
-        u.id = '${userId}'`,
+      `SELECT id, login, email, created_at AS "createdAt"
+      FROM users
+      WHERE id = '${userId}'`,
     );
 
-    return user[0];
+    return {
+      ...user[0],
+      banInfo: {
+        isBanned: false,
+        banDate: null,
+        banReason: null,
+      },
+    };
   }
 }

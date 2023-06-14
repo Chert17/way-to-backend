@@ -1,4 +1,10 @@
-import { Column, Entity, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  OneToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 
 import { User } from './user.entity';
 
@@ -7,15 +13,16 @@ export class ConfirmEmail {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column({ type: 'boolean', default: false })
+  @Column({ type: 'boolean' })
   is_confirmed: boolean;
 
-  @Column({ type: 'uuid', unique: true, default: null, nullable: true })
+  @Column({ type: 'uuid', unique: true })
   confirm_code: string;
 
-  @Column({ type: 'date', default: null, nullable: true })
+  @Column({ type: 'timestamp' })
   expr_date: Date;
 
-  @OneToOne(() => User, user => user.confirmEmail)
+  @OneToOne(() => User, { cascade: true })
+  @JoinColumn({ name: 'user_id' })
   user: User;
 }
