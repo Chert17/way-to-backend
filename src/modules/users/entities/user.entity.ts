@@ -8,10 +8,10 @@ export class User {
   @Column({ type: 'varchar', unique: true })
   login: string;
 
-  @Column({ type: 'varchar', unique: true })
+  @Column({ type: 'text', unique: true })
   email: string;
 
-  @Column({ type: 'varchar', unique: true })
+  @Column({ type: 'text', unique: true })
   pass_hash: string;
 
   @Column({ type: 'timestamp' })

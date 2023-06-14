@@ -16,7 +16,7 @@ export class BanUser {
   @Column({ type: 'boolean' })
   is_banned: boolean;
 
-  @Column({ type: 'varchar' })
+  @Column({ type: 'varchar', default: null, nullable: true })
   ban_reason: string;
 
   @Column({ type: 'date' })

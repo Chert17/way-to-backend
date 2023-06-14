@@ -1,10 +1,4 @@
-import {
-  Column,
-  Entity,
-  JoinColumn,
-  OneToOne,
-  PrimaryGeneratedColumn,
-} from 'typeorm';
+import { Column, Entity, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
 
 import { User } from './user.entity';
 
@@ -19,7 +13,7 @@ export class RecoveryPassword {
   @Column({ type: 'uuid', unique: true })
   recovery_code: string;
 
-  @Column({ type: 'date' })
+  @Column({ type: 'date', default: null, nullable: true })
   expr_date: Date;
 
   @OneToOne(() => User, { cascade: true })
