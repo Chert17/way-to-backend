@@ -25,7 +25,7 @@ export class Device {
   @Column({ type: 'date' })
   last_active_date: Date;
 
-  @ManyToOne(() => User, user => user.devices)
+  @ManyToOne(() => User, { cascade: true })
   @JoinColumn({ name: 'user_id' })
   user: User;
 }
