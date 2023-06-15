@@ -1,4 +1,4 @@
-import { IsBoolean, IsString, Length } from 'class-validator';
+import { IsBoolean, IsOptional, IsString, Length } from 'class-validator';
 
 import { Trim } from '../../../infra/decorators/validation/trim';
 
@@ -9,7 +9,8 @@ export class BanUserDto {
   @Length(20)
   @Trim()
   @IsString()
-  readonly banReason: string;
+  @IsOptional()
+  readonly banReason: string | null;
 }
 
 export class BanUserServiceDto {

@@ -43,7 +43,7 @@ export class UsersRepo {
 
   async checkUserById(userId: string): Promise<User> {
     return this.dataSource.query(
-      `SELECT * FROM ${USERS_TABLE} WHERE id = '${userId}'`,
+      `SELECT * FROM ${USERS_TABLE} u WHERE u.id = '${userId}'`,
     );
   }
 }
