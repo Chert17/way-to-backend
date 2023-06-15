@@ -17,6 +17,7 @@ import { BasicAuthGuard } from '../../infra/guards/basic.auth.guard';
 import { SaQueryPagination } from '../../utils/pagination/pagination';
 import { BanUserDto } from './dto/ban.user.dto';
 import { CreateUserDto } from './dto/create-user.dto';
+import { BanUserCommand } from './use-case/ban.user.use-case';
 import { CreateUserCommand } from './use-case/create.user.use-case';
 
 @Controller('sa/users')
@@ -33,7 +34,9 @@ export class UsersController {
 
   @Put(':userId/ban')
   @HttpCode(HttpStatus.NO_CONTENT)
-  banUser(@Param('userId') userId: string, @Body() dto: BanUserDto) {}
+  banUser(@Param('userId') userId: string, @Body() dto: BanUserDto) {
+    return this.commandBus.execute(new BanUserCommand({ userId, ...dto }));
+  }
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)

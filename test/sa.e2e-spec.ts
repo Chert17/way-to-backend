@@ -69,9 +69,9 @@ describe('super admin e2e', () => {
       const user = await userTest.createUsers(1);
 
       const res = await request(server)
-        .put(SA_URL + `${user[0].id}/ban`)
+        .put(SA_URL + `/${user[0].id}/ban`)
         .auth(admin.login, admin.password, { type: 'basic' })
-        .send({ isBanned: true, banReason: 'test test test' });
+        .send({ isBanned: true, banReason: 'banned user banned user' });
 
       expect(res.status).toBe(HttpStatus.NO_CONTENT);
     });
@@ -80,7 +80,7 @@ describe('super admin e2e', () => {
       const user = await userTest.createUsers(1);
 
       const res = await request(server)
-        .put(SA_URL + `${user[0].id}/ban`)
+        .put(SA_URL + `/${user[0].id}/ban`)
         .auth(admin.login, admin.password, { type: 'basic' })
         .send({ isBanned: null, banReason: '' });
 
@@ -93,7 +93,7 @@ describe('super admin e2e', () => {
     it("shouldn't ban user if no auth", async () => {
       const user = await userTest.createUsers(1);
 
-      const res = await request(server).put(SA_URL + `${user[0].id}/ban`);
+      const res = await request(server).put(SA_URL + `/${user[0].id}/ban`);
 
       expect(res.status).toBe(HttpStatus.UNAUTHORIZED);
     });

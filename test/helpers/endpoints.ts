@@ -1,6 +1,8 @@
-export const SA_URL = '/api/sa/users';
+const GLOBAL_PREFIX = '/api';
 
-const AUTH_URL = '/auth/';
+export const SA_URL = GLOBAL_PREFIX + '/sa/users';
+
+const AUTH_URL = GLOBAL_PREFIX + '/auth';
 
 export const authEndpoints = {
   REGISTER_URL: AUTH_URL + 'registration',

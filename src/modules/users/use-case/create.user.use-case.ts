@@ -1,12 +1,12 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 
 import { generateHash } from '../../../helpers/generate.hash';
-import { CreateUserDto } from '../dto/create-user.dto';
+import { CreateUserServiceDto } from '../dto/create-user.dto';
 import { UsersQueryRepo } from '../repositories/users.query.repo';
 import { UsersRepo } from '../repositories/users.repo';
 
 export class CreateUserCommand {
-  constructor(public dto: CreateUserDto) {}
+  constructor(public dto: CreateUserServiceDto) {}
 }
 
 @CommandHandler(CreateUserCommand)
