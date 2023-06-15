@@ -19,8 +19,8 @@ export class RecoveryPassword {
   @Column({ type: 'uuid', unique: true })
   recovery_code: string;
 
-  @Column({ type: 'date' })
-  expr_date: Date;
+  @Column({ type: 'timestamp' })
+  expr_date: string;
 
   @OneToOne(() => User, { cascade: true })
   @JoinColumn({ name: 'user_id' })

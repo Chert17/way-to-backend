@@ -14,7 +14,7 @@ export class UsersRepo {
 
     const result = await this.dataSource.query(`
   INSERT INTO users ("login", "email", "pass_hash", "created_at")
-  SELECT '${login}', '${email}', '${pass_hash}', '${createdAt}'
+  VALUES ('${login}', '${email}', '${pass_hash}', '${createdAt}')
   RETURNING id 
    `);
 
