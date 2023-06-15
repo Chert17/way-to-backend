@@ -16,11 +16,11 @@ export class BanUser {
   @Column({ type: 'boolean' })
   is_banned: boolean;
 
-  @Column({ type: 'varchar', nullable: true })
-  ban_reason: string | null;
+  @Column({ type: 'varchar' })
+  ban_reason: string;
 
-  @Column({ type: 'timestamp', nullable: true })
-  ban_date: string | null;
+  @Column({ type: 'timestamp' })
+  ban_date: string;
 
   @OneToOne(() => User, { cascade: true })
   @JoinColumn({ name: 'user_id' })
