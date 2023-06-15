@@ -17,6 +17,7 @@ import { UsersModule } from './modules/users/users.module';
     TypeOrmModule.forRootAsync({ useClass: TypeOrmConfig }),
     MailerModule.forRootAsync({ useClass: MailerConfigService }),
     ThrottlerModule.forRootAsync({ useClass: ThrottleConfigService }),
+    // CqrsModule,
 
     TestingModule,
     UsersModule,
