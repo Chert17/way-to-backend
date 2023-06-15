@@ -7,6 +7,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { MailerConfigService } from './configs/mailer.config';
 import { ThrottleConfigService } from './configs/throttle.config';
 import { TypeOrmConfig } from './configs/typeorm.config';
+import { AuthModule } from './modules/auth/auth.module';
 import { TestingModule } from './modules/testing/testing.module';
 import { UsersModule } from './modules/users/users.module';
 
@@ -19,6 +20,9 @@ import { UsersModule } from './modules/users/users.module';
 
     TestingModule,
     UsersModule,
+    AuthModule,
   ],
+
+  // providers: [...controllers, ...services, ...repositories, ...useCase],
 })
 export class AppModule {}

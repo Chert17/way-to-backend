@@ -20,7 +20,7 @@ export class ConfirmEmail {
   confirm_code: string;
 
   @Column({ type: 'timestamp' })
-  expr_date: Date;
+  expr_date: string;
 
   @OneToOne(() => User, { cascade: true })
   @JoinColumn({ name: 'user_id' })

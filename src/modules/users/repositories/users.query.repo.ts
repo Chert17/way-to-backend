@@ -12,8 +12,8 @@ export class UsersQueryRepo {
   async getUserById(userId: string): Promise<UserViewDto> {
     const user = await this.dataSource.query(
       `SELECT id, login, email, created_at AS "createdAt"
-      FROM users
-      WHERE id = '${userId}'`,
+      FROM users u
+      WHERE u.id = '${userId}'`,
     );
 
     return {

@@ -8,30 +8,27 @@ import {
   Param,
   Post,
   Put,
+  Query,
   UseGuards,
 } from '@nestjs/common';
+import { CommandBus } from '@nestjs/cqrs';
 
 import { BasicAuthGuard } from '../../infra/guards/basic.auth.guard';
+import { SaQueryPagination } from '../../utils/pagination/pagination';
 import { BanUserDto } from './dto/ban.user.dto';
 import { CreateUserDto } from './dto/create-user.dto';
-import { UsersQueryRepo } from './repositories/users.query.repo';
-import { UsersService } from './users.service';
+import { CreateUserCommand } from './use-case/create.user.use-case';
 
 @Controller('sa/users')
 @UseGuards(BasicAuthGuard)
 export class UsersController {
-  constructor(
-    private readonly usersQueryRepo: UsersQueryRepo,
-    private readonly usersService: UsersService,
-  ) {}
+  constructor(private readonly commandBus: CommandBus) {}
   @Get()
-  findAll() {}
+  findAll(@Query() pagination: SaQueryPagination) {}
 
   @Post()
-  async create(@Body() dto: CreateUserDto) {
-    const { userId } = await this.usersService.create(dto);
-
-    return await this.usersQueryRepo.getUserById(userId);
+  create(@Body() dto: CreateUserDto) {
+    return this.commandBus.execute(new CreateUserCommand(dto));
   }
 
   @Put(':userId/ban')

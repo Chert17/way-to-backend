@@ -58,7 +58,7 @@ export class PostQueryPagination extends DefaultPagination {}
 
 export class CommentQueryPagination extends DefaultPagination {}
 
-export class UserQueryPagination extends DefaultPagination {
+export class SaQueryPagination extends DefaultPagination {
   @Transform(({ value }) => value ?? '')
   @IsOptional()
   searchEmailTerm = '';
