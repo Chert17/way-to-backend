@@ -36,6 +36,19 @@ export class UserTest {
     return users;
   }
 
+  async createBanUsers(quantity: number) {
+    const users = await this.createUsers(quantity);
+
+    for (let i = 0; i < quantity; i++) {
+      await request(this.server)
+        .put(SA_URL + `/${users[i].id}/ban`)
+        .auth(admin.login, admin.password, { type: 'basic' })
+        .send({ isBanned: true, banReason: 'banned user banned user' });
+    }
+
+    return users;
+  }
+
   private _createtUserData() {
     return {
       login: faker.person.firstName(), //`user`,

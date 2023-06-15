@@ -37,7 +37,7 @@ export class DefaultPagination {
   pageSize = 10;
 
   @IsOptional()
-  sortBy = 'createdAt';
+  sortBy = 'created_at';
 
   @Transform(({ value }) => (value === 'asc' ? 'asc' : 'desc'))
   @IsOptional()
