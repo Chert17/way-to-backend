@@ -10,6 +10,7 @@ import { TypeOrmConfig } from './configs/typeorm.config';
 import { AuthModule } from './modules/auth/auth.module';
 import { TestingModule } from './modules/testing/testing.module';
 import { UsersModule } from './modules/users/users.module';
+import { EmailModule } from './modules/email/email.module';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { UsersModule } from './modules/users/users.module';
     TestingModule,
     UsersModule,
     AuthModule,
+    EmailModule,
   ],
 
   // providers: [...controllers, ...services, ...repositories, ...useCase],
