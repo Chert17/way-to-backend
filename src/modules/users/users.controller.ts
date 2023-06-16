@@ -20,6 +20,7 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UsersQueryRepo } from './repositories/users.query.repo';
 import { BanUserCommand } from './use-case/ban.user.use-case';
 import { CreateUserCommand } from './use-case/create.user.use-case';
+import { DeleteUserCommand } from './use-case/delete.user.use-case';
 
 @Controller('sa/users')
 @UseGuards(BasicAuthGuard)
@@ -44,7 +45,9 @@ export class UsersController {
     return this.commandBus.execute(new BanUserCommand({ userId, ...dto }));
   }
 
-  @Delete(':id')
+  @Delete(':userId')
   @HttpCode(HttpStatus.NO_CONTENT)
-  remove(@Param('id') id: string) {}
+  remove(@Param('userId') userId: string) {
+    return this.commandBus.execute(new DeleteUserCommand(userId));
+  }
 }

@@ -22,7 +22,7 @@ export class BanUser {
   @Column({ type: 'timestamp' })
   ban_date: string;
 
-  @OneToOne(() => User, { cascade: true })
+  @OneToOne(() => User, { cascade: true, onDelete: 'CASCADE' })
   @JoinColumn({ name: 'user_id' })
   user: User;
 }
