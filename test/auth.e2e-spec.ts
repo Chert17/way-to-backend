@@ -5,7 +5,7 @@ import { HttpStatus } from '@nestjs/common';
 import { authEndpoints } from './helpers/endpoints';
 import { errorsData } from './helpers/errors.data';
 import { UserTest } from './helpers/fabrica';
-import { getRefreshToken } from './helpers/get.refresh.token';
+import { getRefreshTokenNameFromCookie } from './helpers/get.refresh.token';
 import { myBeforeAll } from './helpers/my.before.all';
 
 const { REGISTER_URL, LOGIN_URL, CONFIRM_REGISTER_URL } = authEndpoints;
@@ -83,11 +83,14 @@ describe('auth e2e', () => {
 
       const res = await request(server)
         .post(LOGIN_URL)
-        .send({ loginOrEmail: users[0].email, password: users[0].password });
+        .send({ loginOrEmail: users[0].email, password: users[0].password })
+        .set('User-Agent', 'my test');
+
+      const refreshTokenName = getRefreshTokenNameFromCookie(res);
 
       expect(res.status).toBe(HttpStatus.OK);
       expect(res.body).toEqual({ accessToken: expect.any(String) });
-      expect(res.headers['set-cookie']).toEqual(getRefreshToken(res));
+      expect(refreshTokenName).toBeDefined();
     });
 
     it("shouldn't login user with incorrect data", async () => {
@@ -111,6 +114,31 @@ describe('auth e2e', () => {
         .send({ loginOrEmail: users[0].email, password: '123123' });
 
       expect(res.status).toBe(HttpStatus.UNAUTHORIZED);
+    });
+
+    it("should't login user if banned user", async () => {
+      const [banUser0] = await userTest.createBanUsers(1);
+
+      const res = await request(server)
+        .post(LOGIN_URL)
+        .send({ loginOrEmail: banUser0.email, password: banUser0.password });
+
+      expect(res.status).toBe(HttpStatus.UNAUTHORIZED);
+    });
+
+    it("should't login user if not confirm email", async () => {
+      const { email, login, password } = userTest._createtUserData();
+
+      const res = await request(server)
+        .post(REGISTER_URL)
+        .send({ email, login, password });
+
+      const loginRes = await request(server)
+        .post(LOGIN_URL)
+        .send({ loginOrEmail: email, password: password });
+
+      expect(res.status).toBe(HttpStatus.NO_CONTENT);
+      expect(loginRes.status).toBe(HttpStatus.UNAUTHORIZED);
     });
   });
 });
