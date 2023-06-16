@@ -5,11 +5,12 @@ import { InjectDataSource } from '@nestjs/typeorm';
 
 import { UsersSqlTables } from '../../../utils/tables/users.sql.tables';
 import { RegisterDbDto } from '../../auth/dto/input/register.dto';
+import { UserWithEmailInfoAndBanInfo } from '../../auth/types/user.types';
 import { BanUserDbDto } from '../dto/ban.user.dto';
 import { CreateUserDbDto } from '../dto/create-user.dto';
 import { User } from '../entities/user.entity';
 
-const { USERS_BAN_INFO_TABLE, USERS_TABLE, USERS_CONFIRM_EMAIL } =
+const { USERS_BAN_INFO_TABLE, USERS_TABLE, USERS_CONFIRM_EMAIL_TABLE } =
   UsersSqlTables;
 
 @Injectable()
@@ -18,11 +19,11 @@ export class UsersRepo {
 
   async createUser(dto: CreateUserDbDto): Promise<{ userId: string }> {
     //TODO возможно чтоб различать кто создал юзера добавить type sa, так как у юзеров которых создал sa нет confirm_email // ?
-    const { email, login, pass_hash, createdAt } = dto;
+    const { email, login, pass_hash, createdAt, format } = dto;
 
     const result = await this.dataSource.query(`
-    INSERT INTO ${USERS_TABLE} ("login", "email", "pass_hash", "created_at")
-    VALUES ('${login}', '${email}', '${pass_hash}', '${createdAt}')
+    INSERT INTO ${USERS_TABLE} ("login", "email", "pass_hash", "created_at", "format")
+    VALUES ('${login}', '${email}', '${pass_hash}', '${createdAt}', '${format}')
     RETURNING id 
    `);
 
@@ -34,7 +35,7 @@ export class UsersRepo {
 
     return this.dataSource.query(
       `
-    insert into ${USERS_CONFIRM_EMAIL} ("user_id", "is_confirmed", "confirm_code", "expr_date")
+    insert into ${USERS_CONFIRM_EMAIL_TABLE} ("user_id", "is_confirmed", "confirm_code", "expr_date")
     values ($1, $2, $3, $4)
     `,
       [userId, isConfirmed, confirmCode, exprDate],
@@ -46,7 +47,7 @@ export class UsersRepo {
   ): Promise<{ is_confirmed: boolean; expr_date: string }[]> {
     return this.dataSource.query(
       `
-    select is_confirmed, expr_date from ${USERS_CONFIRM_EMAIL}
+    select is_confirmed, expr_date from ${USERS_CONFIRM_EMAIL_TABLE}
     where confirm_code = $1
     `,
       [code],
@@ -56,7 +57,7 @@ export class UsersRepo {
   async setConfirmRegister(code: string) {
     return this.dataSource.query(
       `
-    update ${USERS_CONFIRM_EMAIL}
+    update ${USERS_CONFIRM_EMAIL_TABLE}
     set is_confirmed = true
     where confirm_code = $1
     `,
@@ -88,9 +89,28 @@ export class UsersRepo {
     );
   }
 
-  async checkUserById(userId: string): Promise<User[]> {
-    return this.dataSource.query(
+  async checkUserById(userId: string): Promise<User> {
+    const result = await this.dataSource.query(
       `SELECT * FROM ${USERS_TABLE} u WHERE u.id = '${userId}'`,
     );
+
+    return result[0];
+  }
+
+  async checkUserWithEmailInfoAndBanInfoByLoginOrEmail(
+    loginOrEmail: string,
+  ): Promise<UserWithEmailInfoAndBanInfo> {
+    const result = await this.dataSource.query(
+      `
+    select u.*, e.is_confirmed, b.is_banned
+    from ${USERS_TABLE} u
+    left join ${USERS_CONFIRM_EMAIL_TABLE} e on u.id = e.user_id
+    left join ${USERS_BAN_INFO_TABLE} b on u.id = b.user_id
+    where u.login = $1 or u.email = $1
+    `,
+      [loginOrEmail],
+    );
+
+    return result[0];
   }
 }

@@ -3,13 +3,16 @@ import { CqrsModule } from '@nestjs/cqrs';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
 import { ExistConfirmCode } from '../../infra/decorators/auth/exist.comfirm.code';
+import { DevicesRepo } from '../devices/repositories/devices.repo';
 import { EmailService } from '../email/email.service';
 import { User } from '../users/entities/user.entity';
 import { UsersRepo } from '../users/repositories/users.repo';
 import { UsersService } from '../users/users.service';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
+import { JwtService } from './jwt.service';
 import { ConfirmRegisterUseCase } from './use-case/confirm.register.use-case';
+import { LoginUseCase } from './use-case/login.use-case';
 import { RegisterUseCase } from './use-case/register.use-case';
 
 @Module({
@@ -18,9 +21,12 @@ import { RegisterUseCase } from './use-case/register.use-case';
     AuthService,
     UsersService,
     UsersRepo,
+    DevicesRepo,
     EmailService,
+    JwtService,
     RegisterUseCase,
     ConfirmRegisterUseCase,
+    LoginUseCase,
     ExistConfirmCode,
   ],
   imports: [TypeOrmModule.forFeature([User]), CqrsModule],

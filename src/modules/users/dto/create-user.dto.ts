@@ -1,6 +1,7 @@
 import { IsEmail, IsString, Length, Matches } from 'class-validator';
 
 import { Trim } from '../../../infra/decorators/validation/trim';
+import { CreateUserFormat } from '../types/user.types';
 
 export class CreateUserDto {
   @Matches('^[a-zA-Z0-9_-]*$')
@@ -27,6 +28,7 @@ export class CreateUserServiceDto {
   readonly login: string;
   readonly password: string;
   readonly email: string;
+  readonly format: CreateUserFormat;
 }
 
 export class CreateUserDbDto {
@@ -34,4 +36,5 @@ export class CreateUserDbDto {
   readonly pass_hash: string;
   readonly email: string;
   readonly createdAt: string;
+  readonly format: CreateUserFormat;
 }

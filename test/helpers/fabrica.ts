@@ -6,7 +6,7 @@ import { faker } from '@faker-js/faker';
 import { UsersSqlTables } from '../../src/utils/tables/users.sql.tables';
 import { SA_URL } from './endpoints';
 
-const { USERS_CONFIRM_EMAIL, USERS_TABLE } = UsersSqlTables;
+const { USERS_CONFIRM_EMAIL_TABLE, USERS_TABLE } = UsersSqlTables;
 
 export const admin = {
   login: 'admin',
@@ -61,7 +61,7 @@ export class UserTest {
   ): Promise<{ confirmCode: string }> {
     const code = await this.dataSource.query(
       `
-    select e.confirm_code from ${USERS_CONFIRM_EMAIL} e
+    select e.confirm_code from ${USERS_CONFIRM_EMAIL_TABLE} e
     left join ${USERS_TABLE} u on  e.user_id = u.id
     where u.email = $1
     `,

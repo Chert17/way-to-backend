@@ -1,5 +1,7 @@
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
+import { CreateUserFormat } from '../types/user.types';
+
 @Entity({ name: 'users' })
 export class User {
   @PrimaryGeneratedColumn('uuid')
@@ -16,4 +18,7 @@ export class User {
 
   @Column({ type: 'timestamp' })
   created_at: string;
+
+  @Column({ type: 'enum', enum: CreateUserFormat })
+  format: CreateUserFormat;
 }

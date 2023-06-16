@@ -4,12 +4,13 @@ import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 
 import { addMinutesToCurrentDate } from '../../../helpers/add.minutes.current.date';
 import { EmailService } from '../../email/email.service';
-import { CreateUserServiceDto } from '../../users/dto/create-user.dto';
+import { CreateUserDto } from '../../users/dto/create-user.dto';
 import { UsersRepo } from '../../users/repositories/users.repo';
+import { CreateUserFormat } from '../../users/types/user.types';
 import { UsersService } from '../../users/users.service';
 
 export class RegisterUserCommand {
-  constructor(public dto: CreateUserServiceDto) {}
+  constructor(public dto: CreateUserDto) {}
 }
 
 @CommandHandler(RegisterUserCommand)
@@ -21,7 +22,10 @@ export class RegisterUseCase implements ICommandHandler<RegisterUserCommand> {
   ) {}
 
   async execute({ dto }: RegisterUserCommand) {
-    const { userId } = await this.usersService.createUser(dto);
+    const { userId } = await this.usersService.createUser({
+      ...dto,
+      format: CreateUserFormat.REGISTER,
+    });
 
     const code = randomUUID();
 

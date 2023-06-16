@@ -11,6 +11,7 @@ import { AuthModule } from './modules/auth/auth.module';
 import { TestingModule } from './modules/testing/testing.module';
 import { UsersModule } from './modules/users/users.module';
 import { EmailModule } from './modules/email/email.module';
+import { DevicesModule } from './modules/devices/devices.module';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { EmailModule } from './modules/email/email.module';
     UsersModule,
     AuthModule,
     EmailModule,
+    DevicesModule,
   ],
 
   // providers: [...controllers, ...services, ...repositories, ...useCase],
