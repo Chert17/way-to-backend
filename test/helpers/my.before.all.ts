@@ -1,3 +1,5 @@
+import { DataSource } from 'typeorm';
+
 import { INestApplication } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 
@@ -16,5 +18,7 @@ export const myBeforeAll = async () => {
   await app.init();
   const server = app.getHttpServer();
 
-  return { myApp: app, myServer: server, moduleFixture };
+  const dataSource = app.get(DataSource);
+
+  return { myApp: app, myServer: server, dataSource: dataSource.manager };
 };

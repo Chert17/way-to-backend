@@ -1,8 +1,12 @@
 import request from 'supertest';
+import { EntityManager } from 'typeorm';
 
 import { faker } from '@faker-js/faker';
 
+import { UsersSqlTables } from '../../src/utils/tables/users.sql.tables';
 import { SA_URL } from './endpoints';
+
+const { USERS_CONFIRM_EMAIL, USERS_TABLE } = UsersSqlTables;
 
 export const admin = {
   login: 'admin',
@@ -17,7 +21,10 @@ interface User {
 }
 
 export class UserTest {
-  constructor(private readonly server: any) {}
+  constructor(
+    private readonly server: any,
+    private dataSource?: EntityManager,
+  ) {}
 
   async createUsers(quantity: number) {
     const users: User[] = [];
@@ -49,7 +56,22 @@ export class UserTest {
     return users;
   }
 
-  private _createtUserData() {
+  async getConfirmEmailCodeByUser(
+    email: string,
+  ): Promise<{ confirmCode: string }> {
+    const code = await this.dataSource.query(
+      `
+    select e.confirm_code from ${USERS_CONFIRM_EMAIL} e
+    left join ${USERS_TABLE} u on  e.user_id = u.id
+    where u.email = $1
+    `,
+      [email],
+    );
+
+    return { confirmCode: code[0].confirm_code };
+  }
+
+  _createtUserData() {
     return {
       login: faker.person.firstName(), //`user`,
       email: faker.internet.email(), //`user@email.com`,

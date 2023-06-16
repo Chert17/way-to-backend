@@ -33,7 +33,7 @@ export class UsersQueryRepo {
     json_build_object('isBanned', coalesce(b.is_banned, false), 'banDate', b.ban_date, 'banReason', b.ban_reason) AS "banInfo"
     from ${USERS_TABLE} u
     left join ${USERS_BAN_INFO_TABLE} b on u.id = b.user_id 
-    where u.email like $1 and u.login like $2 and
+    where u.email ilike $1 and u.login ilike $2 and
     case 
       when $3 = true then coalesce(b.is_banned, false) = true
       when $3 = false then coalesce(b.is_banned, false) = false
@@ -49,7 +49,7 @@ export class UsersQueryRepo {
       `
     select count(*) from ${USERS_TABLE} u
     left join ${USERS_BAN_INFO_TABLE} b on u.id = b.user_id
-    where u.email like $1 and u.login like $2 and
+    where u.email ilike $1 and u.login ilike $2 and
       case 
         when $3 = true then coalesce(b.is_banned, false) = true
         when $3 = false then coalesce(b.is_banned, false) = false
