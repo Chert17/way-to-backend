@@ -260,4 +260,98 @@ describe('super admin e2e', () => {
       expect(res.status).toBe(HttpStatus.NOT_FOUND);
     });
   });
+
+  describe('get all users', () => {
+    it('should be returned users with pagination', async () => {
+      const users = await userTest.createUsers(1);
+      const banUsers = await userTest.createBanUsers(1);
+
+      const res = await request(server)
+        .get(SA_URL)
+        .auth(admin.login, admin.password, { type: 'basic' })
+        .query({ banStatus: 'all' });
+
+      expect(res.status).toBe(HttpStatus.OK);
+      expect(res.body.items).toHaveLength(2);
+      expect(res.body).toEqual({
+        pagesCount: 1,
+        page: 1,
+        pageSize: 10,
+        totalCount: 2,
+        items: [
+          {
+            id: banUsers[0].id,
+            login: banUsers[0].login,
+            email: banUsers[0].email,
+            createdAt: expect.any(String),
+            banInfo: {
+              isBanned: true,
+              banDate: expect.any(String),
+              banReason: expect.any(String),
+            },
+          },
+          {
+            id: users[0].id,
+            login: users[0].login,
+            email: users[0].email,
+            createdAt: expect.any(String),
+            banInfo: {
+              isBanned: false,
+              banDate: null,
+              banReason: null,
+            },
+          },
+        ],
+      });
+    });
+
+    it('should be returned users with ban users pagination', async () => {
+      const banUsers = await userTest.createBanUsers(2);
+      await userTest.createUsers(1);
+
+      const res = await request(server)
+        .get(SA_URL)
+        .auth(admin.login, admin.password, { type: 'basic' })
+        .query({ banStatus: 'banned', sortDirection: 'asc' });
+
+      expect(res.status).toBe(HttpStatus.OK);
+      expect(res.body.items).toHaveLength(2);
+      expect(res.body).toEqual({
+        pagesCount: 1,
+        page: 1,
+        pageSize: 10,
+        totalCount: 2,
+        items: [
+          {
+            id: banUsers[0].id,
+            login: banUsers[0].login,
+            email: banUsers[0].email,
+            createdAt: expect.any(String),
+            banInfo: {
+              isBanned: true,
+              banDate: expect.any(String),
+              banReason: expect.any(String),
+            },
+          },
+          {
+            id: banUsers[1].id,
+            login: banUsers[1].login,
+            email: banUsers[1].email,
+            createdAt: expect.any(String),
+            banInfo: {
+              isBanned: true,
+              banDate: expect.any(String),
+              banReason: expect.any(String),
+            },
+          },
+        ],
+      });
+    });
+
+    it("shouldn't get user if no auth", async () => {
+      const res = await request(server).get(SA_URL);
+
+      expect(res.status).toBe(HttpStatus.UNAUTHORIZED);
+    });
+  });
 });
