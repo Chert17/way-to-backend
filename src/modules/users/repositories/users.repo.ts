@@ -41,7 +41,16 @@ export class UsersRepo {
     END $$;`);
   }
 
-  async checkUserById(userId: string): Promise<User> {
+  async deleteUser(userId: string) {
+    return this.dataSource.query(
+      `
+      delete from ${USERS_TABLE} where id = $1
+    `,
+      [`${userId}`],
+    );
+  }
+
+  async checkUserById(userId: string): Promise<User[]> {
     return this.dataSource.query(
       `SELECT * FROM ${USERS_TABLE} u WHERE u.id = '${userId}'`,
     );

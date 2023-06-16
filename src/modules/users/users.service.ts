@@ -1,4 +1,6 @@
-import { Injectable } from '@nestjs/common';
+import { isUUID } from 'class-validator';
+
+import { Injectable, NotFoundException } from '@nestjs/common';
 
 import { UsersRepo } from './repositories/users.repo';
 
@@ -6,13 +8,15 @@ import { UsersRepo } from './repositories/users.repo';
 export class UsersService {
   constructor(private usersRepo: UsersRepo) {}
 
-  // async create(dto: CreateUserServiceDto): Promise<{ userId: string }> {
-  //   return this.usersRepo.createUser({
-  //     ...dto,
-  //     createdAt: new Date().toISOString(),
-  //     pass_hash: await generateHash(dto.password),
-  //   });
-  // }
+  async checkUserById(userId: string) {
+    const isUuid = isUUID(userId);
 
-  // remove(id: string) {}
+    if (!isUuid) throw new NotFoundException();
+
+    const user = await this.usersRepo.checkUserById(userId);
+
+    if (!user.length) throw new NotFoundException();
+
+    return { id: userId };
+  }
 }

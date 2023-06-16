@@ -7,6 +7,7 @@ import { UsersQueryRepo } from './repositories/users.query.repo';
 import { UsersRepo } from './repositories/users.repo';
 import { BanUserUseCase } from './use-case/ban.user.use-case';
 import { CreateUserUseCase } from './use-case/create.user.use-case';
+import { DeleteUserUseCase } from './use-case/delete.user.use-case';
 import { UsersController } from './users.controller';
 import { UsersService } from './users.service';
 
@@ -18,6 +19,7 @@ import { UsersService } from './users.service';
     UsersRepo,
     CreateUserUseCase,
     BanUserUseCase,
+    DeleteUserUseCase,
   ],
   imports: [TypeOrmModule.forFeature([User]), CqrsModule],
 })

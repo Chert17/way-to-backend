@@ -122,6 +122,15 @@ describe('super admin e2e', () => {
 
       expect(res.status).toBe(HttpStatus.UNAUTHORIZED);
     });
+
+    it("shouldn't ban user if userId not exist", async () => {
+      const res = await request(server)
+        .put(SA_URL + `/2a2044a2-3ff3-47fe-88be-e66c1c8bfdc6/ban`)
+        .auth(admin.login, admin.password, { type: 'basic' })
+        .send({ isBanned: true, banReason: 'banned user banned user' });
+
+      expect(res.status).toBe(HttpStatus.NOT_FOUND);
+    });
   });
 
   describe('get all users', () => {
@@ -215,6 +224,40 @@ describe('super admin e2e', () => {
       const res = await request(server).get(SA_URL);
 
       expect(res.status).toBe(HttpStatus.UNAUTHORIZED);
+    });
+  });
+
+  describe('delete user', () => {
+    it('should delete user', async () => {
+      const users = await userTest.createUsers(1);
+
+      const res = await request(server)
+        .delete(SA_URL + `/${users[0].id}`)
+        .auth(admin.login, admin.password, { type: 'basic' });
+
+      const getRes = await request(server)
+        .get(SA_URL)
+        .auth(admin.login, admin.password, { type: 'basic' });
+
+      expect(res.status).toBe(HttpStatus.NO_CONTENT);
+      expect(getRes.status).toBe(HttpStatus.OK);
+      expect(getRes.body.items).toHaveLength(0);
+    });
+
+    it("shouldn't delete user if no auth", async () => {
+      const users = await userTest.createUsers(1);
+
+      const res = await request(server).delete(SA_URL + `/${users[0].id}`);
+
+      expect(res.status).toBe(HttpStatus.UNAUTHORIZED);
+    });
+
+    it("shouldn't delete user if userId no exist", async () => {
+      const res = await request(server)
+        .delete(SA_URL + '2a2044a2-3ff3-47fe-88be-e66c1c8bfdc6')
+        .auth(admin.login, admin.password, { type: 'basic' });
+
+      expect(res.status).toBe(HttpStatus.NOT_FOUND);
     });
   });
 });
