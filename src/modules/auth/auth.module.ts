@@ -3,6 +3,7 @@ import { CqrsModule } from '@nestjs/cqrs';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
 import { ExistConfirmCode } from '../../infra/decorators/auth/exist.comfirm.code';
+import { ExistUserByLoginOrEmail } from '../../infra/decorators/user/exist.user.by.login-email';
 import { DevicesRepo } from '../devices/repositories/devices.repo';
 import { EmailService } from '../email/email.service';
 import { User } from '../users/entities/user.entity';
@@ -28,6 +29,7 @@ import { RegisterUseCase } from './use-case/register.use-case';
     ConfirmRegisterUseCase,
     LoginUseCase,
     ExistConfirmCode,
+    ExistUserByLoginOrEmail,
   ],
   imports: [TypeOrmModule.forFeature([User]), CqrsModule],
 })
