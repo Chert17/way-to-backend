@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { CqrsModule } from '@nestjs/cqrs';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
+import { ExistUserByLoginOrEmail } from '../../infra/decorators/user/exist.user.by.login-email';
 import { User } from './entities/user.entity';
 import { UsersQueryRepo } from './repositories/users.query.repo';
 import { UsersRepo } from './repositories/users.repo';
@@ -20,6 +21,7 @@ import { UsersService } from './users.service';
     CreateUserUseCase,
     BanUserUseCase,
     DeleteUserUseCase,
+    ExistUserByLoginOrEmail,
   ],
   imports: [TypeOrmModule.forFeature([User]), CqrsModule],
 })
