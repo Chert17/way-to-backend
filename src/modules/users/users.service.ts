@@ -22,7 +22,7 @@ export class UsersService {
   async checkUserById(userId: string) {
     if (!isUUID(userId)) throw new NotFoundException();
 
-    const [user] = await this.usersRepo.checkUserById(userId);
+    const user = await this.usersRepo.checkUserById(userId);
 
     if (!user) throw new NotFoundException();
 
