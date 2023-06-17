@@ -3,6 +3,7 @@ import { CqrsModule } from '@nestjs/cqrs';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
 import { ExistConfirmCode } from '../../infra/decorators/auth/exist.comfirm.code';
+import { ExistResendingEmail } from '../../infra/decorators/auth/exist.email.resending';
 import { ExistUserByLoginOrEmail } from '../../infra/decorators/user/exist.user.by.login-email';
 import { DevicesRepo } from '../devices/repositories/devices.repo';
 import { EmailService } from '../email/email.service';
@@ -13,6 +14,7 @@ import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { JwtService } from './jwt.service';
 import { ConfirmRegisterUseCase } from './use-case/confirm.register.use-case';
+import { EmailResendingUseCase } from './use-case/email.resending.use-case';
 import { LoginUseCase } from './use-case/login.use-case';
 import { RegisterUseCase } from './use-case/register.use-case';
 
@@ -28,8 +30,10 @@ import { RegisterUseCase } from './use-case/register.use-case';
     RegisterUseCase,
     ConfirmRegisterUseCase,
     LoginUseCase,
+    EmailResendingUseCase,
     ExistConfirmCode,
     ExistUserByLoginOrEmail,
+    ExistResendingEmail,
   ],
   imports: [TypeOrmModule.forFeature([User]), CqrsModule],
 })

@@ -4,6 +4,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
 
 import { UsersSqlTables } from '../../../utils/tables/users.sql.tables';
+import { EmailResendingDbDto } from '../../auth/dto/input/email.resending.dto';
 import { RegisterDbDto } from '../../auth/dto/input/register.dto';
 import { UserWithEmailInfoAndBanInfo } from '../../auth/types/user.types';
 import { BanUserDbDto } from '../dto/ban.user.dto';
@@ -42,15 +43,49 @@ export class UsersRepo {
     );
   }
 
-  async getConfirmEmailImfoByCode(
+  async getConfirmEmailInfoByCode(
     code: string,
-  ): Promise<{ is_confirmed: boolean; expr_date: string }[]> {
-    return this.dataSource.query(
+  ): Promise<{ is_confirmed: boolean; expr_date: string }> {
+    const result = await this.dataSource.query(
       `
     select is_confirmed, expr_date from ${USERS_CONFIRM_EMAIL_TABLE}
     where confirm_code = $1
     `,
       [code],
+    );
+
+    return result[0];
+  }
+
+  async getConfirmEmailInfoByEmail(
+    email: string,
+  ): Promise<{ is_confirmed: boolean; expr_date: string }> {
+    const result = await this.dataSource.query(
+      `
+    select is_confirmed, expr_date from ${USERS_CONFIRM_EMAIL_TABLE} e
+    left join ${USERS_TABLE} u on u.email = $1
+    where e.user_id = u.id
+    `,
+      [email],
+    );
+
+    return result[0];
+  }
+
+  async updateConfirmEmailInfo(dto: EmailResendingDbDto) {
+    const { email, newCode, newExpDate } = dto;
+
+    return this.dataSource.query(
+      `
+    update ${USERS_CONFIRM_EMAIL_TABLE} e
+    set confirm_code = $2, expr_date = $3
+    WHERE user_id = (
+      SELECT id
+      FROM ${USERS_TABLE}
+      WHERE email = $1
+    )
+    `,
+      [email, newCode, newExpDate],
     );
   }
 
