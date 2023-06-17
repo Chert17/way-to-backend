@@ -8,7 +8,8 @@ import { UserTest } from './helpers/fabrica';
 import { getRefreshTokenNameFromCookie } from './helpers/get.refresh.token';
 import { myBeforeAll } from './helpers/my.before.all';
 
-const { REGISTER_URL, LOGIN_URL, CONFIRM_REGISTER_URL } = authEndpoints;
+const { REGISTER_URL, LOGIN_URL, CONFIRM_REGISTER_URL, RESENDING_EMAIL_URL } =
+  authEndpoints;
 
 describe('auth e2e', () => {
   let server: any;
@@ -139,6 +140,42 @@ describe('auth e2e', () => {
 
       expect(res.status).toBe(HttpStatus.NO_CONTENT);
       expect(loginRes.status).toBe(HttpStatus.UNAUTHORIZED);
+    });
+  });
+
+  describe('email resending', () => {
+    it('should be email resending', async () => {
+      const { email, login, password } = userTest._createtUserData();
+
+      await request(server).post(REGISTER_URL).send({ email, login, password });
+
+      const res = await request(server)
+        .post(RESENDING_EMAIL_URL)
+        .send({ email: email });
+
+      const { confirmCode } = await userTest.getConfirmEmailCodeByUser(email);
+
+      const emailRes = await request(server)
+        .post(CONFIRM_REGISTER_URL)
+        .send({ code: confirmCode });
+
+      expect(res.status).toBe(HttpStatus.NO_CONTENT);
+      expect(emailRes.status).toBe(HttpStatus.NO_CONTENT);
+    });
+
+    it("should't email resending if incorrect email", async () => {
+      const { email, login, password } = userTest._createtUserData();
+
+      await request(server).post(REGISTER_URL).send({ email, login, password });
+
+      const res = await request(server)
+        .post(RESENDING_EMAIL_URL)
+        .send({ email: 'zxczxc@gmail.com' });
+
+      const errors = errorsData('email');
+
+      expect(res.status).toBe(HttpStatus.BAD_REQUEST);
+      expect(res.body).toEqual(errors);
     });
   });
 });

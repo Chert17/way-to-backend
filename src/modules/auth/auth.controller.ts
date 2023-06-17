@@ -16,9 +16,11 @@ import { UserAgent } from '../../infra/decorators/params/req.user.agent.decorato
 import { SETTINGS } from '../../utils/settings';
 import { CreateUserDto } from '../users/dto/create-user.dto';
 import { ConfirmRegisterDto } from './dto/input/confirm.register.dto';
+import { EmailResendingDto } from './dto/input/email.resending.dto';
 import { LoginDto } from './dto/input/login.dto';
 import { JwtTokensViewDto } from './dto/view/jwt.tokens.view.dto';
 import { ConfirmRegisterUserCommand } from './use-case/confirm.register.use-case';
+import { EmailResendingCommand } from './use-case/email.resending.use-case';
 import { LoginUserCommand } from './use-case/login.use-case';
 import { RegisterUserCommand } from './use-case/register.use-case';
 
@@ -59,6 +61,12 @@ export class AuthController {
     this._setRefreshTokenToCookie(res, refreshToken);
 
     return { accessToken };
+  }
+
+  @Post('/registration-email-resending')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  emailResending(@Body() dto: EmailResendingDto) {
+    return this.commandBus.execute(new EmailResendingCommand(dto.email));
   }
 
   private _setRefreshTokenToCookie(res: Response, refreshToken: string) {
