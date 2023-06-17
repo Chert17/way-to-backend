@@ -19,7 +19,7 @@ export class BanUser {
   @Column({ type: 'varchar' })
   ban_reason: string;
 
-  @Column({ type: 'timestamp' })
+  @Column({ type: 'varchar' })
   ban_date: string;
 
   @OneToOne(() => User, { cascade: true, onDelete: 'CASCADE' })
