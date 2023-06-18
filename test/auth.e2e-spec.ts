@@ -15,6 +15,7 @@ const {
   RESENDING_EMAIL_URL,
   REFRESH_TOKEN_URL,
   LOGOUT_URL,
+  GET_ME,
 } = authEndpoints;
 
 describe('auth e2e', () => {
@@ -280,6 +281,31 @@ describe('auth e2e', () => {
         .post(LOGOUT_URL)
         .set('Cookie', `refreshToken=${user0.refreshToken}`)
         .set('User-Agent', user1.userAgent);
+
+      expect(res.status).toBe(HttpStatus.UNAUTHORIZED);
+    });
+  });
+
+  describe('get me', () => {
+    it('should be returned get me', async () => {
+      const [user0] = await userTest.createLoginUsers(1);
+
+      const res = await request(server)
+        .get(GET_ME)
+        .auth(user0.accessToken, { type: 'bearer' });
+
+      expect(res.status).toBe(HttpStatus.OK);
+      expect(res.body).toEqual({
+        userId: user0.id,
+        email: user0.email,
+        login: user0.login,
+      });
+    });
+
+    it("shouldn't returned get me if no auth", async () => {
+      await userTest.createLoginUsers(1);
+
+      const res = await request(server).get(GET_ME);
 
       expect(res.status).toBe(HttpStatus.UNAUTHORIZED);
     });
