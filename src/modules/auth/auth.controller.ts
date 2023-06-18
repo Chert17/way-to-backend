@@ -8,11 +8,15 @@ import {
   Ip,
   Post,
   Res,
+  UseGuards,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { CommandBus } from '@nestjs/cqrs';
 
+import { RefreshTokenPayload } from '../../infra/decorators/params/req.refresh.token.decorator';
 import { UserAgent } from '../../infra/decorators/params/req.user.agent.decorator';
+import { RefreshTokenGuard } from '../../infra/guards/refresh.token.guard';
+import { ReqUserType } from '../../types/req.user.interface';
 import { SETTINGS } from '../../utils/settings';
 import { CreateUserDto } from '../users/dto/create-user.dto';
 import { ConfirmRegisterDto } from './dto/input/confirm.register.dto';
@@ -22,6 +26,7 @@ import { JwtTokensViewDto } from './dto/view/jwt.tokens.view.dto';
 import { ConfirmRegisterUserCommand } from './use-case/confirm.register.use-case';
 import { EmailResendingCommand } from './use-case/email.resending.use-case';
 import { LoginUserCommand } from './use-case/login.use-case';
+import { RefreshTokenCommand } from './use-case/refresh.token.use-case';
 import { RegisterUserCommand } from './use-case/register.use-case';
 
 const { COOKIE_HTTP_ONLY, COOKIE_SECURE, REFRESH_TOKEN_COOKIE_NAME } = SETTINGS;
@@ -53,7 +58,7 @@ export class AuthController {
     @Ip() ip: string,
     @UserAgent() userAgent: string,
   ) {
-    const { accessToken, refreshToken } = await await this.commandBus.execute<
+    const { accessToken, refreshToken } = await this.commandBus.execute<
       LoginUserCommand,
       JwtTokensViewDto
     >(new LoginUserCommand({ ...dto, ip, userAgent }));
@@ -67,6 +72,25 @@ export class AuthController {
   @HttpCode(HttpStatus.NO_CONTENT)
   emailResending(@Body() dto: EmailResendingDto) {
     return this.commandBus.execute(new EmailResendingCommand(dto.email));
+  }
+
+  @Post('/refresh-token')
+  @UseGuards(RefreshTokenGuard)
+  @HttpCode(HttpStatus.OK)
+  async refreshToken(
+    @Res({ passthrough: true }) res: Response,
+    @RefreshTokenPayload() refreshPayload: ReqUserType,
+    @Ip() ip: string,
+    @UserAgent() userAgent: string,
+  ) {
+    const { accessToken, refreshToken } = await this.commandBus.execute<
+      RefreshTokenCommand,
+      JwtTokensViewDto
+    >(new RefreshTokenCommand({ ...refreshPayload, ip, userAgent }));
+
+    this._setRefreshTokenToCookie(res, refreshToken);
+
+    return { accessToken };
   }
 
   private _setRefreshTokenToCookie(res: Response, refreshToken: string) {

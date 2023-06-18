@@ -4,7 +4,10 @@ import { EntityManager } from 'typeorm';
 import { faker } from '@faker-js/faker';
 
 import { UsersSqlTables } from '../../src/utils/tables/users.sql.tables';
-import { SA_URL } from './endpoints';
+import { authEndpoints, SA_URL } from './endpoints';
+import { getRefreshToken } from './get.refresh.token';
+
+const { LOGIN_URL } = authEndpoints;
 
 const { USERS_CONFIRM_EMAIL_TABLE, USERS_TABLE } = UsersSqlTables;
 
@@ -18,6 +21,12 @@ interface User {
   login: string;
   email: string;
   password: string;
+}
+
+interface LoginUserWithTokens extends User {
+  accessToken: string;
+  refreshToken: string;
+  userAgent: string;
 }
 
 export class UserTest {
@@ -54,6 +63,30 @@ export class UserTest {
     }
 
     return users;
+  }
+
+  async createLoginUsers(quantity: number): Promise<LoginUserWithTokens[]> {
+    const result = [];
+
+    const users = await this.createUsers(quantity);
+
+    for (let i = 0; i < quantity; i++) {
+      const res = await request(this.server)
+        .post(LOGIN_URL)
+        .send({ loginOrEmail: users[i].email, password: users[i].password })
+        .set('User-Agent', `my test${i}`);
+
+      const { value } = getRefreshToken(res);
+
+      result.push({
+        ...users[i],
+        accessToken: res.body.accessToken,
+        refreshToken: value,
+        userAgent: `my test${i}`,
+      });
+    }
+
+    return result;
   }
 
   async getConfirmEmailCodeByUser(

@@ -22,10 +22,10 @@ export class Device {
   @Column({ type: 'varchar', length: 100 })
   title: string;
 
-  @Column({ type: 'timestamp' })
+  @Column({ type: 'varchar' })
   last_active_date: string;
 
-  @ManyToOne(() => User, { cascade: true })
+  @ManyToOne(() => User, user => user.devices, { cascade: true })
   @JoinColumn({ name: 'user_id' })
   user: User;
 }

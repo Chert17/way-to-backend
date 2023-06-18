@@ -1,4 +1,4 @@
-import { decode, sign } from 'jsonwebtoken';
+import { decode, sign, verify } from 'jsonwebtoken';
 
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
@@ -27,6 +27,21 @@ export class JwtService {
       });
 
       return { accessToken, refreshToken };
+    } catch (error) {
+      console.log(error);
+      return null;
+    }
+  }
+
+  verifyToken(token: string) {
+    try {
+      const result = verify(token, this._jwtSecret) as any;
+
+      return {
+        userId: result.userId,
+        deviceId: result.deviceId,
+        iat: result.iat,
+      };
     } catch (error) {
       console.log(error);
       return null;

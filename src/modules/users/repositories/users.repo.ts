@@ -79,10 +79,10 @@ export class UsersRepo {
       `
     update ${USERS_CONFIRM_EMAIL_TABLE} e
     set confirm_code = $2, expr_date = $3
-    WHERE user_id = (
-      SELECT id
-      FROM ${USERS_TABLE}
-      WHERE email = $1
+    where user_id = (
+      select id
+      from ${USERS_TABLE}
+      where email = $1
     )
     `,
       [email, newCode, newExpDate],
@@ -144,6 +144,19 @@ export class UsersRepo {
     where u.login = $1 or u.email = $1
     `,
       [loginOrEmail],
+    );
+
+    return result[0];
+  }
+
+  async checkBanUserById(userId: string): Promise<{ is_banned: boolean }> {
+    const result = await this.dataSource.query(
+      `
+    select b.is_banned from ${USERS_TABLE} u
+    left join ${USERS_BAN_INFO_TABLE} b on u.id = b.user_id
+    where u.id = $1
+    `,
+      [userId],
     );
 
     return result[0];

@@ -5,11 +5,16 @@ import { HttpStatus } from '@nestjs/common';
 import { authEndpoints } from './helpers/endpoints';
 import { errorsData } from './helpers/errors.data';
 import { UserTest } from './helpers/fabrica';
-import { getRefreshTokenNameFromCookie } from './helpers/get.refresh.token';
+import { getRefreshToken } from './helpers/get.refresh.token';
 import { myBeforeAll } from './helpers/my.before.all';
 
-const { REGISTER_URL, LOGIN_URL, CONFIRM_REGISTER_URL, RESENDING_EMAIL_URL } =
-  authEndpoints;
+const {
+  REGISTER_URL,
+  LOGIN_URL,
+  CONFIRM_REGISTER_URL,
+  RESENDING_EMAIL_URL,
+  REFRESH_TOKEN_URL,
+} = authEndpoints;
 
 describe('auth e2e', () => {
   let server: any;
@@ -87,11 +92,11 @@ describe('auth e2e', () => {
         .send({ loginOrEmail: users[0].email, password: users[0].password })
         .set('User-Agent', 'my test');
 
-      const refreshTokenName = getRefreshTokenNameFromCookie(res);
+      const { name } = getRefreshToken(res);
 
       expect(res.status).toBe(HttpStatus.OK);
       expect(res.body).toEqual({ accessToken: expect.any(String) });
-      expect(refreshTokenName).toBeDefined();
+      expect(name).toBeDefined();
     });
 
     it("shouldn't login user with incorrect data", async () => {
@@ -176,6 +181,69 @@ describe('auth e2e', () => {
 
       expect(res.status).toBe(HttpStatus.BAD_REQUEST);
       expect(res.body).toEqual(errors);
+    });
+  });
+
+  describe('refresh token', () => {
+    it('should be return new pair tokens', async () => {
+      const [user0] = await userTest.createLoginUsers(1);
+
+      const res = await request(server)
+        .post(REFRESH_TOKEN_URL)
+        .set('Cookie', `refreshToken=${user0.refreshToken}`)
+        .set('User-Agent', user0.userAgent);
+
+      const { name } = getRefreshToken(res);
+
+      expect(res.status).toBe(HttpStatus.OK);
+      expect(res.body).toEqual({ accessToken: expect.any(String) });
+      expect(name).toBeDefined();
+    });
+
+    it("shouldn't get new tokens if incorrect refresh token", async () => {
+      const [user0] = await userTest.createLoginUsers(1);
+
+      const sleep = (ms: number) => new Promise(r => setTimeout(r, ms));
+
+      await sleep(1500);
+
+      const res = await request(server)
+        .post(REFRESH_TOKEN_URL)
+        .set('Cookie', `refreshToken=${user0.refreshToken}`)
+        .set('User-Agent', user0.userAgent);
+
+      const res2 = await request(server)
+        .post(REFRESH_TOKEN_URL)
+        .set('Cookie', `refreshToken=${user0.refreshToken}`)
+        .set('User-Agent', user0.userAgent);
+
+      const { name } = getRefreshToken(res);
+
+      expect(res.status).toBe(HttpStatus.OK);
+      expect(res.body).toEqual({ accessToken: expect.any(String) });
+      expect(name).toBeDefined();
+      expect(res2.status).toBe(HttpStatus.UNAUTHORIZED);
+    });
+
+    it("shouldn't get new tokens if other user-agent", async () => {
+      const [user0, user1] = await userTest.createLoginUsers(2);
+
+      const res = await request(server)
+        .post(REFRESH_TOKEN_URL)
+        .set('Cookie', `refreshToken=${user0.refreshToken}`)
+        .set('User-Agent', user0.userAgent);
+
+      const { name, value } = getRefreshToken(res);
+
+      const res2 = await request(server)
+        .post(REFRESH_TOKEN_URL)
+        .set('Cookie', `refreshToken=${value}`)
+        .set('User-Agent', user1.userAgent);
+
+      expect(res.status).toBe(HttpStatus.OK);
+      expect(res.body).toEqual({ accessToken: expect.any(String) });
+      expect(name).toBeDefined();
+      expect(res2.status).toBe(HttpStatus.UNAUTHORIZED);
     });
   });
 });
