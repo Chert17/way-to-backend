@@ -35,6 +35,8 @@ interface LoginUserWithTokens extends User {
   userAgent: string;
 }
 
+type DeviceWithTokens = LoginUserWithTokens;
+
 export class UserTest {
   constructor(
     private readonly server: any,
@@ -86,6 +88,30 @@ export class UserTest {
 
       result.push({
         ...users[i],
+        accessToken: res.body.accessToken,
+        refreshToken: value,
+        userAgent: `my test${i}`,
+      });
+    }
+
+    return result;
+  }
+
+  async createDevices(quantity: number): Promise<DeviceWithTokens[]> {
+    const result = [];
+
+    const [users0] = await this.createUsers(1);
+
+    for (let i = 0; i < quantity; i++) {
+      const res = await request(this.server)
+        .post(LOGIN_URL)
+        .send({ loginOrEmail: users0.email, password: users0.password })
+        .set('User-Agent', `my test${i}`);
+
+      const { value } = getRefreshToken(res);
+
+      result.push({
+        ...users0,
         accessToken: res.body.accessToken,
         refreshToken: value,
         userAgent: `my test${i}`,
