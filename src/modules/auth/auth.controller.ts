@@ -3,6 +3,7 @@ import { Response } from 'express';
 import {
   Body,
   Controller,
+  Get,
   HttpCode,
   HttpStatus,
   Ip,
@@ -12,13 +13,17 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { CommandBus } from '@nestjs/cqrs';
+import { SkipThrottle } from '@nestjs/throttler';
 
 import { RefreshTokenPayload } from '../../infra/decorators/params/req.refresh.token.decorator';
 import { UserAgent } from '../../infra/decorators/params/req.user.agent.decorator';
+import { ReqUser } from '../../infra/decorators/params/req.user.decorator';
+import { JwtAuthGuard } from '../../infra/guards/jwt.auth.guard';
 import { RefreshTokenGuard } from '../../infra/guards/refresh.token.guard';
 import { ReqUserType } from '../../types/req.user.interface';
 import { SETTINGS } from '../../utils/settings';
 import { CreateUserDto } from '../users/dto/create-user.dto';
+import { UserViewDto } from '../users/dto/user.view.dto';
 import { ConfirmRegisterDto } from './dto/input/confirm.register.dto';
 import { EmailResendingDto } from './dto/input/email.resending.dto';
 import { LoginDto } from './dto/input/login.dto';
@@ -38,6 +43,13 @@ export class AuthController {
     private configService: ConfigService,
     private readonly commandBus: CommandBus,
   ) {}
+
+  @Get('/me')
+  @SkipThrottle()
+  @UseGuards(JwtAuthGuard)
+  async getMe(@ReqUser() user: UserViewDto) {
+    return { userId: user.id, login: user.login, email: user.email };
+  }
 
   @Post('/registration')
   @HttpCode(HttpStatus.NO_CONTENT)
