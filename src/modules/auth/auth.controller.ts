@@ -13,7 +13,7 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { CommandBus } from '@nestjs/cqrs';
-import { SkipThrottle } from '@nestjs/throttler';
+import { SkipThrottle, ThrottlerGuard } from '@nestjs/throttler';
 
 import { RefreshTokenPayload } from '../../infra/decorators/params/req.refresh.token.decorator';
 import { UserAgent } from '../../infra/decorators/params/req.user.agent.decorator';
@@ -42,6 +42,7 @@ import { RegisterUserCommand } from './use-case/register.use-case';
 const { COOKIE_HTTP_ONLY, COOKIE_SECURE, REFRESH_TOKEN_COOKIE_NAME } = SETTINGS;
 
 @Controller('auth')
+@UseGuards(ThrottlerGuard)
 export class AuthController {
   constructor(
     private configService: ConfigService,
@@ -92,6 +93,7 @@ export class AuthController {
   }
 
   @Post('/refresh-token')
+  @SkipThrottle()
   @UseGuards(RefreshTokenGuard)
   @HttpCode(HttpStatus.OK)
   async refreshToken(

@@ -382,4 +382,30 @@ describe('auth e2e', () => {
       expect(passRes.body).toEqual(errors);
     });
   });
+
+  describe('rate limit', () => {
+    it('should be returned to many request 429 status code', async () => {
+      const urls = [
+        REGISTER_URL,
+        CONFIRM_REGISTER_URL,
+        LOGIN_URL,
+        LOGOUT_URL,
+        RESENDING_EMAIL_URL,
+        RECOVERY_PASS_URL,
+        NEW_PASS_URL,
+      ];
+
+      const resCount = 6;
+
+      urls.map(async url => {
+        for (let i = 0; i <= resCount; i++) {
+          const res = await request(server).post(url);
+
+          if (i === resCount) {
+            expect(res.status).toBe(HttpStatus.TOO_MANY_REQUESTS);
+          }
+        }
+      });
+    });
+  });
 });
