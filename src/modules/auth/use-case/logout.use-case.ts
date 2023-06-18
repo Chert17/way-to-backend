@@ -1,7 +1,7 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 
-import { DevicesService } from '../../devices/devices.service';
 import { DevicesRepo } from '../../devices/repositories/devices.repo';
+import { AuthService } from '../auth.service';
 import { LogoutServiceDto } from '../dto/input/logout.dto';
 
 export class LogoutCommand {
@@ -12,7 +12,7 @@ export class LogoutCommand {
 export class LogoutUseCase implements ICommandHandler<LogoutCommand> {
   constructor(
     private devicesRepo: DevicesRepo,
-    private devicesService: DevicesService,
+    private authService: AuthService,
   ) {}
 
   async execute({ dto }: LogoutCommand) {
@@ -20,7 +20,7 @@ export class LogoutUseCase implements ICommandHandler<LogoutCommand> {
 
     const device = await this.devicesRepo.getDeviceById(deviceId);
 
-    this.devicesService.checkDevice(device, userId, iat, userAgent);
+    this.authService.checkDevice(device, userId, iat, userAgent);
 
     return this.devicesRepo.deleteOneDevice({ userId, deviceId });
   }
