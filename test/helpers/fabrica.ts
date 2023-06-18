@@ -10,8 +10,12 @@ import { getRefreshToken } from './get.refresh.token';
 
 const { LOGIN_URL } = authEndpoints;
 
-const { USERS_CONFIRM_EMAIL_TABLE, USERS_TABLE, USERS_DEVICES_TABLE } =
-  UsersSqlTables;
+const {
+  USERS_CONFIRM_EMAIL_TABLE,
+  USERS_TABLE,
+  USERS_DEVICES_TABLE,
+  USERS_RECOVERY_PASS_TABLE,
+} = UsersSqlTables;
 
 export const admin = {
   login: 'admin',
@@ -91,9 +95,7 @@ export class UserTest {
     return result;
   }
 
-  async getConfirmEmailCodeByUser(
-    email: string,
-  ): Promise<{ confirmCode: string }> {
+  async getConfirmEmailCode(email: string): Promise<{ confirmCode: string }> {
     const code = await this.dataSource.query(
       `
     select e.confirm_code from ${USERS_CONFIRM_EMAIL_TABLE} e
@@ -108,6 +110,19 @@ export class UserTest {
 
   async getUserDevices(): Promise<Device[]> {
     return this.dataSource.query(`select * from ${USERS_DEVICES_TABLE}`);
+  }
+
+  async getRecoveryCode(email: string): Promise<{ recoveryCode: string }> {
+    const code = await this.dataSource.query(
+      `
+    select p.recovery_code from ${USERS_RECOVERY_PASS_TABLE} p
+    left join ${USERS_TABLE} u on p.user_id = u.id
+    where u.email = $1
+    `,
+      [email],
+    );
+
+    return { recoveryCode: code[0]?.recovery_code ?? null };
   }
 
   _createtUserData() {

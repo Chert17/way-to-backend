@@ -5,14 +5,20 @@ import { InjectDataSource } from '@nestjs/typeorm';
 
 import { UsersSqlTables } from '../../../utils/tables/users.sql.tables';
 import { EmailResendingDbDto } from '../../auth/dto/input/email.resending.dto';
+import { RecoveyPassowrdDbDto } from '../../auth/dto/input/recovery.password.dto';
 import { RegisterDbDto } from '../../auth/dto/input/register.dto';
+import { RecoveryPassDb } from '../../auth/types/recovery.pass.types';
 import { UserWithEmailInfoAndBanInfo } from '../../auth/types/user.types';
 import { BanUserDbDto } from '../dto/ban.user.dto';
 import { CreateUserDbDto } from '../dto/create-user.dto';
 import { User } from '../entities/user.entity';
 
-const { USERS_BAN_INFO_TABLE, USERS_TABLE, USERS_CONFIRM_EMAIL_TABLE } =
-  UsersSqlTables;
+const {
+  USERS_BAN_INFO_TABLE,
+  USERS_TABLE,
+  USERS_CONFIRM_EMAIL_TABLE,
+  USERS_RECOVERY_PASS_TABLE,
+} = UsersSqlTables;
 
 @Injectable()
 export class UsersRepo {
@@ -124,6 +130,40 @@ export class UsersRepo {
     );
   }
 
+  async createRecoveryPassInfo(dto: RecoveyPassowrdDbDto) {
+    const { expDate, recoveryCode, userId } = dto;
+
+    return this.dataSource.query(
+      `
+    insert into ${USERS_RECOVERY_PASS_TABLE} ("recovery_code", "expr_date", "user_id")
+    values ($2, $3, $1)
+    `,
+      [userId, recoveryCode, expDate],
+    );
+  }
+
+  async getRecoveryPassInfoByCode(code: string): Promise<RecoveryPassDb> {
+    const result = await this.dataSource.query(
+      `
+    select * from ${USERS_RECOVERY_PASS_TABLE} where recovery_code = $1
+    `,
+      [code],
+    );
+
+    return result[0];
+  }
+
+  async setNewPass(userId: string, passHash: string) {
+    return this.dataSource.query(
+      `
+    update ${USERS_TABLE}
+    set pass_hash = $2
+    where id = $1
+    `,
+      [userId, passHash],
+    );
+  }
+
   async checkUserById(userId: string): Promise<User> {
     const result = await this.dataSource.query(
       `SELECT * FROM ${USERS_TABLE} u WHERE u.id = '${userId}'`,
@@ -157,6 +197,17 @@ export class UsersRepo {
     where u.id = $1
     `,
       [userId],
+    );
+
+    return result[0];
+  }
+
+  async checkUserByEmail(email: string): Promise<User> {
+    const result = await this.dataSource.query(
+      `
+    select * from ${USERS_TABLE} where email = $1
+    `,
+      [email],
     );
 
     return result[0];

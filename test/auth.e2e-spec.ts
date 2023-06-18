@@ -16,6 +16,8 @@ const {
   REFRESH_TOKEN_URL,
   LOGOUT_URL,
   GET_ME,
+  RECOVERY_PASS_URL,
+  NEW_PASS_URL,
 } = authEndpoints;
 
 describe('auth e2e', () => {
@@ -43,7 +45,7 @@ describe('auth e2e', () => {
         .post(REGISTER_URL)
         .send({ email, login, password });
 
-      const { confirmCode } = await userTest.getConfirmEmailCodeByUser(email);
+      const { confirmCode } = await userTest.getConfirmEmailCode(email);
 
       const emailRes = await request(server)
         .post(CONFIRM_REGISTER_URL)
@@ -160,7 +162,7 @@ describe('auth e2e', () => {
         .post(RESENDING_EMAIL_URL)
         .send({ email: email });
 
-      const { confirmCode } = await userTest.getConfirmEmailCodeByUser(email);
+      const { confirmCode } = await userTest.getConfirmEmailCode(email);
 
       const emailRes = await request(server)
         .post(CONFIRM_REGISTER_URL)
@@ -308,6 +310,76 @@ describe('auth e2e', () => {
       const res = await request(server).get(GET_ME);
 
       expect(res.status).toBe(HttpStatus.UNAUTHORIZED);
+    });
+  });
+
+  describe('recovery password', () => {
+    it('should be recovery pass', async () => {
+      const { email, login, password } = userTest._createtUserData();
+
+      await request(server).post(REGISTER_URL).send({ email, login, password });
+
+      const res = await request(server).post(RECOVERY_PASS_URL).send({ email });
+
+      const { recoveryCode } = await userTest.getRecoveryCode(email);
+
+      const passRes = await request(server)
+        .post(NEW_PASS_URL)
+        .send({ newPassword: 'newPass123', recoveryCode: recoveryCode });
+
+      expect(res.status).toBe(HttpStatus.NO_CONTENT);
+      expect(passRes.status).toBe(HttpStatus.NO_CONTENT);
+    });
+
+    it("shouldn't recovery pass if user email no register", async () => {
+      const { email } = userTest._createtUserData();
+
+      const res = await request(server).post(RECOVERY_PASS_URL).send({ email });
+
+      const { recoveryCode } = await userTest.getRecoveryCode(email);
+
+      expect(res.status).toBe(HttpStatus.NO_CONTENT);
+      expect(recoveryCode).toBeNull();
+    });
+
+    it("shouldn't recovery pass if incorreect code", async () => {
+      const { email, login, password } = userTest._createtUserData();
+
+      await request(server).post(REGISTER_URL).send({ email, login, password });
+
+      const res = await request(server).post(RECOVERY_PASS_URL).send({ email });
+
+      const passRes = await request(server).post(NEW_PASS_URL).send({
+        newPassword: 'newPass123',
+        recoveryCode: 'a6db59ed-2550-404d-801a-244d3115cf82',
+      });
+
+      const errors = errorsData('recoveryCode');
+
+      expect(res.status).toBe(HttpStatus.NO_CONTENT);
+      expect(passRes.status).toBe(HttpStatus.BAD_REQUEST);
+      expect(passRes.body).toEqual(errors);
+    });
+
+    it("shouldn't recovery pass if incorreect pass", async () => {
+      const { email, login, password } = userTest._createtUserData();
+
+      await request(server).post(REGISTER_URL).send({ email, login, password });
+
+      const res = await request(server).post(RECOVERY_PASS_URL).send({ email });
+
+      const { recoveryCode } = await userTest.getRecoveryCode(email);
+
+      const passRes = await request(server).post(NEW_PASS_URL).send({
+        newPassword: '',
+        recoveryCode: recoveryCode,
+      });
+
+      const errors = errorsData('newPassword');
+
+      expect(res.status).toBe(HttpStatus.NO_CONTENT);
+      expect(passRes.status).toBe(HttpStatus.BAD_REQUEST);
+      expect(passRes.body).toEqual(errors);
     });
   });
 });
