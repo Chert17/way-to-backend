@@ -7,6 +7,7 @@ import { errorsData } from './helpers/errors.data';
 import { UserTest } from './helpers/fabrica';
 import { getRefreshToken } from './helpers/get.refresh.token';
 import { myBeforeAll } from './helpers/my.before.all';
+import { sleep } from './helpers/sleep';
 
 const {
   REGISTER_URL,
@@ -206,8 +207,6 @@ describe('auth e2e', () => {
 
     it("shouldn't get new tokens if incorrect refresh token", async () => {
       const [user0] = await userTest.createLoginUsers(1);
-
-      const sleep = (ms: number) => new Promise(r => setTimeout(r, ms));
 
       await sleep(1500);
 

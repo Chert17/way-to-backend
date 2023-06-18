@@ -9,6 +9,7 @@ import { DevicesController } from './devices.controller';
 import { DevicesService } from './devices.service';
 import { DevicesQueryRepo } from './repositories/devices.query.repo';
 import { DevicesRepo } from './repositories/devices.repo';
+import { DeleteDeviceUseCase } from './use-case/delete.device.use-case';
 import { GetAllDevicesUseCase } from './use-case/get.all.devices.use-case';
 
 @Module({
@@ -22,6 +23,7 @@ import { GetAllDevicesUseCase } from './use-case/get.all.devices.use-case';
     UsersRepo,
     // use-case
     GetAllDevicesUseCase,
+    DeleteDeviceUseCase,
   ],
   imports: [TypeOrmModule.forFeature([Device]), CqrsModule],
 })

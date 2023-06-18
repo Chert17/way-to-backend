@@ -32,8 +32,6 @@ describe('auth e2e', () => {
           .get(DEVICE_URL)
           .set('Cookie', `refreshToken=${device0.refreshToken}`);
 
-        console.log('TEST', res.body);
-
         expect(res.status).toBe(HttpStatus.OK);
         expect(res.body).toEqual([
           {
@@ -55,6 +53,66 @@ describe('auth e2e', () => {
         await userTest.createDevices(1);
 
         const res = await request(server).get(DEVICE_URL);
+
+        expect(res.status).toBe(HttpStatus.UNAUTHORIZED);
+      });
+    });
+
+    describe('delete device by id', () => {
+      it('should be delete device by id', async () => {
+        const [device0, device1] = await userTest.createDevices(2);
+
+        const devices = await request(server)
+          .get(DEVICE_URL)
+          .set('Cookie', `refreshToken=${device0.refreshToken}`);
+
+        const res = await request(server)
+          .delete(DEVICE_URL + `/${devices.body[0].deviceId}`)
+          .set('Cookie', `refreshToken=${device0.refreshToken}`);
+
+        const expectDevices = await request(server)
+          .get(DEVICE_URL)
+          .set('Cookie', `refreshToken=${device1.refreshToken}`);
+
+        expect(res.status).toBe(HttpStatus.NO_CONTENT);
+        expect(expectDevices.body).toHaveLength(1);
+      });
+
+      it("shouldn't delete device if not exist device", async () => {
+        const [device0] = await userTest.createDevices(1);
+
+        const res = await request(server)
+          .delete(DEVICE_URL + `/2a6b5dc8-a865-4a5e-8bd8-cd93a332ce2a`)
+          .set('Cookie', `refreshToken=${device0.refreshToken}`);
+
+        expect(res.status).toBe(HttpStatus.NOT_FOUND);
+      });
+
+      it("shouldn't delete device if other owner", async () => {
+        const [device0] = await userTest.createDevices(1);
+        const [device1] = await userTest.createDevices(1);
+
+        const devices = await request(server)
+          .get(DEVICE_URL)
+          .set('Cookie', `refreshToken=${device0.refreshToken}`);
+
+        const res = await request(server)
+          .delete(DEVICE_URL + `/${devices.body[0].deviceId}`)
+          .set('Cookie', `refreshToken=${device1.refreshToken}`);
+
+        expect(res.status).toBe(HttpStatus.FORBIDDEN);
+      });
+
+      it("shouldn't delete device if incorrect refresh token", async () => {
+        const [device0] = await userTest.createDevices(1);
+
+        const devices = await request(server)
+          .get(DEVICE_URL)
+          .set('Cookie', `refreshToken=${device0.refreshToken}`);
+
+        const res = await request(server).delete(
+          DEVICE_URL + `/${devices.body[0].deviceId}`,
+        );
 
         expect(res.status).toBe(HttpStatus.UNAUTHORIZED);
       });
