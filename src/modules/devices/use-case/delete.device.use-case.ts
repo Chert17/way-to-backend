@@ -16,8 +16,6 @@ export class DeleteDeviceUseCase
   async execute({ dto }: DeleteDeviceCommand) {
     const { userId, deviceId } = dto;
 
-    console.log('USE-CASE', dto);
-
     const device = await this.devicesRepo.getDeviceById(deviceId);
 
     if (!device) throw new NotFoundException();
