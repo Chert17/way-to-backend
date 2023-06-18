@@ -21,3 +21,5 @@ export const BLOG_URL = '/blogs/';
 export const POST_URL = '/posts/';
 
 export const COMMENT_URL = '/comments/';
+
+export const DEVICE_URL = GLOBAL_PREFIX + '/security/devices';
