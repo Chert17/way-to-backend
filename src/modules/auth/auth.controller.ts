@@ -26,6 +26,7 @@ import { JwtTokensViewDto } from './dto/view/jwt.tokens.view.dto';
 import { ConfirmRegisterUserCommand } from './use-case/confirm.register.use-case';
 import { EmailResendingCommand } from './use-case/email.resending.use-case';
 import { LoginUserCommand } from './use-case/login.use-case';
+import { LogoutCommand } from './use-case/logout.use-case';
 import { RefreshTokenCommand } from './use-case/refresh.token.use-case';
 import { RegisterUserCommand } from './use-case/register.use-case';
 
@@ -91,6 +92,22 @@ export class AuthController {
     this._setRefreshTokenToCookie(res, refreshToken);
 
     return { accessToken };
+  }
+
+  @Post('/logout')
+  @UseGuards(RefreshTokenGuard)
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async logout(
+    @Res({ passthrough: true }) res: Response,
+    @RefreshTokenPayload() refreshPayload: ReqUserType,
+    @UserAgent() userAgent: string,
+  ) {
+    await this.commandBus.execute(
+      new LogoutCommand({ ...refreshPayload, userAgent }),
+    );
+
+    res.clearCookie(REFRESH_TOKEN_COOKIE_NAME);
+    return;
   }
 
   private _setRefreshTokenToCookie(res: Response, refreshToken: string) {

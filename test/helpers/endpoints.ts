@@ -10,6 +10,7 @@ export const authEndpoints = {
   RESENDING_EMAIL_URL: AUTH_URL + '/registration-email-resending',
   LOGIN_URL: AUTH_URL + '/login',
   REFRESH_TOKEN_URL: AUTH_URL + '/refresh-token',
+  LOGOUT_URL: AUTH_URL + '/logout',
   GET_ME: AUTH_URL + '/me',
 };
 

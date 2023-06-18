@@ -3,13 +3,15 @@ import { EntityManager } from 'typeorm';
 
 import { faker } from '@faker-js/faker';
 
+import { Device } from '../../src/modules/users/entities/devices';
 import { UsersSqlTables } from '../../src/utils/tables/users.sql.tables';
 import { authEndpoints, SA_URL } from './endpoints';
 import { getRefreshToken } from './get.refresh.token';
 
 const { LOGIN_URL } = authEndpoints;
 
-const { USERS_CONFIRM_EMAIL_TABLE, USERS_TABLE } = UsersSqlTables;
+const { USERS_CONFIRM_EMAIL_TABLE, USERS_TABLE, USERS_DEVICES_TABLE } =
+  UsersSqlTables;
 
 export const admin = {
   login: 'admin',
@@ -102,6 +104,10 @@ export class UserTest {
     );
 
     return { confirmCode: code[0].confirm_code };
+  }
+
+  async getUserDevices(): Promise<Device[]> {
+    return this.dataSource.query(`select * from ${USERS_DEVICES_TABLE}`);
   }
 
   _createtUserData() {
