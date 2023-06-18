@@ -27,11 +27,15 @@ import { UserViewDto } from '../users/dto/user.view.dto';
 import { ConfirmRegisterDto } from './dto/input/confirm.register.dto';
 import { EmailResendingDto } from './dto/input/email.resending.dto';
 import { LoginDto } from './dto/input/login.dto';
+import { NewPasswordDto } from './dto/input/new.password.dto';
+import { RecoveryPasswordDto } from './dto/input/recovery.password.dto';
 import { JwtTokensViewDto } from './dto/view/jwt.tokens.view.dto';
 import { ConfirmRegisterUserCommand } from './use-case/confirm.register.use-case';
 import { EmailResendingCommand } from './use-case/email.resending.use-case';
 import { LoginUserCommand } from './use-case/login.use-case';
 import { LogoutCommand } from './use-case/logout.use-case';
+import { NewPassCommand } from './use-case/new.pass.use-case';
+import { RecoveryPassCommand } from './use-case/recovery.pass.use-case';
 import { RefreshTokenCommand } from './use-case/refresh.token.use-case';
 import { RegisterUserCommand } from './use-case/register.use-case';
 
@@ -120,6 +124,18 @@ export class AuthController {
 
     res.clearCookie(REFRESH_TOKEN_COOKIE_NAME);
     return;
+  }
+
+  @Post('/password-recovery')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  recoveryPassword(@Body() dto: RecoveryPasswordDto) {
+    return this.commandBus.execute(new RecoveryPassCommand(dto.email));
+  }
+
+  @Post('/new-password')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  newPassword(@Body() dto: NewPasswordDto) {
+    return this.commandBus.execute(new NewPassCommand(dto));
   }
 
   private _setRefreshTokenToCookie(res: Response, refreshToken: string) {

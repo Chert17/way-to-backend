@@ -13,9 +13,6 @@ export class RecoveryPassword {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column({ type: 'boolean' })
-  is_confirmed: boolean;
-
   @Column({ type: 'uuid', unique: true })
   recovery_code: string;
 

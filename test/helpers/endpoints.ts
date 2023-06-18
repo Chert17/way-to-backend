@@ -11,6 +11,8 @@ export const authEndpoints = {
   LOGIN_URL: AUTH_URL + '/login',
   REFRESH_TOKEN_URL: AUTH_URL + '/refresh-token',
   LOGOUT_URL: AUTH_URL + '/logout',
+  RECOVERY_PASS_URL: AUTH_URL + '/password-recovery',
+  NEW_PASS_URL: AUTH_URL + '/new-password',
   GET_ME: AUTH_URL + '/me',
 };
 
