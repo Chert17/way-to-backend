@@ -17,12 +17,14 @@ import { JwtService } from './jwt.service';
 import { ConfirmRegisterUseCase } from './use-case/confirm.register.use-case';
 import { EmailResendingUseCase } from './use-case/email.resending.use-case';
 import { LoginUseCase } from './use-case/login.use-case';
+import { LogoutUseCase } from './use-case/logout.use-case';
 import { RefreshTokenUseCase } from './use-case/refresh.token.use-case';
 import { RegisterUseCase } from './use-case/register.use-case';
 
 @Module({
   controllers: [AuthController],
   providers: [
+    // service
     AuthService,
     UsersService,
     UsersRepo,
@@ -30,11 +32,14 @@ import { RegisterUseCase } from './use-case/register.use-case';
     EmailService,
     JwtService,
     DevicesService,
+    // use-case
     RegisterUseCase,
     ConfirmRegisterUseCase,
     LoginUseCase,
     EmailResendingUseCase,
     RefreshTokenUseCase,
+    LogoutUseCase,
+    // validation
     ExistConfirmCode,
     ExistUserByLoginOrEmail,
     ExistResendingEmail,

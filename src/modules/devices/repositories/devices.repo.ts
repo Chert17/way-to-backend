@@ -5,6 +5,7 @@ import { InjectDataSource } from '@nestjs/typeorm';
 
 import { UsersSqlTables } from '../../../utils/tables/users.sql.tables';
 import { CreateDevicesDbDto } from '../dto/create.device.dto';
+import { DeleteDeviceDbDto } from '../dto/delete.device.dto';
 import { UpdateDeviceDbDto } from '../dto/update.device.dto';
 import { DeviceDb } from '../types/device.db';
 
@@ -47,6 +48,17 @@ export class DevicesRepo {
   where user_id = $1 and device_id = $2
   `,
       [userId, deviceId, ip, lastActiveDate],
+    );
+  }
+
+  async deleteOneDevice(dto: DeleteDeviceDbDto) {
+    const { userId, deviceId } = dto;
+
+    return this.dataSource.query(
+      `
+    delete from ${USERS_DEVICES_TABLE} where user_id = $1 and device_id = $2
+    `,
+      [userId, deviceId],
     );
   }
 }

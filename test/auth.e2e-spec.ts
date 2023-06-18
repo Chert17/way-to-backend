@@ -14,6 +14,7 @@ const {
   CONFIRM_REGISTER_URL,
   RESENDING_EMAIL_URL,
   REFRESH_TOKEN_URL,
+  LOGOUT_URL,
 } = authEndpoints;
 
 describe('auth e2e', () => {
@@ -244,6 +245,43 @@ describe('auth e2e', () => {
       expect(res.body).toEqual({ accessToken: expect.any(String) });
       expect(name).toBeDefined();
       expect(res2.status).toBe(HttpStatus.UNAUTHORIZED);
+    });
+  });
+
+  describe('logout', () => {
+    it('should be logout user', async () => {
+      const [user0] = await userTest.createLoginUsers(2);
+
+      const res = await request(server)
+        .post(LOGOUT_URL)
+        .set('Cookie', `refreshToken=${user0.refreshToken}`)
+        .set('User-Agent', user0.userAgent);
+
+      const devices = await userTest.getUserDevices();
+
+      expect(res.status).toBe(HttpStatus.NO_CONTENT);
+      expect(devices.length).toBe(1);
+    });
+
+    it("shouldn't logout if no refresh token in cookie", async () => {
+      const [user0] = await userTest.createLoginUsers(1);
+
+      const res = await request(server)
+        .post(LOGOUT_URL)
+        .set('User-Agent', user0.userAgent);
+
+      expect(res.status).toBe(HttpStatus.UNAUTHORIZED);
+    });
+
+    it("shouldn't logout ifother user-agent", async () => {
+      const [user0, user1] = await userTest.createLoginUsers(2);
+
+      const res = await request(server)
+        .post(LOGOUT_URL)
+        .set('Cookie', `refreshToken=${user0.refreshToken}`)
+        .set('User-Agent', user1.userAgent);
+
+      expect(res.status).toBe(HttpStatus.UNAUTHORIZED);
     });
   });
 });
