@@ -5,12 +5,25 @@ import { InjectDataSource } from '@nestjs/typeorm';
 
 import { UsersSqlTables } from '../../../utils/tables/users.sql.tables';
 import { CreateDevicesDbDto } from '../dto/create.device.dto';
+import { UpdateDeviceDbDto } from '../dto/update.device.dto';
+import { DeviceDb } from '../types/device.db';
 
 const { USERS_DEVICES_TABLE } = UsersSqlTables;
 
 @Injectable()
 export class DevicesRepo {
   constructor(@InjectDataSource() private dataSource: DataSource) {}
+
+  async getDeviceById(deviceId: string): Promise<DeviceDb> {
+    const result = await this.dataSource.query(
+      `
+    select * from ${USERS_DEVICES_TABLE} where device_id = $1
+    `,
+      [deviceId],
+    );
+
+    return result[0];
+  }
 
   async createDevice(dto: CreateDevicesDbDto) {
     const { userId, deviceId, ip, title, lastActiveDate } = dto;
@@ -21,6 +34,19 @@ export class DevicesRepo {
     values ($1, $2, $3, $4, $5)
      `,
       [userId, deviceId, ip, title, lastActiveDate],
+    );
+  }
+
+  async updateDevice(dto: UpdateDeviceDbDto) {
+    const { deviceId, ip, lastActiveDate, userId } = dto;
+
+    return this.dataSource.query(
+      `
+  update ${USERS_DEVICES_TABLE} 
+  set last_active_date = $4, ip = $3
+  where user_id = $1 and device_id = $2
+  `,
+      [userId, deviceId, ip, lastActiveDate],
     );
   }
 }
