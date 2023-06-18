@@ -117,5 +117,33 @@ describe('auth e2e', () => {
         expect(res.status).toBe(HttpStatus.UNAUTHORIZED);
       });
     });
+
+    describe('delete all devices except current', () => {
+      it('should be delete all devices expect current', async () => {
+        const [device0] = await userTest.createDevices(3);
+
+        const res = await request(server)
+          .delete(DEVICE_URL)
+          .set('Cookie', `refreshToken=${device0.refreshToken}`);
+
+        const devices = await request(server)
+          .get(DEVICE_URL)
+          .set('Cookie', `refreshToken=${device0.refreshToken}`);
+
+        expect(res.status).toBe(HttpStatus.NO_CONTENT);
+        expect(devices.body).toHaveLength(1);
+        expect(device0.userAgent).toEqual(devices.body[0].title);
+      });
+
+      it("shouldn't delete all if incorrect refresh token", async () => {
+        await userTest.createDevices(2);
+
+        const res = await request(server)
+          .delete(DEVICE_URL)
+          .set('Cookie', `refreshToken=refreshToken`);
+
+        expect(res.status).toBe(HttpStatus.UNAUTHORIZED);
+      });
+    });
   });
 });

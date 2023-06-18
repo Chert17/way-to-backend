@@ -61,4 +61,13 @@ export class DevicesRepo {
       [userId, deviceId],
     );
   }
+
+  async deleteDevicesExceptCurrent(userId: string, deviceId: string) {
+    return this.dataSource.query(
+      `
+      delete from ${USERS_DEVICES_TABLE} where user_id = $1 and device_id <> $2
+    `,
+      [userId, deviceId],
+    );
+  }
 }
