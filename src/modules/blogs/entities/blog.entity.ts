@@ -13,7 +13,7 @@ export class Blog {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column({ type: 'varchar', length: 20 })
+  @Column({ type: 'varchar', length: 20, collation: 'C' })
   title: string;
 
   @Column({ type: 'text' })
