@@ -42,6 +42,15 @@ export class BlogsRepo {
     );
   }
 
+  async deleteBlog(blogId: string) {
+    return this.dataSource.query(
+      `
+    delete from ${BLOGS_TABLE} where id = $1
+    `,
+      [blogId],
+    );
+  }
+
   async checkBlogById(blogId: string): Promise<BlogDb> {
     const result = await this.dataSource.query(
       `

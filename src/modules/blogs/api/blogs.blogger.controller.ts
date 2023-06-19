@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   HttpCode,
   HttpStatus,
@@ -21,6 +22,7 @@ import { CreateBlogDto } from '../dto/create.blog.dto';
 import { UpdateBlogDto } from '../dto/update.blog.dto';
 import { BlogsQueryRepo } from '../repositories/blogs.query.repo';
 import { CreateBlogCommand } from '../use-case/create.blog.use-case';
+import { DeleteBlogCommand } from '../use-case/delete.blog.use-case';
 import { UpdateBlogCommand } from '../use-case/update.blog.use-case';
 
 @Controller('blogger')
@@ -55,5 +57,12 @@ export class BlogsBloggerController {
     @Body() dto: UpdateBlogDto,
   ) {
     return this.commandBus.execute(new UpdateBlogCommand({ ...dto, blogId }));
+  }
+
+  @Delete('/blogs/:blogId')
+  @UseGuards(CanUserWorkWithBlog)
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async deleteBlog(@Param('blogId') blogId: string) {
+    return await this.commandBus.execute(new DeleteBlogCommand(blogId));
   }
 }
