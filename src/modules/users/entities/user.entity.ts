@@ -1,5 +1,6 @@
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 
+import { Blog } from '../../blogs/entities/blog.entity';
 import { CreateUserFormat } from '../types/user.types';
 import { Device } from './devices';
 
@@ -25,4 +26,7 @@ export class User {
 
   @OneToMany(() => Device, devices => devices.user)
   devices: Device[];
+
+  @OneToMany(() => Blog, blogs => blogs.user)
+  blogs: Blog[];
 }

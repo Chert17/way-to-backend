@@ -1,3 +1,3 @@
-import { usersUseCase } from '../modules/users/use-case';
+// import { usersUseCase } from '../modules/users/use-case';
 
-export const useCase = [...usersUseCase];
+// export const useCase = [...usersUseCase];

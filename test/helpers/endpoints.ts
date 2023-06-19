@@ -16,10 +16,10 @@ export const authEndpoints = {
   GET_ME: AUTH_URL + '/me',
 };
 
-export const BLOG_URL = '/blogs/';
-
-export const POST_URL = '/posts/';
-
-export const COMMENT_URL = '/comments/';
-
 export const DEVICE_URL = GLOBAL_PREFIX + '/security/devices';
+
+const BLOGGER_URL = GLOBAL_PREFIX + '/blogger';
+
+export const bloggerEndpoints = {
+  CREATE_BLOG_URL: BLOGGER_URL + '/blogs',
+};
