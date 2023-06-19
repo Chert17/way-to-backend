@@ -12,6 +12,7 @@ import { Blog } from './entities/blog.entity';
 import { BlogsQueryRepo } from './repositories/blogs.query.repo';
 import { BlogsRepo } from './repositories/blogs.repo';
 import { CreateBlogUseCase } from './use-case/create.blog.use-case';
+import { UpdateBlogUseCase } from './use-case/update.blog.use-case';
 
 @Module({
   controllers: [
@@ -28,6 +29,7 @@ import { CreateBlogUseCase } from './use-case/create.blog.use-case';
     UsersRepo,
     // use-case
     CreateBlogUseCase,
+    UpdateBlogUseCase,
   ],
   imports: [TypeOrmModule.forFeature([Blog]), CqrsModule],
 })
