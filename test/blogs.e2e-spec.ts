@@ -2,14 +2,14 @@ import request from 'supertest';
 
 import { HttpStatus } from '@nestjs/common';
 
-import { bloggerEndpoints } from './helpers/endpoints';
+import { BLOG_URL, bloggerEndpoints } from './helpers/endpoints';
 import { errorsData } from './helpers/errors.data';
 import { BlogTest, UserTest } from './helpers/fabrica';
 import { myBeforeAll } from './helpers/my.before.all';
 
-const { CREATE_BLOG_URL, GET_BLOGS_URL } = bloggerEndpoints;
+const { BLOGGER_BLOGS_URL } = bloggerEndpoints;
 
-describe('blogs e2e', () => {
+describe('blogger e2e', () => {
   let server: any;
 
   let userTest: UserTest;
@@ -35,7 +35,7 @@ describe('blogs e2e', () => {
       const blogData = blogTest._createBlogData();
 
       const res = await request(server)
-        .post(CREATE_BLOG_URL)
+        .post(BLOGGER_BLOGS_URL)
         .auth(user0.accessToken, { type: 'bearer' })
         .send({ ...blogData });
 
@@ -56,7 +56,7 @@ describe('blogs e2e', () => {
       const blogData = blogTest._createBlogData();
 
       const res = await request(server)
-        .post(CREATE_BLOG_URL)
+        .post(BLOGGER_BLOGS_URL)
         .auth(user0.accessToken, { type: 'bearer' })
         .send({ name: blogData.name, description: blogData.description });
 
@@ -67,7 +67,7 @@ describe('blogs e2e', () => {
     });
 
     it("shouldn't create blog if no auth", async () => {
-      const res = await request(server).post(CREATE_BLOG_URL);
+      const res = await request(server).post(BLOGGER_BLOGS_URL);
 
       expect(res.status).toBe(HttpStatus.UNAUTHORIZED);
     });
@@ -80,7 +80,7 @@ describe('blogs e2e', () => {
       const [blog0, blog1] = await blogTest.createBlogs(2, user0.accessToken);
 
       const res = await request(server)
-        .get(GET_BLOGS_URL)
+        .get(BLOGGER_BLOGS_URL)
         .auth(user0.accessToken, { type: 'bearer' });
 
       expect(res.status).toBe(HttpStatus.OK);
@@ -110,7 +110,7 @@ describe('blogs e2e', () => {
       });
 
       const res1 = await request(server)
-        .get(GET_BLOGS_URL)
+        .get(BLOGGER_BLOGS_URL)
         .auth(user0.accessToken, { type: 'bearer' })
         .query({ sortDirection: 'asc', pageSize: 1 });
 
@@ -134,9 +134,67 @@ describe('blogs e2e', () => {
     });
 
     it("shouldn't get all blogs if not auth", async () => {
-      const res = await request(server).get(GET_BLOGS_URL);
+      const res = await request(server).get(BLOGGER_BLOGS_URL);
 
       expect(res.status).toBe(HttpStatus.UNAUTHORIZED);
+    });
+  });
+
+  describe('update blog', () => {
+    it('should be update blog', async () => {
+      const [user0] = await userTest.createLoginUsers(1);
+
+      const [blog0] = await blogTest.createBlogs(1, user0.accessToken);
+
+      const blogData = blogTest._createBlogData();
+
+      const res = await request(server)
+        .get(BLOGGER_BLOGS_URL)
+        .auth(user0.accessToken, { type: 'bearer' })
+        .send({ ...blogData });
+
+      expect(res.status).toBe(HttpStatus.NO_CONTENT);
+    });
+  });
+});
+
+describe('public blogs e2e', () => {
+  let server: any;
+
+  let userTest: UserTest;
+  let blogTest: BlogTest;
+
+  beforeAll(async () => {
+    const { myServer, dataSource } = await myBeforeAll();
+
+    server = myServer;
+
+    userTest = new UserTest(server, dataSource);
+    blogTest = new BlogTest(server, dataSource);
+  });
+
+  beforeEach(async () => {
+    await request(server).delete('/api/testing/all-data');
+  });
+
+  describe('get blog by id', () => {
+    it('should be returned blog', async () => {
+      const [user0] = await userTest.createLoginUsers(1);
+
+      const [blog0] = await blogTest.createBlogs(1, user0.accessToken);
+
+      const res = await request(server).get(BLOG_URL + `/${blog0.id}`);
+
+      expect(res.status).toBe(HttpStatus.OK);
+      expect(res.body).toEqual(blog0);
+    });
+
+    it("shouldn't returned blog if not exist", async () => {
+      const res = await request(server).get(
+        BLOG_URL + '/8eb3bb41-99b3-4b00-bd23-2fd410dab21f',
+      );
+
+      expect(res.status).toBe(HttpStatus.NOT_FOUND);
     });
   });
 });

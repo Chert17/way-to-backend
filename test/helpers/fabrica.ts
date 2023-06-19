@@ -9,7 +9,7 @@ import { authEndpoints, bloggerEndpoints, SA_URL } from './endpoints';
 import { getRefreshToken } from './get.refresh.token';
 
 const { LOGIN_URL } = authEndpoints;
-const { CREATE_BLOG_URL } = bloggerEndpoints;
+const { BLOGGER_BLOGS_URL } = bloggerEndpoints;
 
 const {
   USERS_CONFIRM_EMAIL_TABLE,
@@ -183,9 +183,9 @@ export class BlogTest {
       const blogData = this._createBlogData();
 
       const res = await request(this.server)
-        .post(CREATE_BLOG_URL)
+        .post(BLOGGER_BLOGS_URL)
         .auth(accessToken, { type: 'bearer' })
-        .send({ ...blogData });
+        .send(blogData);
 
       blogs.push({
         id: res.body.id,
