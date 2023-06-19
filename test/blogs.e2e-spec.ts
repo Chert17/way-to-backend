@@ -16,6 +16,8 @@ describe('blogger e2e', () => {
   let blogTest: BlogTest;
 
   beforeAll(async () => {
+    process.env.THROTTLR_LIMIT = 1000 + '';
+
     const { myServer, dataSource } = await myBeforeAll();
 
     server = myServer;
@@ -149,11 +151,67 @@ describe('blogger e2e', () => {
       const blogData = blogTest._createBlogData();
 
       const res = await request(server)
-        .get(BLOGGER_BLOGS_URL)
+        .put(BLOGGER_BLOGS_URL + `/${blog0.id}`)
         .auth(user0.accessToken, { type: 'bearer' })
-        .send({ ...blogData });
+        .send(blogData);
+
+      const getRes = await request(server).get(BLOG_URL + `/${blog0.id}`);
 
       expect(res.status).toBe(HttpStatus.NO_CONTENT);
+      expect(getRes.status).toBe(HttpStatus.OK);
+      expect(getRes.body).toEqual({
+        id: blog0.id,
+        name: blogData.name,
+        description: blogData.description,
+        websiteUrl: blogData.websiteUrl,
+        createdAt: blog0.createdAt,
+        isMembership: blog0.isMembership,
+      });
+    });
+
+    it("shouldn't update blog with incorrect data", async () => {
+      const [user0] = await userTest.createLoginUsers(1);
+
+      const [blog0] = await blogTest.createBlogs(1, user0.accessToken);
+
+      const res = await request(server)
+        .put(BLOGGER_BLOGS_URL + `/${blog0.id}`)
+        .auth(user0.accessToken, { type: 'bearer' })
+        .send({
+          name: '',
+          description: 'string',
+          websiteUrl: 'https://CfpnAx36q8NOMIfxZgSffKmh1djdfQqlFvEcglSvVi',
+        });
+
+      const errors = errorsData('name');
+
+      expect(res.status).toBe(HttpStatus.BAD_REQUEST);
+      expect(res.body).toEqual(errors);
+    });
+
+    it("shouldn't update blog if not auth", async () => {
+      const [user0] = await userTest.createLoginUsers(1);
+
+      const [blog0] = await blogTest.createBlogs(1, user0.accessToken);
+
+      const res = await request(server).put(BLOGGER_BLOGS_URL + `/${blog0.id}`);
+
+      expect(res.status).toBe(HttpStatus.UNAUTHORIZED);
+    });
+
+    it("shouldn't update blog if other owner", async () => {
+      const [user0, user1] = await userTest.createLoginUsers(2);
+
+      const [blog0] = await blogTest.createBlogs(1, user0.accessToken);
+
+      const blogData = blogTest._createBlogData();
+
+      const res = await request(server)
+        .put(BLOGGER_BLOGS_URL + `/${blog0.id}`)
+        .auth(user1.accessToken, { type: 'bearer' })
+        .send(blogData);
+
+      expect(res.status).toBe(HttpStatus.FORBIDDEN);
     });
   });
 });
