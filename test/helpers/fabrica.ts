@@ -5,10 +5,11 @@ import { faker } from '@faker-js/faker';
 
 import { Device } from '../../src/modules/users/entities/devices';
 import { UsersSqlTables } from '../../src/utils/tables/users.sql.tables';
-import { authEndpoints, SA_URL } from './endpoints';
+import { authEndpoints, bloggerEndpoints, SA_URL } from './endpoints';
 import { getRefreshToken } from './get.refresh.token';
 
 const { LOGIN_URL } = authEndpoints;
+const { CREATE_BLOG_URL } = bloggerEndpoints;
 
 const {
   USERS_CONFIRM_EMAIL_TABLE,
@@ -36,6 +37,15 @@ interface LoginUserWithTokens extends User {
 }
 
 type DeviceWithTokens = LoginUserWithTokens;
+
+interface Blog {
+  id: string;
+  name: string;
+  description: string;
+  websiteUrl: string;
+  createdAt: string;
+  isMembership: boolean;
+}
 
 export class UserTest {
   constructor(
@@ -165,6 +175,28 @@ export class BlogTest {
     private readonly server: any,
     private dataSource?: EntityManager,
   ) {}
+
+  async createBlogs(quantity: number, accessToken: string): Promise<Blog[]> {
+    const blogs: Blog[] = [];
+
+    for (let i = 0; i < quantity; i++) {
+      const blogData = this._createBlogData();
+
+      const res = await request(this.server)
+        .post(CREATE_BLOG_URL)
+        .auth(accessToken, { type: 'bearer' })
+        .send({ ...blogData });
+
+      blogs.push({
+        id: res.body.id,
+        createdAt: res.body.createdAt,
+        isMembership: res.body.isMembership,
+        ...blogData,
+      });
+    }
+
+    return blogs;
+  }
 
   _createBlogData() {
     return {

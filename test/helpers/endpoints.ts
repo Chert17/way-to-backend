@@ -22,4 +22,5 @@ const BLOGGER_URL = GLOBAL_PREFIX + '/blogger';
 
 export const bloggerEndpoints = {
   CREATE_BLOG_URL: BLOGGER_URL + '/blogs',
+  GET_BLOGS_URL: BLOGGER_URL + '/blogs',
 };
