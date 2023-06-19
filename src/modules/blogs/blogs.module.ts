@@ -12,6 +12,7 @@ import { Blog } from './entities/blog.entity';
 import { BlogsQueryRepo } from './repositories/blogs.query.repo';
 import { BlogsRepo } from './repositories/blogs.repo';
 import { CreateBlogUseCase } from './use-case/create.blog.use-case';
+import { DeleteBlogUseCase } from './use-case/delete.blog.use-case';
 import { UpdateBlogUseCase } from './use-case/update.blog.use-case';
 
 @Module({
@@ -30,6 +31,7 @@ import { UpdateBlogUseCase } from './use-case/update.blog.use-case';
     // use-case
     CreateBlogUseCase,
     UpdateBlogUseCase,
+    DeleteBlogUseCase,
   ],
   imports: [TypeOrmModule.forFeature([Blog]), CqrsModule],
 })

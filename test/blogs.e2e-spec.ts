@@ -213,6 +213,80 @@ describe('blogger e2e', () => {
 
       expect(res.status).toBe(HttpStatus.FORBIDDEN);
     });
+
+    it("shouldn't update blog if not exist", async () => {
+      const [user0] = await userTest.createLoginUsers(1);
+
+      await blogTest.createBlogs(1, user0.accessToken);
+
+      const res = await request(server)
+        .put(BLOGGER_BLOGS_URL + `/8eb3bb41-99b3-4b00-bd23-2fd410dab21f`)
+        .auth(user0.accessToken, { type: 'bearer' });
+
+      expect(res.status).toBe(HttpStatus.NOT_FOUND);
+    });
+  });
+
+  describe('delete blog', () => {
+    it('should be delete blog by id', async () => {
+      const [user0] = await userTest.createLoginUsers(1);
+
+      const [blog0] = await blogTest.createBlogs(1, user0.accessToken);
+
+      const beforeGetRes = await request(server)
+        .get(BLOGGER_BLOGS_URL)
+        .auth(user0.accessToken, { type: 'bearer' });
+
+      const res = await request(server)
+        .delete(BLOGGER_BLOGS_URL + `/${blog0.id}`)
+        .auth(user0.accessToken, { type: 'bearer' });
+
+      const getRes = await request(server)
+        .get(BLOGGER_BLOGS_URL)
+        .auth(user0.accessToken, { type: 'bearer' });
+
+      expect(res.status).toBe(HttpStatus.NO_CONTENT);
+      expect(beforeGetRes.status).toBe(HttpStatus.OK);
+      expect(beforeGetRes.body.items).toHaveLength(1);
+      expect(getRes.status).toBe(HttpStatus.OK);
+      expect(getRes.body.items).toHaveLength(0);
+    });
+
+    it("shouldn't delete blog if not exist", async () => {
+      const [user0] = await userTest.createLoginUsers(1);
+
+      await blogTest.createBlogs(1, user0.accessToken);
+
+      const res = await request(server)
+        .delete(BLOGGER_BLOGS_URL + '/8eb3bb41-99b3-4b00-bd23-2fd410dab21f')
+        .auth(user0.accessToken, { type: 'bearer' });
+
+      expect(res.status).toBe(HttpStatus.NOT_FOUND);
+    });
+
+    it("shouldn't delete blog if not auth", async () => {
+      const [user0] = await userTest.createLoginUsers(1);
+
+      const [blog0] = await blogTest.createBlogs(1, user0.accessToken);
+
+      const res = await request(server).delete(
+        BLOGGER_BLOGS_URL + `/${blog0.id}`,
+      );
+
+      expect(res.status).toBe(HttpStatus.UNAUTHORIZED);
+    });
+
+    it("shouldn't delete blog if other owner", async () => {n
+      const [user0, user1] = await userTest.createLoginUsers(2);
+
+      const [blog0] = await blogTest.createBlogs(1, user0.accessToken);
+
+      const res = await request(server)
+        .delete(BLOGGER_BLOGS_URL + `/${blog0.id}`)
+        .auth(user1.accessToken, { type: 'bearer' });
+
+      expect(res.status).toBe(HttpStatus.FORBIDDEN);
+    });
   });
 });
 
