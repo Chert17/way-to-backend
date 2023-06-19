@@ -6,7 +6,7 @@ import { DEVICE_URL } from './helpers/endpoints';
 import { UserTest } from './helpers/fabrica';
 import { myBeforeAll } from './helpers/my.before.all';
 
-describe('auth e2e', () => {
+describe('devices e2e', () => {
   let server: any;
 
   let userTest: UserTest;
