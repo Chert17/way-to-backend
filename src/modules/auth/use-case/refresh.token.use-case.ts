@@ -1,7 +1,7 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 
+import { DevicesService } from '../../devices/devices.service';
 import { DevicesRepo } from '../../devices/repositories/devices.repo';
-import { AuthService } from '../auth.service';
 import { RefreshTokenServiceDto } from '../dto/input/refresh.token.dto';
 import { JwtService } from '../jwt.service';
 
@@ -16,15 +16,15 @@ export class RefreshTokenUseCase
   constructor(
     private jwtService: JwtService,
     private devicesRepo: DevicesRepo,
-    private authService: AuthService,
+    private devicesService: DevicesService,
   ) {}
 
   async execute({ dto }: RefreshTokenCommand) {
-    const { deviceId, iat, ip, userId, userAgent } = dto;
+    const { deviceId, iat, ip, userId } = dto;
 
     const device = await this.devicesRepo.getDeviceById(deviceId);
 
-    this.authService.checkDevice(device, userId, iat, userAgent);
+    this.devicesService.checkDevice(device, userId, iat);
 
     const tokens = this.jwtService.createJWT(userId, deviceId);
 

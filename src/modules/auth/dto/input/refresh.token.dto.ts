@@ -3,5 +3,5 @@ export class RefreshTokenServiceDto {
   deviceId: string;
   iat: number;
   ip: string;
-  userAgent: string;
+  // userAgent: string;
 }
