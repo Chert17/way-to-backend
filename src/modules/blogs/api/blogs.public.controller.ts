@@ -1,8 +1,17 @@
-import { Controller } from '@nestjs/common';
+import { Controller, Get, NotFoundException, Param } from '@nestjs/common';
 
-import { BlogsService } from '../blogs.service';
+import { BlogsQueryRepo } from '../repositories/blogs.query.repo';
 
 @Controller('blogs')
 export class BlogsPublicController {
-  constructor(private readonly blogsService: BlogsService) {}
+  constructor(private readonly blogsQueryRepo: BlogsQueryRepo) {}
+
+  @Get(':blogId')
+  async getBlogById(@Param('blogId') blogId: string) {
+    const result = await this.blogsQueryRepo.getBlogById(blogId);
+
+    if (!result) throw new NotFoundException();
+
+    return result;
+  }
 }

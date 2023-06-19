@@ -21,6 +21,7 @@ export const DEVICE_URL = GLOBAL_PREFIX + '/security/devices';
 const BLOGGER_URL = GLOBAL_PREFIX + '/blogger';
 
 export const bloggerEndpoints = {
-  CREATE_BLOG_URL: BLOGGER_URL + '/blogs',
-  GET_BLOGS_URL: BLOGGER_URL + '/blogs',
+  BLOGGER_BLOGS_URL: BLOGGER_URL + '/blogs',
 };
+
+export const BLOG_URL = GLOBAL_PREFIX + '/blogs';
