@@ -12,6 +12,8 @@ describe('auth e2e', () => {
   let userTest: UserTest;
 
   beforeAll(async () => {
+    process.env.THROTTLR_LIMIT = 1000 + '';
+
     const { myServer, dataSource } = await myBeforeAll();
 
     server = myServer;

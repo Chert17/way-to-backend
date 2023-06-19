@@ -227,27 +227,6 @@ describe('auth e2e', () => {
       expect(name).toBeDefined();
       expect(res2.status).toBe(HttpStatus.UNAUTHORIZED);
     });
-
-    it("shouldn't get new tokens if other user-agent", async () => {
-      const [user0, user1] = await userTest.createLoginUsers(2);
-
-      const res = await request(server)
-        .post(REFRESH_TOKEN_URL)
-        .set('Cookie', `refreshToken=${user0.refreshToken}`)
-        .set('User-Agent', user0.userAgent);
-
-      const { name, value } = getRefreshToken(res);
-
-      const res2 = await request(server)
-        .post(REFRESH_TOKEN_URL)
-        .set('Cookie', `refreshToken=${value}`)
-        .set('User-Agent', user1.userAgent);
-
-      expect(res.status).toBe(HttpStatus.OK);
-      expect(res.body).toEqual({ accessToken: expect.any(String) });
-      expect(name).toBeDefined();
-      expect(res2.status).toBe(HttpStatus.UNAUTHORIZED);
-    });
   });
 
   describe('logout', () => {
@@ -271,17 +250,6 @@ describe('auth e2e', () => {
       const res = await request(server)
         .post(LOGOUT_URL)
         .set('User-Agent', user0.userAgent);
-
-      expect(res.status).toBe(HttpStatus.UNAUTHORIZED);
-    });
-
-    it("shouldn't logout ifother user-agent", async () => {
-      const [user0, user1] = await userTest.createLoginUsers(2);
-
-      const res = await request(server)
-        .post(LOGOUT_URL)
-        .set('Cookie', `refreshToken=${user0.refreshToken}`)
-        .set('User-Agent', user1.userAgent);
 
       expect(res.status).toBe(HttpStatus.UNAUTHORIZED);
     });

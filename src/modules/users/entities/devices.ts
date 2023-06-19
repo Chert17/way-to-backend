@@ -19,7 +19,7 @@ export class Device {
   @Column({ type: 'varchar', length: 100 })
   ip: string;
 
-  @Column({ type: 'varchar', length: 100 })
+  @Column({ type: 'text' })
   title: string;
 
   @Column({ type: 'varchar' })

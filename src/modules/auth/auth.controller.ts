@@ -100,12 +100,11 @@ export class AuthController {
     @Res({ passthrough: true }) res: Response,
     @RefreshTokenPayload() refreshPayload: ReqUserType,
     @Ip() ip: string,
-    @UserAgent() userAgent: string,
   ) {
     const { accessToken, refreshToken } = await this.commandBus.execute<
       RefreshTokenCommand,
       JwtTokensViewDto
-    >(new RefreshTokenCommand({ ...refreshPayload, ip, userAgent }));
+    >(new RefreshTokenCommand({ ...refreshPayload, ip }));
 
     this._setRefreshTokenToCookie(res, refreshToken);
 
@@ -118,11 +117,8 @@ export class AuthController {
   async logout(
     @Res({ passthrough: true }) res: Response,
     @RefreshTokenPayload() refreshPayload: ReqUserType,
-    @UserAgent() userAgent: string,
   ) {
-    await this.commandBus.execute(
-      new LogoutCommand({ ...refreshPayload, userAgent }),
-    );
+    await this.commandBus.execute(new LogoutCommand(refreshPayload));
 
     res.clearCookie(REFRESH_TOKEN_COOKIE_NAME);
     return;
