@@ -281,7 +281,7 @@ describe('blogger e2e', () => {
       expect(res.status).toBe(HttpStatus.UNAUTHORIZED);
     });
 
-    it("shouldn't delete blog if other owner", async () => {n
+    it("shouldn't delete blog if other owner", async () => {
       const [user0, user1] = await userTest.createLoginUsers(2);
 
       const [blog0] = await blogTest.createBlogs(1, user0.accessToken);
