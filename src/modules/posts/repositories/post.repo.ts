@@ -4,7 +4,9 @@ import { Injectable } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
 
 import { PostSqlTables } from '../../../utils/tables/posts.sql.tables';
-import { createPostDbDto } from '../../blogs/dto/create.post.by.blog.dto';
+import { CreatePostDbDto } from '../../blogs/dto/create.post.by.blog.dto';
+import { UpdatePostDbDto } from '../../blogs/dto/update.post.by.blog';
+import { PostDb } from '../types/post.types';
 
 const { POSTS_TABLE } = PostSqlTables;
 
@@ -12,7 +14,7 @@ const { POSTS_TABLE } = PostSqlTables;
 export class PostsRepo {
   constructor(@InjectDataSource() private dataSource: DataSource) {}
 
-  async createPost(dto: createPostDbDto): Promise<{ postId: string }> {
+  async createPost(dto: CreatePostDbDto): Promise<{ postId: string }> {
     const { blogId, title, content, shortDescription, createdAt } = dto;
 
     const result = await this.dataSource.query(
@@ -25,5 +27,29 @@ export class PostsRepo {
     );
 
     return { postId: result[0].id };
+  }
+
+  async updatePost(dto: UpdatePostDbDto) {
+    const { postId, title, shortDescription, content } = dto;
+
+    return this.dataSource.query(
+      `
+    update ${POSTS_TABLE}
+    set title = $2, short_descr = $3, content = $4
+    where id = $1
+    `,
+      [postId, title, shortDescription, content],
+    );
+  }
+
+  async checkPostById(postId: string): Promise<PostDb> {
+    const result = await this.dataSource.query(
+      `
+    select * from ${POSTS_TABLE} where id = $1
+    `,
+      [postId],
+    );
+
+    return result[0];
   }
 }

@@ -20,14 +20,16 @@ export class PostsQueryRepo {
       [postId],
     );
 
-    return {
-      ...result[0],
-      extendedLikesInfo: {
-        likesCount: 0,
-        dislikesCount: 0,
-        myStatus: 'None',
-        newestLikes: [],
-      },
-    };
+    return (
+      result[0] && {
+        ...result[0],
+        extendedLikesInfo: {
+          likesCount: 0,
+          dislikesCount: 0,
+          myStatus: 'None',
+          newestLikes: [],
+        },
+      }
+    );
   }
 }

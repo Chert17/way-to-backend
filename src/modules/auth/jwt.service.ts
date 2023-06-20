@@ -53,4 +53,15 @@ export class JwtService {
 
     return { iat: new Date(tokenIat.iat * 1000).toISOString() };
   }
+
+  getUserIdFromAccessToken(accessToken: string): { userId: string } {
+    try {
+      const result = decode(accessToken) as any;
+
+      return { userId: result.userId };
+    } catch (error) {
+      console.log(error);
+      return null;
+    }
+  }
 }
