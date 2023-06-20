@@ -540,6 +540,7 @@ describe('blogger e2e', () => {
       expect(res.status).toBe(HttpStatus.NOT_FOUND);
     });
   });
+
 });
 
 describe('public blogs e2e', () => {
