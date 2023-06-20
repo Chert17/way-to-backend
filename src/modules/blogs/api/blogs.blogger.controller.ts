@@ -20,11 +20,13 @@ import { User } from '../../users/entities/user.entity';
 import { CreateBlogDto } from '../dto/create.blog.dto';
 import { CreatePostByBlogDto } from '../dto/create.post.by.blog.dto';
 import { UpdateBlogDto } from '../dto/update.blog.dto';
+import { UpdatePostByBlogDto } from '../dto/update.post.by.blog';
 import { BlogsQueryRepo } from '../repositories/blogs.query.repo';
 import { CreateBlogCommand } from '../use-case/create.blog.use-case';
 import { CreatePostByBlogCommand } from '../use-case/create.post.by.blog.use-case';
 import { DeleteBlogCommand } from '../use-case/delete.blog.use-case';
 import { UpdateBlogCommand } from '../use-case/update.blog.use-case';
+import { UpdatePostByBlogCommand } from '../use-case/update.post.by.blog.use-case';
 
 @Controller('blogger')
 @UseGuards(JwtAuthGuard)
@@ -78,10 +80,16 @@ export class BlogsBloggerController {
     );
   }
 
-  @Delete('/blogs/:blogId')
-  @UseGuards(CanUserWorkWithBlog)
+  @Put('/blogs/:blogId/posts/:postId')
   @HttpCode(HttpStatus.NO_CONTENT)
-  async deleteBlog(@Param('blogId') blogId: string) {
-    return await this.commandBus.execute(new DeleteBlogCommand(blogId));
+  updatePostByBlog(
+    @ReqUser() user: User,
+    @Param('blogId') blogId: string,
+    @Param('postId') postId: string,
+    @Body() dto: UpdatePostByBlogDto,
+  ) {
+    return this.commandBus.execute(
+      new UpdatePostByBlogCommand({ ...dto, blogId, postId, userId: user.id }),
+    );
   }
 }

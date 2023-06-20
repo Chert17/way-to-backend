@@ -2,8 +2,7 @@ import { Module } from '@nestjs/common';
 import { CqrsModule } from '@nestjs/cqrs';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
-import { BlogsRepo } from '../blogs/repositories/blogs.repo';
-import { CreatePostByBlogUseCase } from '../blogs/use-case/create.post.by.blog.use-case';
+import { JwtService } from '../auth/jwt.service';
 import { Post } from './entities/post.entity';
 import { PostsController } from './posts.controller';
 import { PostsService } from './posts.service';
@@ -17,9 +16,8 @@ import { PostsRepo } from './repositories/post.repo';
     PostsService,
     PostsQueryRepo,
     PostsRepo,
-    BlogsRepo,
+    JwtService,
     // use-case
-    CreatePostByBlogUseCase,
   ],
   imports: [TypeOrmModule.forFeature([Post]), CqrsModule],
 })

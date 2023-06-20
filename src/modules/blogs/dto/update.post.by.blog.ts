@@ -2,7 +2,7 @@ import { IsString, Length } from 'class-validator';
 
 import { Trim } from '../../../infra/decorators/validation/trim';
 
-export class CreatePostByBlogDto {
+export class UpdatePostByBlogDto {
   @Length(1, 30)
   @Trim()
   @IsString()
@@ -19,18 +19,18 @@ export class CreatePostByBlogDto {
   readonly content: string;
 }
 
-export class CreatePostByBlogServiceDto {
+export class UpdatePostByBlogServiceDto {
   readonly userId: string;
   readonly blogId: string;
+  readonly postId: string;
   readonly title: string;
   readonly shortDescription: string;
   readonly content: string;
 }
 
-export class CreatePostDbDto {
-  readonly blogId: string;
+export class UpdatePostDbDto {
+  readonly postId: string;
   readonly title: string;
   readonly shortDescription: string;
   readonly content: string;
-  readonly createdAt: string;
 }

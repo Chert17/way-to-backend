@@ -17,6 +17,7 @@ import { CreateBlogUseCase } from './use-case/create.blog.use-case';
 import { CreatePostByBlogUseCase } from './use-case/create.post.by.blog.use-case';
 import { DeleteBlogUseCase } from './use-case/delete.blog.use-case';
 import { UpdateBlogUseCase } from './use-case/update.blog.use-case';
+import { UpdatePostByBlogUseCase } from './use-case/update.post.by.blog.use-case';
 
 @Module({
   controllers: [
@@ -38,6 +39,7 @@ import { UpdateBlogUseCase } from './use-case/update.blog.use-case';
     UpdateBlogUseCase,
     DeleteBlogUseCase,
     CreatePostByBlogUseCase,
+    UpdatePostByBlogUseCase,
   ],
   imports: [TypeOrmModule.forFeature([Blog]), CqrsModule],
 })

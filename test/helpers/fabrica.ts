@@ -4,6 +4,7 @@ import { EntityManager } from 'typeorm';
 import { faker } from '@faker-js/faker';
 
 import { Device } from '../../src/modules/users/entities/devices';
+import { LikeStatus } from '../../src/utils/like.status';
 import { UsersSqlTables } from '../../src/utils/tables/users.sql.tables';
 import { authEndpoints, bloggerEndpoints, SA_URL } from './endpoints';
 import { getRefreshToken } from './get.refresh.token';
@@ -45,6 +46,28 @@ interface Blog {
   websiteUrl: string;
   createdAt: string;
   isMembership: boolean;
+}
+
+interface Post {
+  id: string;
+  title: string;
+  shortDescription: string;
+  content: string;
+  blogId: string;
+  blogName: string;
+  createdAt: string;
+  extendedLikesInfo: {
+    likesCount: 0;
+    dislikesCount: 0;
+    myStatus: LikeStatus;
+    newestLikes: [
+      {
+        addedAt: string;
+        userId: string;
+        login: string;
+      },
+    ];
+  };
 }
 
 export class UserTest {
@@ -212,6 +235,39 @@ export class PostTest {
     private readonly server: any,
     private dataSource?: EntityManager,
   ) {}
+
+  async createPosts(
+    quantity: number,
+    accessToken: string,
+    blogId: string,
+  ): Promise<Post[]> {
+    const posts: Post[] = [];
+
+    for (let i = 0; i < quantity; i++) {
+      const postData = this._createPostData();
+
+      const res = await request(this.server)
+        .post(BLOGGER_BLOGS_URL + `/${blogId}/posts`)
+        .auth(accessToken, { type: 'bearer' })
+        .send(postData);
+
+      posts.push({
+        ...postData,
+        id: res.body.id,
+        createdAt: res.body.createdAt,
+        blogId: res.body.blogId,
+        blogName: res.body.blogName,
+        extendedLikesInfo: {
+          dislikesCount: res.body?.dislikesCount,
+          likesCount: res.body?.likesCount,
+          myStatus: res.body?.myStatus,
+          newestLikes: res.body?.newestLikes ?? [],
+        },
+      });
+    }
+
+    return posts;
+  }
 
   _createPostData() {
     return {

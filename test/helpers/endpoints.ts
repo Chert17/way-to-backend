@@ -25,3 +25,5 @@ export const bloggerEndpoints = {
 };
 
 export const BLOG_URL = GLOBAL_PREFIX + '/blogs';
+
+export const POST_URL = GLOBAL_PREFIX + '/posts';

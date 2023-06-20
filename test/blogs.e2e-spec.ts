@@ -2,7 +2,7 @@ import request from 'supertest';
 
 import { HttpStatus } from '@nestjs/common';
 
-import { BLOG_URL, bloggerEndpoints } from './helpers/endpoints';
+import { BLOG_URL, bloggerEndpoints, POST_URL } from './helpers/endpoints';
 import { errorsData } from './helpers/errors.data';
 import { BlogTest, PostTest, UserTest } from './helpers/fabrica';
 import { myBeforeAll } from './helpers/my.before.all';
@@ -14,7 +14,7 @@ describe('blogger e2e', () => {
 
   let userTest: UserTest;
   let blogTest: BlogTest;
-  let poatTest: PostTest;
+  let postTest: PostTest;
 
   beforeAll(async () => {
     process.env.THROTTLR_LIMIT = 1000 + '';
@@ -25,7 +25,7 @@ describe('blogger e2e', () => {
 
     userTest = new UserTest(server, dataSource);
     blogTest = new BlogTest(server, dataSource);
-    poatTest = new PostTest(server, dataSource);
+    postTest = new PostTest(server, dataSource);
   });
 
   beforeEach(async () => {
@@ -300,7 +300,7 @@ describe('blogger e2e', () => {
 
       const [blog0] = await blogTest.createBlogs(1, user0.accessToken);
 
-      const postData = poatTest._createPostData();
+      const postData = postTest._createPostData();
 
       const res = await request(server)
         .post(BLOGGER_BLOGS_URL + `/${blog0.id}/posts`)
@@ -330,7 +330,7 @@ describe('blogger e2e', () => {
 
       const [blog0] = await blogTest.createBlogs(1, user0.accessToken);
 
-      const postData = poatTest._createPostData();
+      const postData = postTest._createPostData();
 
       const res = await request(server)
         .post(BLOGGER_BLOGS_URL + `/${blog0.id}/posts`)
@@ -364,7 +364,7 @@ describe('blogger e2e', () => {
 
       const [blog0] = await blogTest.createBlogs(1, user0.accessToken);
 
-      const postData = poatTest._createPostData();
+      const postData = postTest._createPostData();
 
       const res = await request(server)
         .post(BLOGGER_BLOGS_URL + `/${blog0.id}/posts`)
@@ -379,7 +379,7 @@ describe('blogger e2e', () => {
 
       await blogTest.createBlogs(1, user0.accessToken);
 
-      const postData = poatTest._createPostData();
+      const postData = postTest._createPostData();
 
       const res = await request(server)
         .post(BLOGGER_BLOGS_URL + `/8eb3bb41-99b3-4b00-bd23-2fd410dab21f/posts`)
@@ -389,6 +389,158 @@ describe('blogger e2e', () => {
       expect(res.status).toBe(HttpStatus.NOT_FOUND);
     });
   });
+
+  describe('update post by blog', () => {
+    it('should be update post', async () => {
+      const [user0] = await userTest.createLoginUsers(1);
+
+      const [blog0] = await blogTest.createBlogs(1, user0.accessToken);
+
+      const [post0] = await postTest.createPosts(
+        1,
+        user0.accessToken,
+        blog0.id,
+      );
+
+      const postData = postTest._createPostData();
+
+      const res = await request(server)
+        .put(BLOGGER_BLOGS_URL + `/${blog0.id}/posts/${post0.id}`)
+        .auth(user0.accessToken, { type: 'bearer' })
+        .send(postData);
+
+      const getRes = await request(server).get(POST_URL + `/${post0.id}`);
+
+      expect(res.status).toBe(HttpStatus.NO_CONTENT);
+      expect(getRes.status).toBe(HttpStatus.OK);
+      expect(getRes.body).toEqual({
+        id: post0.id,
+        title: postData.title,
+        shortDescription: postData.shortDescription,
+        content: postData.content,
+        blogId: blog0.id,
+        blogName: blog0.name,
+        createdAt: post0.createdAt,
+        extendedLikesInfo: {
+          likesCount: 0,
+          dislikesCount: 0,
+          myStatus: 'None',
+          newestLikes: post0.extendedLikesInfo.newestLikes,
+        },
+      });
+    });
+
+    it("shouldn't update post with incorrect data", async () => {
+      const [user0] = await userTest.createLoginUsers(1);
+
+      const [blog0] = await blogTest.createBlogs(1, user0.accessToken);
+
+      const [post0] = await postTest.createPosts(
+        1,
+        user0.accessToken,
+        blog0.id,
+      );
+
+      const postData = postTest._createPostData();
+
+      const res = await request(server)
+        .put(BLOGGER_BLOGS_URL + `/${blog0.id}/posts/${post0.id}`)
+        .auth(user0.accessToken, { type: 'bearer' })
+        .send({
+          content: postData.content,
+          shortDescription: postData.shortDescription,
+        });
+
+      const errors = errorsData('title');
+
+      expect(res.status).toBe(HttpStatus.BAD_REQUEST);
+      expect(res.body).toEqual(errors);
+    });
+
+    it("shouldn't update post if not auth", async () => {
+      const [user0] = await userTest.createLoginUsers(1);
+
+      const [blog0] = await blogTest.createBlogs(1, user0.accessToken);
+
+      const [post0] = await postTest.createPosts(
+        1,
+        user0.accessToken,
+        blog0.id,
+      );
+
+      const res = await request(server).put(
+        BLOGGER_BLOGS_URL + `/${blog0.id}/posts/${post0.id}`,
+      );
+
+      expect(res.status).toBe(HttpStatus.UNAUTHORIZED);
+    });
+
+    it("shouldn't update post if other owner blog", async () => {
+      const [user0, user1] = await userTest.createLoginUsers(2);
+
+      const [blog0] = await blogTest.createBlogs(1, user0.accessToken);
+
+      const [post0] = await postTest.createPosts(
+        1,
+        user0.accessToken,
+        blog0.id,
+      );
+
+      const postData = postTest._createPostData();
+
+      const res = await request(server)
+        .put(BLOGGER_BLOGS_URL + `/${blog0.id}/posts/${post0.id}`)
+        .auth(user1.accessToken, { type: 'bearer' })
+        .send(postData);
+
+      expect(res.status).toBe(HttpStatus.FORBIDDEN);
+    });
+
+    it("shouldn't update post if not exist post", async () => {
+      const [user0] = await userTest.createLoginUsers(1);
+
+      const [blog0] = await blogTest.createBlogs(1, user0.accessToken);
+
+      await postTest.createPosts(1, user0.accessToken, blog0.id);
+
+      const postData = postTest._createPostData();
+
+      const res = await request(server)
+        .put(
+          BLOGGER_BLOGS_URL +
+            `/${blog0.id}/posts/8eb3bb41-99b3-4b00-bd23-2fd410dab21f`,
+        )
+        .auth(user0.accessToken, { type: 'bearer' })
+        .send(postData);
+
+      expect(res.status).toBe(HttpStatus.NOT_FOUND);
+    });
+
+    it("shouldn't update post if not exist blog", async () => {
+      const [user0] = await userTest.createLoginUsers(1);
+
+      const [blog0] = await blogTest.createBlogs(1, user0.accessToken);
+
+      const [post0] = await postTest.createPosts(
+        1,
+        user0.accessToken,
+        blog0.id,
+      );
+
+      const postData = postTest._createPostData();
+
+      const res = await request(server)
+        .put(
+          BLOGGER_BLOGS_URL +
+            `/8eb3bb41-99b3-4b00-bd23-2fd410dab21f/posts/${post0.id}`,
+        )
+        .auth(user0.accessToken, { type: 'bearer' })
+        .send(postData);
+
+      expect(res.status).toBe(HttpStatus.NOT_FOUND);
+    });
+  });
+
 });
 
 describe('public blogs e2e', () => {
