@@ -2,9 +2,9 @@ import request from 'supertest';
 
 import { HttpStatus } from '@nestjs/common';
 
-import { POST_URL } from './endpoints';
-import { BlogTest, PostTest, UserTest } from './fabrica';
-import { myBeforeAll } from './my.before.all';
+import { POST_URL } from './helpers/endpoints';
+import { BlogTest, PostTest, UserTest } from './helpers/fabrica';
+import { myBeforeAll } from './helpers/my.before.all';
 
 describe('posts e2e', () => {
   let server: any;
@@ -67,6 +67,62 @@ describe('posts e2e', () => {
       );
 
       expect(res.status).toBe(HttpStatus.NOT_FOUND);
+    });
+  });
+
+  describe('get all posts', () => {
+    it('should be returned posts', async () => {
+      const [user0] = await userTest.createLoginUsers(1);
+
+      const [blog0] = await blogTest.createBlogs(1, user0.accessToken);
+
+      const [post0, post1] = await postTest.createPosts(
+        2,
+        user0.accessToken,
+        blog0.id,
+      );
+
+      const res = await request(server).get(POST_URL);
+
+      expect(res.status).toBe(HttpStatus.OK);
+      expect(res.body).toEqual({
+        pagesCount: 1,
+        page: 1,
+        pageSize: 10,
+        totalCount: 2,
+        items: [
+          {
+            id: post1.id,
+            title: post1.title,
+            shortDescription: post1.shortDescription,
+            content: post1.content,
+            blogId: blog0.id,
+            blogName: blog0.name,
+            createdAt: post1.createdAt,
+            extendedLikesInfo: {
+              likesCount: 0,
+              dislikesCount: 0,
+              myStatus: 'None',
+              newestLikes: [],
+            },
+          },
+          {
+            id: post0.id,
+            title: post0.title,
+            shortDescription: post0.shortDescription,
+            content: post0.content,
+            blogId: blog0.id,
+            blogName: blog0.name,
+            createdAt: post0.createdAt,
+            extendedLikesInfo: {
+              likesCount: 0,
+              dislikesCount: 0,
+              myStatus: 'None',
+              newestLikes: [],
+            },
+          },
+        ],
+      });
     });
   });
 });

@@ -25,6 +25,7 @@ import { BlogsQueryRepo } from '../repositories/blogs.query.repo';
 import { CreateBlogCommand } from '../use-case/create.blog.use-case';
 import { CreatePostByBlogCommand } from '../use-case/create.post.by.blog.use-case';
 import { DeleteBlogCommand } from '../use-case/delete.blog.use-case';
+import { DeletePostByBlogCommand } from '../use-case/delete.post.by.blog.use-case';
 import { UpdateBlogCommand } from '../use-case/update.blog.use-case';
 import { UpdatePostByBlogCommand } from '../use-case/update.post.by.blog.use-case';
 
@@ -90,6 +91,18 @@ export class BlogsBloggerController {
   ) {
     return this.commandBus.execute(
       new UpdatePostByBlogCommand({ ...dto, blogId, postId, userId: user.id }),
+    );
+  }
+
+  @Delete('/blogs/:blogId/posts/:postId')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  deletePostByBlog(
+    @ReqUser() user: User,
+    @Param('blogId') blogId: string,
+    @Param('postId') postId: string,
+  ) {
+    return this.commandBus.execute(
+      new DeletePostByBlogCommand(user.id, blogId, postId),
     );
   }
 }
