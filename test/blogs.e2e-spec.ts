@@ -541,6 +541,107 @@ describe('blogger e2e', () => {
     });
   });
 
+  describe('delete post by blog', () => {
+    it('should be delete post', async () => {
+      const [user0] = await userTest.createLoginUsers(1);
+
+      const [blog0] = await blogTest.createBlogs(1, user0.accessToken);
+
+      const [post0] = await postTest.createPosts(
+        1,
+        user0.accessToken,
+        blog0.id,
+      );
+
+      const beforeGetRes = await request(server).get(POST_URL);
+
+      const res = await request(server)
+        .delete(BLOGGER_BLOGS_URL + `/${blog0.id}/posts/${post0.id}`)
+        .auth(user0.accessToken, { type: 'bearer' });
+
+      const afterGetRes = await request(server).get(POST_URL);
+
+      expect(res.status).toBe(HttpStatus.NO_CONTENT);
+      expect(beforeGetRes.status).toBe(HttpStatus.OK);
+      expect(beforeGetRes.body.items).toHaveLength(1);
+      expect(afterGetRes.status).toBe(HttpStatus.OK);
+      expect(afterGetRes.body.items).toHaveLength(0);
+    });
+
+    it("shouldn't delete post in not auth", async () => {
+      const [user0] = await userTest.createLoginUsers(1);
+
+      const [blog0] = await blogTest.createBlogs(1, user0.accessToken);
+
+      const [post0] = await postTest.createPosts(
+        1,
+        user0.accessToken,
+        blog0.id,
+      );
+
+      const res = await request(server).delete(
+        BLOGGER_BLOGS_URL + `/${blog0.id}/posts/${post0.id}`,
+      );
+
+      expect(res.status).toBe(HttpStatus.UNAUTHORIZED);
+    });
+
+    it("shouldn't delete post if other owner blog", async () => {
+      const [user0, user1] = await userTest.createLoginUsers(2);
+
+      const [blog0] = await blogTest.createBlogs(1, user0.accessToken);
+
+      const [post0] = await postTest.createPosts(
+        1,
+        user0.accessToken,
+        blog0.id,
+      );
+
+      const res = await request(server)
+        .delete(BLOGGER_BLOGS_URL + `/${blog0.id}/posts/${post0.id}`)
+        .auth(user1.accessToken, { type: 'bearer' });
+
+      expect(res.status).toBe(HttpStatus.FORBIDDEN);
+    });
+
+    it("shouldn't delete post if not exist post", async () => {
+      const [user0] = await userTest.createLoginUsers(1);
+
+      const [blog0] = await blogTest.createBlogs(1, user0.accessToken);
+
+      await postTest.createPosts(1, user0.accessToken, blog0.id);
+
+      const res = await request(server)
+        .delete(
+          BLOGGER_BLOGS_URL +
+            `/${blog0.id}/posts/8eb3bb41-99b3-4b00-bd23-2fd410dab21f`,
+        )
+        .auth(user0.accessToken, { type: 'bearer' });
+
+      expect(res.status).toBe(HttpStatus.NOT_FOUND);
+    });
+
+    it("shouldn't delete post if not exist blog", async () => {
+      const [user0] = await userTest.createLoginUsers(1);
+
+      const [blog0] = await blogTest.createBlogs(1, user0.accessToken);
+
+      const [post0] = await postTest.createPosts(
+        1,
+        user0.accessToken,
+        blog0.id,
+      );
+
+      const res = await request(server)
+        .delete(
+          BLOGGER_BLOGS_URL +
+            `/8eb3bb41-99b3-4b00-bd23-2fd410dab21f/posts/${post0.id}`,
+        )
+        .auth(user0.accessToken, { type: 'bearer' });
+
+      expect(res.status).toBe(HttpStatus.NOT_FOUND);
+    });
+  });
 });
 
 describe('public blogs e2e', () => {

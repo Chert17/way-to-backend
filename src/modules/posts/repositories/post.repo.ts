@@ -42,6 +42,15 @@ export class PostsRepo {
     );
   }
 
+  async deletePost(postId: string) {
+    return this.dataSource.query(
+      `
+    delete from ${POSTS_TABLE} where id = $1
+    `,
+      [postId],
+    );
+  }
+
   async checkPostById(postId: string): Promise<PostDb> {
     const result = await this.dataSource.query(
       `
