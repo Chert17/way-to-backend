@@ -3,9 +3,11 @@ import {
   Entity,
   JoinColumn,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 
+import { Post } from '../../posts/entities/post.entity';
 import { User } from '../../users/entities/user.entity';
 
 @Entity({ name: 'blogs' })
@@ -34,7 +36,13 @@ export class Blog {
   @Column({ type: 'varchar', nullable: true })
   ban_date: string | null;
 
-  @ManyToOne(() => User, user => user.blogs, { cascade: true })
+  @ManyToOne(() => User, user => user.blogs, {
+    cascade: true,
+    onDelete: 'CASCADE',
+  })
   @JoinColumn({ name: 'user_id' })
   user: User;
+
+  @OneToMany(() => Post, posts => posts.blog)
+  posts: Post[];
 }

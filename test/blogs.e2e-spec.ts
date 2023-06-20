@@ -4,7 +4,7 @@ import { HttpStatus } from '@nestjs/common';
 
 import { BLOG_URL, bloggerEndpoints } from './helpers/endpoints';
 import { errorsData } from './helpers/errors.data';
-import { BlogTest, UserTest } from './helpers/fabrica';
+import { BlogTest, PostTest, UserTest } from './helpers/fabrica';
 import { myBeforeAll } from './helpers/my.before.all';
 
 const { BLOGGER_BLOGS_URL } = bloggerEndpoints;
@@ -14,6 +14,7 @@ describe('blogger e2e', () => {
 
   let userTest: UserTest;
   let blogTest: BlogTest;
+  let poatTest: PostTest;
 
   beforeAll(async () => {
     process.env.THROTTLR_LIMIT = 1000 + '';
@@ -24,6 +25,7 @@ describe('blogger e2e', () => {
 
     userTest = new UserTest(server, dataSource);
     blogTest = new BlogTest(server, dataSource);
+    poatTest = new PostTest(server, dataSource);
   });
 
   beforeEach(async () => {
@@ -219,9 +221,12 @@ describe('blogger e2e', () => {
 
       await blogTest.createBlogs(1, user0.accessToken);
 
+      const blogData = blogTest._createBlogData();
+
       const res = await request(server)
         .put(BLOGGER_BLOGS_URL + `/8eb3bb41-99b3-4b00-bd23-2fd410dab21f`)
-        .auth(user0.accessToken, { type: 'bearer' });
+        .auth(user0.accessToken, { type: 'bearer' })
+        .send(blogData);
 
       expect(res.status).toBe(HttpStatus.NOT_FOUND);
     });
@@ -286,6 +291,102 @@ describe('blogger e2e', () => {
         .auth(user1.accessToken, { type: 'bearer' });
 
       expect(res.status).toBe(HttpStatus.FORBIDDEN);
+    });
+  });
+
+  describe('create post for blog', () => {
+    it('should be create post for blog', async () => {
+      const [user0] = await userTest.createLoginUsers(1);
+
+      const [blog0] = await blogTest.createBlogs(1, user0.accessToken);
+
+      const postData = poatTest._createPostData();
+
+      const res = await request(server)
+        .post(BLOGGER_BLOGS_URL + `/${blog0.id}/posts`)
+        .auth(user0.accessToken, { type: 'bearer' })
+        .send(postData);
+
+      expect(res.status).toBe(HttpStatus.CREATED);
+      expect(res.body).toEqual({
+        id: expect.any(String),
+        title: postData.title,
+        shortDescription: postData.shortDescription,
+        content: postData.content,
+        blogId: blog0.id,
+        blogName: blog0.name,
+        createdAt: expect.any(String),
+        extendedLikesInfo: {
+          likesCount: 0,
+          dislikesCount: 0,
+          myStatus: 'None',
+          newestLikes: [],
+        },
+      });
+    });
+
+    it("shouldn't create post with incorrect data", async () => {
+      const [user0] = await userTest.createLoginUsers(1);
+
+      const [blog0] = await blogTest.createBlogs(1, user0.accessToken);
+
+      const postData = poatTest._createPostData();
+
+      const res = await request(server)
+        .post(BLOGGER_BLOGS_URL + `/${blog0.id}/posts`)
+        .auth(user0.accessToken, { type: 'bearer' })
+        .send({
+          title: postData.title,
+          shortDescription: postData.shortDescription,
+          content: '',
+        });
+
+      const errors = errorsData('content');
+
+      expect(res.status).toBe(HttpStatus.BAD_REQUEST);
+      expect(res.body).toEqual(errors);
+    });
+
+    it("shouldn't create post if not auth", async () => {
+      const [user0] = await userTest.createLoginUsers(1);
+
+      const [blog0] = await blogTest.createBlogs(1, user0.accessToken);
+
+      const res = await request(server).post(
+        BLOGGER_BLOGS_URL + `/${blog0.id}/posts`,
+      );
+
+      expect(res.status).toBe(HttpStatus.UNAUTHORIZED);
+    });
+
+    it("shouldn't create post if other owner blog", async () => {
+      const [user0, user1] = await userTest.createLoginUsers(2);
+
+      const [blog0] = await blogTest.createBlogs(1, user0.accessToken);
+
+      const postData = poatTest._createPostData();
+
+      const res = await request(server)
+        .post(BLOGGER_BLOGS_URL + `/${blog0.id}/posts`)
+        .auth(user1.accessToken, { type: 'bearer' })
+        .send(postData);
+
+      expect(res.status).toBe(HttpStatus.FORBIDDEN);
+    });
+
+    it("shouldn't create post if not exist blog", async () => {
+      const [user0] = await userTest.createLoginUsers(1);
+
+      await blogTest.createBlogs(1, user0.accessToken);
+
+      const postData = poatTest._createPostData();
+
+      const res = await request(server)
+        .post(BLOGGER_BLOGS_URL + `/8eb3bb41-99b3-4b00-bd23-2fd410dab21f/posts`)
+        .auth(user0.accessToken, { type: 'bearer' })
+        .send(postData);
+
+      expect(res.status).toBe(HttpStatus.NOT_FOUND);
     });
   });
 });
