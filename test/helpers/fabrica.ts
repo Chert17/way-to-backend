@@ -206,3 +206,18 @@ export class BlogTest {
     };
   }
 }
+
+export class PostTest {
+  constructor(
+    private readonly server: any,
+    private dataSource?: EntityManager,
+  ) {}
+
+  _createPostData() {
+    return {
+      title: faker.person.firstName(),
+      shortDescription: faker.person.firstName(),
+      content: faker.lorem.paragraph(),
+    };
+  }
+}

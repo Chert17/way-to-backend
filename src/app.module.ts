@@ -13,6 +13,7 @@ import { DevicesModule } from './modules/devices/devices.module';
 import { EmailModule } from './modules/email/email.module';
 import { TestingModule } from './modules/testing/testing.module';
 import { UsersModule } from './modules/users/users.module';
+import { PostsModule } from './modules/posts/posts.module';
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { UsersModule } from './modules/users/users.module';
     EmailModule,
     DevicesModule,
     BlogsModule,
+    PostsModule,
   ],
 
   // providers: [...controllers, ...services, ...repositories, ...useCase],

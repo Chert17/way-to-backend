@@ -25,7 +25,10 @@ export class Device {
   @Column({ type: 'varchar' })
   last_active_date: string;
 
-  @ManyToOne(() => User, user => user.devices, { cascade: true })
+  @ManyToOne(() => User, user => user.devices, {
+    cascade: true,
+    onDelete: 'CASCADE',
+  })
   @JoinColumn({ name: 'user_id' })
   user: User;
 }

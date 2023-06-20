@@ -19,7 +19,7 @@ export class RecoveryPassword {
   @Column({ type: 'timestamp' })
   expr_date: string;
 
-  @OneToOne(() => User, { cascade: true })
+  @OneToOne(() => User, { cascade: true, onDelete: 'CASCADE' })
   @JoinColumn({ name: 'user_id' })
   user: User;
 }

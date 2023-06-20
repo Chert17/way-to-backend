@@ -21,6 +21,7 @@ export class UpdateBlogDto {
 }
 
 export class UpdateBlogServiceDto {
+  readonly userId: string;
   readonly blogId: string;
   readonly name: string;
   readonly description: string;
