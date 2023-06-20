@@ -77,4 +77,11 @@ export class BlogsBloggerController {
       new CreatePostByBlogCommand({ ...dto, blogId, userId: user.id }),
     );
   }
+
+  @Delete('/blogs/:blogId')
+  @UseGuards(CanUserWorkWithBlog)
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async deleteBlog(@Param('blogId') blogId: string) {
+    return await this.commandBus.execute(new DeleteBlogCommand(blogId));
+  }
 }
