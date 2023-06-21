@@ -4,9 +4,14 @@ import { Injectable } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
 
 import { WithPagination } from '../../../types/pagination.interface';
-import { BlogQueryPagination } from '../../../utils/pagination/pagination';
+import {
+  BlogQueryPagination,
+  PostQueryPagination,
+} from '../../../utils/pagination/pagination';
 import { BlogSqlTables } from '../../../utils/tables/blogs.sql.tables';
+import { PostSqlTables } from '../../../utils/tables/posts.sql.tables';
 import { UsersSqlTables } from '../../../utils/tables/users.sql.tables';
+import { PostViewDto } from '../../posts/dto/post.view.dto';
 import {
   BanUserByBlogViewDto,
   BlogViewBySADto,
@@ -15,6 +20,7 @@ import {
 
 const { BLOGS_TABLE, BANNED_BLOG_USERS } = BlogSqlTables;
 const { USERS_TABLE } = UsersSqlTables;
+const { POSTS_TABLE } = PostSqlTables;
 
 @Injectable()
 export class BlogsQueryRepo {
@@ -193,6 +199,53 @@ export class BlogsQueryRepo {
       pageSize: pageSize,
       totalCount: +totalCount[0].count,
       items: result,
+    };
+  }
+
+  async getAllPostsByBlog(
+    userId: string,
+    blogId: string,
+    pagination: PostQueryPagination,
+  ): Promise<WithPagination<PostViewDto>> {
+    const { pageNumber, pageSize, sortBy, sortDirection } = pagination;
+
+    const result = await this.dataSource.query(
+      `
+    select p.id, p.title, p.short_descr as "shortDescription", p.content, p.created_at as "createdAt", p.blog_id as "blogId", b.title as "blogName"
+    from ${POSTS_TABLE} p
+    left join ${BLOGS_TABLE} b on p.blog_id = b.id
+    where p.blog_id = $1 and b.is_ban = false
+    order by p.${sortBy} ${sortDirection}
+    limit ${pageSize} offset ${pagination.skip()}
+    `,
+      [blogId],
+    );
+
+    const totalCount = await this.dataSource.query(
+      `
+    select count(*) from ${POSTS_TABLE} p
+    left join ${BLOGS_TABLE} b on p.blog_id = b.id
+    where p.blog_id = $1 and b.is_ban = false
+    `,
+      [blogId],
+    );
+
+    const pageCount = Math.ceil(+totalCount[0].count / pageSize);
+
+    return {
+      pagesCount: pageCount === 0 ? 1 : pageCount,
+      page: pageNumber,
+      pageSize: pageSize,
+      totalCount: +totalCount[0].count,
+      items: result.map((i: any) => ({
+        ...i,
+        extendedLikesInfo: {
+          likesCount: 0,
+          dislikesCount: 0,
+          myStatus: 'None',
+          newestLikes: [],
+        },
+      })),
     };
   }
 }

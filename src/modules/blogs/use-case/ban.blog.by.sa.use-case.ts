@@ -9,9 +9,7 @@ export class BanBlogBySaCommand {
 }
 
 @CommandHandler(BanBlogBySaCommand)
-export class BBanBlogBySaUseCase
-  implements ICommandHandler<BanBlogBySaCommand>
-{
+export class BanBlogBySaUseCase implements ICommandHandler<BanBlogBySaCommand> {
   constructor(private blogsRepo: BlogsRepo) {}
 
   async execute({ dto }: BanBlogBySaCommand) {

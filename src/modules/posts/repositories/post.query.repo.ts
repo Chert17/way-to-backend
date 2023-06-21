@@ -22,7 +22,7 @@ export class PostsQueryRepo {
     select p.id, p.title, p.short_descr as "shortDescription", p.content, p.created_at as "createdAt", p.blog_id as "blogId", b.title as "blogName"
     from ${POSTS_TABLE} p
     left join ${BLOGS_TABLE} b on p.blog_id = b.id
-    where p.id = $1
+    where p.id = $1 and b.is_ban = false
     `,
       [postId],
     );
@@ -51,6 +51,7 @@ export class PostsQueryRepo {
     select p.id, p.title, p.short_descr as "shortDescription", p.content, p.created_at as "createdAt", p.blog_id as "blogId", b.title as "blogName"
     from ${POSTS_TABLE} p
     left join ${BLOGS_TABLE} b on p.blog_id = b.id
+    where b.is_ban = false
     order by p.${sortBy} ${sortDirection}
     limit ${pageSize} offset ${pagination.skip()}
     `,
