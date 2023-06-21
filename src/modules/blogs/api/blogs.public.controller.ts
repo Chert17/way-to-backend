@@ -1,10 +1,22 @@
-import { Controller, Get, NotFoundException, Param } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  NotFoundException,
+  Param,
+  Query,
+} from '@nestjs/common';
 
+import { BlogQueryPagination } from '../../../utils/pagination/pagination';
 import { BlogsQueryRepo } from '../repositories/blogs.query.repo';
 
 @Controller('blogs')
 export class BlogsPublicController {
   constructor(private readonly blogsQueryRepo: BlogsQueryRepo) {}
+
+  @Get()
+  async getAll(@Query() pagination: BlogQueryPagination) {
+    return await this.blogsQueryRepo.getAllBlogs(pagination);
+  }
 
   @Get(':blogId')
   async getBlogById(@Param('blogId') blogId: string) {

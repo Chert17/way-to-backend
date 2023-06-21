@@ -797,6 +797,37 @@ describe('public blogs e2e', () => {
       expect(res.status).toBe(HttpStatus.NOT_FOUND);
     });
   });
+
+  describe('get all blogs', () => {
+    it('should be returned all blogs exact ban blogs', async () => {
+      const [user0] = await userTest.createLoginUsers(1);
+
+      const [blog0, blog1] = await blogTest.createBlogs(2, user0.accessToken);
+
+      await blogTest.createBanBlogs(1, [blog1.id]);
+
+      const res = await request(server).get(BLOG_URL).query({ pageSize: 1 });
+
+      expect(res.status).toBe(HttpStatus.OK);
+      expect(res.body.items).toHaveLength(1);
+      expect(res.body).toEqual({
+        pagesCount: 1,
+        page: 1,
+        pageSize: 1,
+        totalCount: 1,
+        items: [
+          {
+            id: blog0.id,
+            name: blog0.name,
+            description: blog0.description,
+            websiteUrl: blog0.websiteUrl,
+            createdAt: blog0.createdAt,
+            isMembership: blog0.isMembership,
+          },
+        ],
+      });
+    });
+  });
 });
 
 describe(' blogs sa e2e', () => {
