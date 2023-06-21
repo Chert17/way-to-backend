@@ -7,7 +7,11 @@ import { WithPagination } from '../../../types/pagination.interface';
 import { BlogQueryPagination } from '../../../utils/pagination/pagination';
 import { BlogSqlTables } from '../../../utils/tables/blogs.sql.tables';
 import { UsersSqlTables } from '../../../utils/tables/users.sql.tables';
-import { BanUserByBlogViewDto, BlogViewDto } from '../dto/blog.view.dto';
+import {
+  BanUserByBlogViewDto,
+  BlogViewBySADto,
+  BlogViewDto,
+} from '../dto/blog.view.dto';
 
 const { BLOGS_TABLE, BANNED_BLOG_USERS } = BlogSqlTables;
 const { USERS_TABLE } = UsersSqlTables;
@@ -109,4 +113,76 @@ export class BlogsQueryRepo {
       items: result,
     };
   }
+
+  async getAllBlogsBySA(
+    pagination: BlogQueryPagination,
+  ): Promise<WithPagination<BlogViewBySADto>> {
+    const { pageNumber, pageSize, searchNameTerm, sortBy, sortDirection } =
+      pagination;
+
+    const result = await this.dataSource.query(
+      `
+    SELECT
+  b.id,
+  b.title AS "name",
+  b.descr AS "description",
+  b.web_url AS "websiteUrl",
+  b.created_at AS "createdAt",
+  b.is_membership AS "isMembership",
+  json_build_object(
+    'isBanned', COALESCE(b.is_ban, false),
+    'banDate', b.ban_date
+  ) AS "banInfo",
+  json_build_object(
+    'userId', u.id,
+    'userLogin', u.login
+  ) AS "blogOwnerInfo"
+FROM
+  ${BLOGS_TABLE} b
+LEFT JOIN
+  ${USERS_TABLE} u ON b.user_id = u.id
+WHERE
+  b.title ILIKE $1
+ORDER BY
+  u.${sortBy} ${sortDirection}
+LIMIT
+  ${pageSize} OFFSET ${pagination.skip()}
+
+    `,
+      [`%${searchNameTerm}%`],
+    );
+
+    const totalCount = await this.dataSource.query(
+      `
+    select count(*) from ${BLOGS_TABLE} b
+    where b.title ilike $1
+    `,
+      [`%${searchNameTerm}%`],
+    );
+
+    const pageCount = Math.ceil(+totalCount[0].count / pageSize);
+
+    return {
+      pagesCount: pageCount === 0 ? 1 : pageCount,
+      page: pageNumber,
+      pageSize: pageSize,
+      totalCount: +totalCount[0].count,
+      items: result,
+    };
+  }
 }
+
+// select b.id, b.title as "name", b.descr as "description", b.web_url as "websiteUrl", b.created_at as "createdAt", b.is_membership as "isMembership",
+//     json_build_object(
+//       'isBanned', coalesce(b.is_ban, false),
+//       'banDate', b_u.ban_date
+//     ) as "banInfo",
+//     json_build_object(
+//       'userId', u.id),
+//       'userLogin', u.login
+//     ) as "blogOwnerInfo"
+//     from ${BLOGS_TABLE} b
+//     left join ${USERS_TABLE} u on b.user_id = u.id
+//     where b.title ilike $1
+//     order by b.${sortBy} ${sortDirection}
+//     limit ${pageSize} offset ${pagination.skip()}
