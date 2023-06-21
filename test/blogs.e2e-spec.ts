@@ -763,6 +763,7 @@ describe('public blogs e2e', () => {
 
   let userTest: UserTest;
   let blogTest: BlogTest;
+  let postTest: PostTest;
 
   beforeAll(async () => {
     const { myServer, dataSource } = await myBeforeAll();
@@ -771,6 +772,7 @@ describe('public blogs e2e', () => {
 
     userTest = new UserTest(server, dataSource);
     blogTest = new BlogTest(server, dataSource);
+    postTest = new PostTest(server, dataSource);
   });
 
   beforeEach(async () => {
@@ -781,12 +783,21 @@ describe('public blogs e2e', () => {
     it('should be returned blog', async () => {
       const [user0] = await userTest.createLoginUsers(1);
 
-      const [blog0] = await blogTest.createBlogs(1, user0.accessToken);
+      const [blog0, blog1] = await blogTest.createBlogs(2, user0.accessToken);
+
+      await blogTest.createBanBlogs(1, [blog1.id]);
 
       const res = await request(server).get(BLOG_URL + `/${blog0.id}`);
 
       expect(res.status).toBe(HttpStatus.OK);
-      expect(res.body).toEqual(blog0);
+      expect(res.body).toEqual({
+        id: blog0.id,
+        name: blog0.name,
+        description: blog0.description,
+        websiteUrl: blog0.websiteUrl,
+        createdAt: blog0.createdAt,
+        isMembership: blog0.isMembership,
+      });
     });
 
     it("shouldn't returned blog if not exist", async () => {
@@ -826,6 +837,69 @@ describe('public blogs e2e', () => {
           },
         ],
       });
+    });
+  });
+
+  describe('get all posts by blog', () => {
+    it('should be retutned all posts by blog', async () => {
+      const [user0] = await userTest.createLoginUsers(1);
+
+      const [blog0] = await blogTest.createBlogs(1, user0.accessToken);
+
+      const [post0] = await postTest.createPosts(
+        1,
+        user0.accessToken,
+        blog0.id,
+      );
+
+      const res = await request(server).get(BLOG_URL + `/${blog0.id}/posts`);
+
+      expect(res.status).toBe(HttpStatus.OK);
+      expect(res.body).toEqual({
+        pagesCount: 1,
+        page: 1,
+        pageSize: 10,
+        totalCount: 1,
+        items: [
+          {
+            id: post0.id,
+            title: post0.title,
+            shortDescription: post0.shortDescription,
+            content: post0.content,
+            blogId: post0.blogId,
+            blogName: post0.blogName,
+            createdAt: post0.createdAt,
+            extendedLikesInfo: {
+              likesCount: 0,
+              dislikesCount: 0,
+              myStatus: 'None',
+              newestLikes: post0.extendedLikesInfo.newestLikes,
+            },
+          },
+        ],
+      });
+    });
+
+    it("shoulbn't returned posts if ban blog", async () => {
+      const [user0] = await userTest.createLoginUsers(1);
+
+      const [blog0] = await blogTest.createBlogs(1, user0.accessToken);
+
+      await postTest.createPosts(1, user0.accessToken, blog0.id);
+
+      await blogTest.createBanBlogs(1, [blog0.id]);
+
+      const res = await request(server).get(BLOG_URL + `/${blog0.id}/posts`);
+
+      expect(res.status).toBe(HttpStatus.NOT_FOUND);
+    });
+
+    it("shouldn't returned posts if not exist blog", async () => {
+      const res = await request(server).get(
+        BLOG_URL + `/8eb3bb41-99b3-4b00-bd23-2fd410dab21f/posts`,
+      );
+
+      expect(res.status).toBe(HttpStatus.NOT_FOUND);
     });
   });
 });
