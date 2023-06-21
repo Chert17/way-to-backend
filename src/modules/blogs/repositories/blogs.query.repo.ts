@@ -122,31 +122,20 @@ export class BlogsQueryRepo {
 
     const result = await this.dataSource.query(
       `
-    SELECT
-  b.id,
-  b.title AS "name",
-  b.descr AS "description",
-  b.web_url AS "websiteUrl",
-  b.created_at AS "createdAt",
-  b.is_membership AS "isMembership",
-  json_build_object(
-    'isBanned', COALESCE(b.is_ban, false),
+    select b.id, b.title as "name", b.descr as "description", b.web_url as "websiteUrl", b.created_at as "createdAt", b.is_membership as "isMembership",
+    json_build_object(
+    'isBanned', coalesce(b.is_ban, false),
     'banDate', b.ban_date
-  ) AS "banInfo",
-  json_build_object(
+     ) as "banInfo",
+    json_build_object(
     'userId', u.id,
     'userLogin', u.login
-  ) AS "blogOwnerInfo"
-FROM
-  ${BLOGS_TABLE} b
-LEFT JOIN
-  ${USERS_TABLE} u ON b.user_id = u.id
-WHERE
-  b.title ILIKE $1
-ORDER BY
-  u.${sortBy} ${sortDirection}
-LIMIT
-  ${pageSize} OFFSET ${pagination.skip()}
+    ) as "blogOwnerInfo"
+    from ${BLOGS_TABLE} b
+    left join ${USERS_TABLE} u on b.user_id = u.id
+    where b.title ilike $1
+    order by b.${sortBy} ${sortDirection}
+    limit ${pageSize} offset ${pagination.skip()}
 
     `,
       [`%${searchNameTerm}%`],
@@ -171,18 +160,3 @@ LIMIT
     };
   }
 }
-
-// select b.id, b.title as "name", b.descr as "description", b.web_url as "websiteUrl", b.created_at as "createdAt", b.is_membership as "isMembership",
-//     json_build_object(
-//       'isBanned', coalesce(b.is_ban, false),
-//       'banDate', b_u.ban_date
-//     ) as "banInfo",
-//     json_build_object(
-//       'userId', u.id),
-//       'userLogin', u.login
-//     ) as "blogOwnerInfo"
-//     from ${BLOGS_TABLE} b
-//     left join ${USERS_TABLE} u on b.user_id = u.id
-//     where b.title ilike $1
-//     order by b.${sortBy} ${sortDirection}
-//     limit ${pageSize} offset ${pagination.skip()}
