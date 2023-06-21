@@ -15,7 +15,7 @@ import { myBeforeAll } from './helpers/my.before.all';
 const { BLOGGER_BLOGS_URL, BLOGGER_USERS_URL, GET_ALL_BAN_USERS_BY_BLOG_URL } =
   bloggerEndpoints;
 
-const { SA_BAN_BLOG_URL } = SABlogsEndpoints;
+const { SA_BAN_BLOG_URL, SA_GET_ALL_BAN_BLOGS_URL } = SABlogsEndpoints;
 
 describe('blogger e2e', () => {
   let server: any;
@@ -877,6 +877,91 @@ describe(' blogs sa e2e', () => {
       const res = await request(server).put(
         SA_BAN_BLOG_URL + `/${blog0.id}/ban`,
       );
+
+      expect(res.status).toBe(HttpStatus.UNAUTHORIZED);
+    });
+  });
+
+  describe('get all blogs', () => {
+    it('should be returned all ban blogs by sa', async () => {
+      const [user0, user1] = await userTest.createLoginUsers(2);
+
+      const [blog0, blog1] = await blogTest.createBlogs(2, user0.accessToken);
+      const [blog2] = await blogTest.createBlogs(1, user1.accessToken);
+
+      await blogTest.createBanBlogs(2, [blog0.id, blog1.id]);
+
+      const res = await request(server)
+        .get(SA_GET_ALL_BAN_BLOGS_URL)
+        .auth(admin.login, admin.password, { type: 'basic' });
+
+      expect(res.status).toBe(HttpStatus.OK);
+      expect(res.body).toEqual({
+        pagesCount: 1,
+        page: 1,
+        pageSize: 10,
+        totalCount: 3,
+        items: [
+          {
+            id: blog2.id,
+            name: blog2.name,
+            description: blog2.description,
+            websiteUrl: blog2.websiteUrl,
+            createdAt: blog2.createdAt,
+            isMembership: blog2.isMembership,
+            blogOwnerInfo: {
+              userId: user1.id,
+              userLogin: user1.login,
+            },
+            banInfo: {
+              isBanned: false,
+              banDate: null,
+            },
+          },
+          {
+            id: blog1.id,
+            name: blog1.name,
+            description: blog1.description,
+            websiteUrl: blog1.websiteUrl,
+            createdAt: blog1.createdAt,
+            isMembership: blog1.isMembership,
+            blogOwnerInfo: {
+              userId: user0.id,
+              userLogin: user0.login,
+            },
+            banInfo: {
+              isBanned: true,
+              banDate: expect.any(String),
+            },
+          },
+          {
+            id: blog0.id,
+            name: blog0.name,
+            description: blog0.description,
+            websiteUrl: blog0.websiteUrl,
+            createdAt: blog0.createdAt,
+            isMembership: blog0.isMembership,
+            blogOwnerInfo: {
+              userId: user0.id,
+              userLogin: user0.login,
+            },
+            banInfo: {
+              isBanned: true,
+              banDate: expect.any(String),
+            },
+          },
+        ],
+      });
+    });
+
+    it("shouldn't returned all blogs if not auth", async () => {
+      const [user0] = await userTest.createLoginUsers(1);
+
+      const [blog0] = await blogTest.createBlogs(1, user0.accessToken);
+
+      await blogTest.createBanBlogs(1, [blog0.id]);
+
+      const res = await request(server).get(SA_GET_ALL_BAN_BLOGS_URL);
 
       expect(res.status).toBe(HttpStatus.UNAUTHORIZED);
     });

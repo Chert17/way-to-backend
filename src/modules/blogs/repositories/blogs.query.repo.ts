@@ -7,7 +7,11 @@ import { WithPagination } from '../../../types/pagination.interface';
 import { BlogQueryPagination } from '../../../utils/pagination/pagination';
 import { BlogSqlTables } from '../../../utils/tables/blogs.sql.tables';
 import { UsersSqlTables } from '../../../utils/tables/users.sql.tables';
-import { BanUserByBlogViewDto, BlogViewDto } from '../dto/blog.view.dto';
+import {
+  BanUserByBlogViewDto,
+  BlogViewBySADto,
+  BlogViewDto,
+} from '../dto/blog.view.dto';
 
 const { BLOGS_TABLE, BANNED_BLOG_USERS } = BlogSqlTables;
 const { USERS_TABLE } = UsersSqlTables;
@@ -97,6 +101,52 @@ export class BlogsQueryRepo {
     where b_u.blog_id = $1 and u.login ilike $2
     `,
       [blogId, `%${searchNameTerm}%`],
+    );
+
+    const pageCount = Math.ceil(+totalCount[0].count / pageSize);
+
+    return {
+      pagesCount: pageCount === 0 ? 1 : pageCount,
+      page: pageNumber,
+      pageSize: pageSize,
+      totalCount: +totalCount[0].count,
+      items: result,
+    };
+  }
+
+  async getAllBlogsBySA(
+    pagination: BlogQueryPagination,
+  ): Promise<WithPagination<BlogViewBySADto>> {
+    const { pageNumber, pageSize, searchNameTerm, sortBy, sortDirection } =
+      pagination;
+
+    const result = await this.dataSource.query(
+      `
+    select b.id, b.title as "name", b.descr as "description", b.web_url as "websiteUrl", b.created_at as "createdAt", b.is_membership as "isMembership",
+    json_build_object(
+    'isBanned', coalesce(b.is_ban, false),
+    'banDate', b.ban_date
+     ) as "banInfo",
+    json_build_object(
+    'userId', u.id,
+    'userLogin', u.login
+    ) as "blogOwnerInfo"
+    from ${BLOGS_TABLE} b
+    left join ${USERS_TABLE} u on b.user_id = u.id
+    where b.title ilike $1
+    order by b.${sortBy} ${sortDirection}
+    limit ${pageSize} offset ${pagination.skip()}
+
+    `,
+      [`%${searchNameTerm}%`],
+    );
+
+    const totalCount = await this.dataSource.query(
+      `
+    select count(*) from ${BLOGS_TABLE} b
+    where b.title ilike $1
+    `,
+      [`%${searchNameTerm}%`],
     );
 
     const pageCount = Math.ceil(+totalCount[0].count / pageSize);

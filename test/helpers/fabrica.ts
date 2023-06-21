@@ -6,11 +6,17 @@ import { faker } from '@faker-js/faker';
 import { Device } from '../../src/modules/users/entities/devices';
 import { LikeStatus } from '../../src/utils/like.status';
 import { UsersSqlTables } from '../../src/utils/tables/users.sql.tables';
-import { authEndpoints, bloggerEndpoints, SA_URL } from './endpoints';
+import {
+  authEndpoints,
+  bloggerEndpoints,
+  SA_URL,
+  SABlogsEndpoints,
+} from './endpoints';
 import { getRefreshToken } from './get.refresh.token';
 
 const { LOGIN_URL } = authEndpoints;
 const { BLOGGER_BLOGS_URL, BLOGGER_USERS_URL } = bloggerEndpoints;
+const { SA_BAN_BLOG_URL } = SABlogsEndpoints;
 
 const {
   USERS_CONFIRM_EMAIL_TABLE,
@@ -236,6 +242,15 @@ export class BlogTest {
           banReason: 'test ban user for blog by blogger',
           blogId,
         });
+    }
+  }
+
+  async createBanBlogs(quantity: number, blogId: string[]) {
+    for (let i = 0; i < quantity; i++) {
+      await request(this.server)
+        .put(SA_BAN_BLOG_URL + `/${blogId[i]}/ban`)
+        .auth(admin.login, admin.password, { type: 'basic' })
+        .send({ isBanned: true });
     }
   }
 
