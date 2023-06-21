@@ -17,11 +17,13 @@ import { ReqUser } from '../../../infra/decorators/params/req.user.decorator';
 import { JwtAuthGuard } from '../../../infra/guards/jwt.auth.guard';
 import { BlogQueryPagination } from '../../../utils/pagination/pagination';
 import { User } from '../../users/entities/user.entity';
+import { BanUserByBloggerBlogDto } from '../dto/ban.user.by.blogger.blog.dto';
 import { CreateBlogDto } from '../dto/create.blog.dto';
 import { CreatePostByBlogDto } from '../dto/create.post.by.blog.dto';
 import { UpdateBlogDto } from '../dto/update.blog.dto';
 import { UpdatePostByBlogDto } from '../dto/update.post.by.blog';
 import { BlogsQueryRepo } from '../repositories/blogs.query.repo';
+import { BanUserByBloggerBlogCommand } from '../use-case/ban.user.byblogger.blog.use-case';
 import { CreateBlogCommand } from '../use-case/create.blog.use-case';
 import { CreatePostByBlogCommand } from '../use-case/create.post.by.blog.use-case';
 import { DeleteBlogCommand } from '../use-case/delete.blog.use-case';
@@ -103,6 +105,18 @@ export class BlogsBloggerController {
   ) {
     return this.commandBus.execute(
       new DeletePostByBlogCommand(user.id, blogId, postId),
+    );
+  }
+
+  @Put('/users/:banUserId/ban')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  banUserByBlog(
+    @ReqUser() user: User,
+    @Param('banUserId') banUserId: string,
+    @Body() dto: BanUserByBloggerBlogDto,
+  ) {
+    return this.commandBus.execute(
+      new BanUserByBloggerBlogCommand({ ...dto, userId: user.id, banUserId }),
     );
   }
 }
