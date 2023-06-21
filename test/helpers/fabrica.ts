@@ -10,7 +10,7 @@ import { authEndpoints, bloggerEndpoints, SA_URL } from './endpoints';
 import { getRefreshToken } from './get.refresh.token';
 
 const { LOGIN_URL } = authEndpoints;
-const { BLOGGER_BLOGS_URL } = bloggerEndpoints;
+const { BLOGGER_BLOGS_URL, BLOGGER_USERS_URL } = bloggerEndpoints;
 
 const {
   USERS_CONFIRM_EMAIL_TABLE,
@@ -219,6 +219,24 @@ export class BlogTest {
     }
 
     return blogs;
+  }
+
+  async createBanUsersForBlog(
+    quantity: number,
+    accessToken: string,
+    blogId: string,
+    banUserId: string[],
+  ) {
+    for (let i = 0; i < quantity; i++) {
+      await request(this.server)
+        .put(BLOGGER_USERS_URL + `/${banUserId[i]}/ban`)
+        .auth(accessToken, { type: 'bearer' })
+        .send({
+          isBanned: true,
+          banReason: 'test ban user for blog by blogger',
+          blogId,
+        });
+    }
   }
 
   _createBlogData() {

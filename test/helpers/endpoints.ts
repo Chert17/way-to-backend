@@ -23,6 +23,7 @@ const BLOGGER_URL = GLOBAL_PREFIX + '/blogger';
 export const bloggerEndpoints = {
   BLOGGER_BLOGS_URL: BLOGGER_URL + '/blogs',
   BLOGGER_USERS_URL: BLOGGER_URL + '/users',
+  GET_ALL_BAN_USERS_BY_BLOG_URL: BLOGGER_URL + '/users/blog',
 };
 
 export const BLOG_URL = GLOBAL_PREFIX + '/blogs';

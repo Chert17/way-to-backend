@@ -19,6 +19,7 @@ import { CreateBlogUseCase } from './use-case/create.blog.use-case';
 import { CreatePostByBlogUseCase } from './use-case/create.post.by.blog.use-case';
 import { DeleteBlogUseCase } from './use-case/delete.blog.use-case';
 import { DeletePostByBlogUseCase } from './use-case/delete.post.by.blog.use-case';
+import { GetAllBanUsersByBloggerBlogUseCase } from './use-case/get.all.ban.users.by.blogger.blog.use-case';
 import { UpdateBlogUseCase } from './use-case/update.blog.use-case';
 import { UpdatePostByBlogUseCase } from './use-case/update.post.by.blog.use-case';
 
@@ -45,6 +46,7 @@ import { UpdatePostByBlogUseCase } from './use-case/update.post.by.blog.use-case
     UpdatePostByBlogUseCase,
     DeletePostByBlogUseCase,
     BanUserByBloggerBlogUseCase,
+    GetAllBanUsersByBloggerBlogUseCase,
     // validation
     ExistBlog,
   ],
