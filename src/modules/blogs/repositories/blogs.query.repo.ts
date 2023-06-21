@@ -140,7 +140,7 @@ export class BlogsQueryRepo {
     from ${BLOGS_TABLE} b
     left join ${USERS_TABLE} u on b.user_id = u.id
     where b.title ilike $1
-    order by b.${sortBy} ${sortDirection}
+    order by b.${sortBy === 'name' ? '"title"' : sortBy} ${sortDirection}
     limit ${pageSize} offset ${pagination.skip()}
 
     `,

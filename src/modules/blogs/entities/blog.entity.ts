@@ -22,7 +22,7 @@ export class Blog {
   @Column({ type: 'text' })
   descr: string;
 
-  @Column({ type: 'varchar', unique: true })
+  @Column({ type: 'varchar' }) //? unique
   web_url: string;
 
   @Column({ type: 'varchar' })

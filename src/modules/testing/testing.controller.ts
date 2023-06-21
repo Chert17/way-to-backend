@@ -3,9 +3,13 @@ import { DataSource } from 'typeorm';
 import { Controller, Delete, HttpCode, HttpStatus } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
 
+import { BlogSqlTables } from '../../utils/tables/blogs.sql.tables';
+import { PostSqlTables } from '../../utils/tables/posts.sql.tables';
 import { UsersSqlTables } from '../../utils/tables/users.sql.tables';
 
 const { USERS_TABLE } = UsersSqlTables;
+const { BLOGS_TABLE } = BlogSqlTables;
+const { POSTS_TABLE } = PostSqlTables;
 
 @Controller('testing/all-data')
 export class TestingController {
@@ -14,6 +18,8 @@ export class TestingController {
   @Delete()
   @HttpCode(HttpStatus.NO_CONTENT)
   delete() {
-    return this.dataSource.query(`TRUNCATE ${USERS_TABLE} CASCADE`);
+    return this.dataSource.query(
+      `TRUNCATE ${USERS_TABLE}, ${BLOGS_TABLE}, ${POSTS_TABLE} CASCADE`,
+    );
   }
 }
