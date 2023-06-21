@@ -159,4 +159,40 @@ export class BlogsQueryRepo {
       items: result,
     };
   }
+
+  async getAllBlogs(
+    pagination: BlogQueryPagination,
+  ): Promise<WithPagination<BlogViewDto>> {
+    const { pageNumber, pageSize, searchNameTerm, sortBy, sortDirection } =
+      pagination;
+
+    const result = await this.dataSource.query(
+      `
+    select id, title as "name", descr as "description", web_url as "websiteUrl", created_at as "createdAt", is_membership as "isMembership"
+    from ${BLOGS_TABLE}
+    where title ilike $1 and is_ban = false
+    order by ${sortBy} ${sortDirection}
+    limit ${pageSize} offset ${pagination.skip()}
+    `,
+      [`%${searchNameTerm}%`],
+    );
+
+    const totalCount = await this.dataSource.query(
+      `
+    select count(*) from ${BLOGS_TABLE}
+    where title ilike $1 and is_ban = false
+    `,
+      [`%${searchNameTerm}%`],
+    );
+
+    const pageCount = Math.ceil(+totalCount[0].count / pageSize);
+
+    return {
+      pagesCount: pageCount === 0 ? 1 : pageCount,
+      page: pageNumber,
+      pageSize: pageSize,
+      totalCount: +totalCount[0].count,
+      items: result,
+    };
+  }
 }
