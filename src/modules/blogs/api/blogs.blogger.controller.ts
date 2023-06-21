@@ -28,6 +28,7 @@ import { CreateBlogCommand } from '../use-case/create.blog.use-case';
 import { CreatePostByBlogCommand } from '../use-case/create.post.by.blog.use-case';
 import { DeleteBlogCommand } from '../use-case/delete.blog.use-case';
 import { DeletePostByBlogCommand } from '../use-case/delete.post.by.blog.use-case';
+import { GetAllBanUsersByBloggerBlogCommand } from '../use-case/get.all.ban.users.by.blogger.blog.use-case';
 import { UpdateBlogCommand } from '../use-case/update.blog.use-case';
 import { UpdatePostByBlogCommand } from '../use-case/update.post.by.blog.use-case';
 
@@ -117,6 +118,17 @@ export class BlogsBloggerController {
   ) {
     return this.commandBus.execute(
       new BanUserByBloggerBlogCommand({ ...dto, userId: user.id, banUserId }),
+    );
+  }
+
+  @Get('/users/blog/:blogId')
+  getAllBanUsersByBloggerBlog(
+    @ReqUser() user: User,
+    @Query() pagination: BlogQueryPagination,
+    @Param('blogId') blogId: string,
+  ) {
+    return this.commandBus.execute(
+      new GetAllBanUsersByBloggerBlogCommand(user.id, blogId, pagination),
     );
   }
 }

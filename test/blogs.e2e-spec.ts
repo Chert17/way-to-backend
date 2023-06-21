@@ -7,7 +7,8 @@ import { errorsData } from './helpers/errors.data';
 import { BlogTest, PostTest, UserTest } from './helpers/fabrica';
 import { myBeforeAll } from './helpers/my.before.all';
 
-const { BLOGGER_BLOGS_URL, BLOGGER_USERS_URL } = bloggerEndpoints;
+const { BLOGGER_BLOGS_URL, BLOGGER_USERS_URL, GET_ALL_BAN_USERS_BY_BLOG_URL } =
+  bloggerEndpoints;
 
 describe('blogger e2e', () => {
   let server: any;
@@ -686,6 +687,63 @@ describe('blogger e2e', () => {
 
       const res = await request(server).put(
         BLOGGER_USERS_URL + `/${user1.id}/ban`,
+      );
+
+      expect(res.status).toBe(HttpStatus.UNAUTHORIZED);
+    });
+  });
+
+  describe('get all banned users by blog', () => {
+    it('should be returned all banned users by blog', async () => {
+      const [user0, user1, user2] = await userTest.createLoginUsers(3);
+
+      const [blog0] = await blogTest.createBlogs(1, user0.accessToken);
+
+      await blogTest.createBanUsersForBlog(2, user0.accessToken, blog0.id, [
+        user1.id,
+        user2.id,
+      ]);
+
+      const res = await request(server)
+        .get(GET_ALL_BAN_USERS_BY_BLOG_URL + `/${blog0.id}`)
+        .auth(user0.accessToken, { type: 'bearer' });
+
+      expect(res.status).toBe(HttpStatus.OK);
+      expect(res.body).toEqual({
+        pagesCount: 1,
+        page: 1,
+        pageSize: 10,
+        totalCount: 2,
+        items: [
+          {
+            id: user2.id,
+            login: user2.login,
+            banInfo: {
+              isBanned: true,
+              banDate: expect.any(String),
+              banReason: expect.any(String),
+            },
+          },
+          {
+            id: user1.id,
+            login: user1.login,
+            banInfo: {
+              isBanned: true,
+              banDate: expect.any(String),
+              banReason: expect.any(String),
+            },
+          },
+        ],
+      });
+    });
+
+    it("shouldn't returned ban users if not auth", async () => {
+      const [user0] = await userTest.createLoginUsers(3);
+
+      const [blog0] = await blogTest.createBlogs(1, user0.accessToken);
+
+      const res = await request(server).get(
+        GET_ALL_BAN_USERS_BY_BLOG_URL + `/${blog0.id}`,
       );
 
       expect(res.status).toBe(HttpStatus.UNAUTHORIZED);

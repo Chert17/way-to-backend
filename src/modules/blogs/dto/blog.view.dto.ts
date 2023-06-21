@@ -17,3 +17,13 @@ export class BlogViewBySADto {
   readonly blogOwnerInfo: { userId: string; userLogin: string };
   readonly banInfo: { isBanned: boolean; banDate: string | null };
 }
+
+export class BanUserByBlogViewDto {
+  id: string;
+  login: string;
+  banInfo: {
+    isBanned: boolean;
+    banDate: string;
+    banReason: string;
+  };
+}
