@@ -2,13 +2,20 @@ import request from 'supertest';
 
 import { HttpStatus } from '@nestjs/common';
 
-import { BLOG_URL, bloggerEndpoints, POST_URL } from './helpers/endpoints';
+import {
+  BLOG_URL,
+  bloggerEndpoints,
+  POST_URL,
+  SABlogsEndpoints,
+} from './helpers/endpoints';
 import { errorsData } from './helpers/errors.data';
-import { BlogTest, PostTest, UserTest } from './helpers/fabrica';
+import { admin, BlogTest, PostTest, UserTest } from './helpers/fabrica';
 import { myBeforeAll } from './helpers/my.before.all';
 
 const { BLOGGER_BLOGS_URL, BLOGGER_USERS_URL, GET_ALL_BAN_USERS_BY_BLOG_URL } =
   bloggerEndpoints;
+
+const { SA_BAN_BLOG_URL } = SABlogsEndpoints;
 
 describe('blogger e2e', () => {
   let server: any;
@@ -788,6 +795,90 @@ describe('public blogs e2e', () => {
       );
 
       expect(res.status).toBe(HttpStatus.NOT_FOUND);
+    });
+  });
+});
+
+describe(' blogs sa e2e', () => {
+  let server: any;
+
+  let userTest: UserTest;
+  let blogTest: BlogTest;
+
+  beforeAll(async () => {
+    process.env.THROTTLR_LIMIT = 1000 + '';
+
+    const { myServer, dataSource } = await myBeforeAll();
+
+    server = myServer;
+
+    userTest = new UserTest(server, dataSource);
+    blogTest = new BlogTest(server, dataSource);
+  });
+
+  beforeEach(async () => {
+    await request(server).delete('/api/testing/all-data');
+  });
+
+  describe('ban blog', () => {
+    it('should be ban blog', async () => {
+      const [user0] = await userTest.createLoginUsers(1);
+
+      const [blog0] = await blogTest.createBlogs(1, user0.accessToken);
+
+      const beforeGetRes = await request(server).get(BLOG_URL + `/${blog0.id}`);
+
+      const res = await request(server)
+        .put(SA_BAN_BLOG_URL + `/${blog0.id}/ban`)
+        .auth(admin.login, admin.password, { type: 'basic' })
+        .send({ isBanned: true });
+
+      const afterGetRes = await request(server).get(BLOG_URL + `/${blog0.id}`);
+
+      const unbanRes = await request(server)
+        .put(SA_BAN_BLOG_URL + `/${blog0.id}/ban`)
+        .auth(admin.login, admin.password, { type: 'basic' })
+        .send({ isBanned: false });
+
+      const beforeUnbanRes = await request(server).get(
+        BLOG_URL + `/${blog0.id}`,
+      );
+
+      expect(res.status).toBe(HttpStatus.NO_CONTENT);
+      expect(beforeGetRes.status).toBe(HttpStatus.OK);
+      expect(beforeGetRes.body).toBeDefined();
+      expect(afterGetRes.status).toBe(HttpStatus.NOT_FOUND);
+      expect(unbanRes.status).toBe(HttpStatus.NO_CONTENT);
+      expect(beforeUnbanRes.status).toBe(HttpStatus.OK);
+      expect(beforeUnbanRes.body).toBeDefined();
+    });
+
+    it("shouldn't ban blog with incorrect data", async () => {
+      const [user0] = await userTest.createLoginUsers(1);
+
+      const [blog0] = await blogTest.createBlogs(1, user0.accessToken);
+
+      const res = await request(server)
+        .put(SA_BAN_BLOG_URL + `/${blog0.id}/ban`)
+        .auth(admin.login, admin.password, { type: 'basic' })
+        .send({ isBanned: 'qweqwe' });
+
+      const errors = errorsData('isBanned');
+
+      expect(res.status).toBe(HttpStatus.BAD_REQUEST);
+      expect(res.body).toEqual(errors);
+    });
+
+    it("shouldn't ban blog if not auth", async () => {
+      const [user0] = await userTest.createLoginUsers(1);
+
+      const [blog0] = await blogTest.createBlogs(1, user0.accessToken);
+
+      const res = await request(server).put(
+        SA_BAN_BLOG_URL + `/${blog0.id}/ban`,
+      );
+
+      expect(res.status).toBe(HttpStatus.UNAUTHORIZED);
     });
   });
 });

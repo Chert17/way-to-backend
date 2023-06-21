@@ -21,7 +21,7 @@ export class BlogsQueryRepo {
       `
     select id, title as "name", descr as "description", web_url as "websiteUrl", created_at as "createdAt", is_membership as "isMembership"
     from ${BLOGS_TABLE}
-    where id = $1
+    where id = $1 and is_ban = false
     `,
       [blogId],
     );

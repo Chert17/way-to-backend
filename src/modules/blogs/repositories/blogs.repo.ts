@@ -4,6 +4,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
 
 import { BlogSqlTables } from '../../../utils/tables/blogs.sql.tables';
+import { BanBlogDbDto } from '../dto/ban.blog.dto';
 import { BanUserByBloggerBlogDbDto } from '../dto/ban.user.by.blogger.blog.dto';
 import { CreateBlogDbDto } from '../dto/create.blog.dto';
 import { UpdateBlogDbDto } from '../dto/update.blog.dto';
@@ -66,6 +67,19 @@ export class BlogsRepo {
           DELETE FROM ${BANNED_BLOG_USERS} WHERE ban_user_id = '${banUserId}' and blog_id = '${blogId}';
       END IF;
     END $$;`,
+    );
+  }
+
+  async banBlogBySA(dto: BanBlogDbDto) {
+    const { blogId, isBanned, banDate } = dto;
+
+    return this.dataSource.query(
+      `
+    update ${BLOGS_TABLE}
+    set is_ban = $2, ban_date = $3
+    where id = $1
+    `,
+      [blogId, isBanned, banDate],
     );
   }
 
