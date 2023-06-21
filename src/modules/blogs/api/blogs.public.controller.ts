@@ -26,13 +26,8 @@ export class BlogsPublicController {
   ) {}
 
   @Get()
-  async getAll(@Query() pagination: BlogQueryPagination) {
-    return await this.blogsQueryRepo.getAllBlogs(pagination);
-  }
-
-  @Get()
-  async getAll(@Query() pagination: BlogQueryPagination) {
-    return await this.blogsQueryRepo.getAllBlogs(pagination);
+  getAllBlogs(@Query() pagination: BlogQueryPagination) {
+    return this.blogsQueryRepo.getAllBlogs(pagination);
   }
 
   @Get(':blogId')
