@@ -4,6 +4,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
 
 import { BlogSqlTables } from '../../../utils/tables/blogs.sql.tables';
+import { PostSqlTables } from '../../../utils/tables/posts.sql.tables';
 import { BanBlogDbDto } from '../dto/ban.blog.dto';
 import { BanUserByBloggerBlogDbDto } from '../dto/ban.user.by.blogger.blog.dto';
 import { CreateBlogDbDto } from '../dto/create.blog.dto';
@@ -11,6 +12,7 @@ import { UpdateBlogDbDto } from '../dto/update.blog.dto';
 import { BlogDb } from '../types/blog.types';
 
 const { BLOGS_TABLE, BANNED_BLOG_USERS } = BlogSqlTables;
+const { POSTS_TABLE } = PostSqlTables;
 
 @Injectable()
 export class BlogsRepo {
@@ -90,6 +92,21 @@ export class BlogsRepo {
     `,
       [blogId],
     );
+
+    return result[0];
+  }
+
+  async checkBlogByPostId(postId: string): Promise<BlogDb> {
+    const result = await this.dataSource.query(
+      `
+    select b.* from ${POSTS_TABLE} p
+    left join ${BLOGS_TABLE} b on p.blog_id = b.id
+    where p.id = $1
+    `,
+      [postId],
+    );
+
+    console.log(result[0]);
 
     return result[0];
   }

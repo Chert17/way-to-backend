@@ -58,7 +58,10 @@ export class PostsQueryRepo {
     );
 
     const totalCount = await this.dataSource.query(`
-    select count(*) from ${POSTS_TABLE}
+    select count(*) from ${POSTS_TABLE} p
+    left join ${BLOGS_TABLE} b on p.blog_id = b.id
+    where b.is_ban = false
+
     `);
 
     const pageCount = Math.ceil(+totalCount[0].count / pageSize);

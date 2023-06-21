@@ -68,6 +68,24 @@ describe('posts e2e', () => {
 
       expect(res.status).toBe(HttpStatus.NOT_FOUND);
     });
+
+    it("shouldn't return post if ban blog", async () => {
+      const [user0] = await userTest.createLoginUsers(1);
+
+      const [blog0] = await blogTest.createBlogs(1, user0.accessToken);
+
+      const [post0] = await postTest.createPosts(
+        1,
+        user0.accessToken,
+        blog0.id,
+      );
+
+      await blogTest.createBanBlogs(1, [blog0.id]);
+
+      const res = await request(server).get(POST_URL + `/${post0.id}`);
+
+      expect(res.status).toBe(HttpStatus.NOT_FOUND);
+    });
   });
 
   describe('get all posts', () => {
