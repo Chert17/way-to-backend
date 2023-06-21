@@ -14,6 +14,7 @@ import { BlogsService } from './blogs.service';
 import { Blog } from './entities/blog.entity';
 import { BlogsQueryRepo } from './repositories/blogs.query.repo';
 import { BlogsRepo } from './repositories/blogs.repo';
+import { BBanBlogBySaUseCase } from './use-case/ban.blog.by.sa.use-case';
 import { BanUserByBloggerBlogUseCase } from './use-case/ban.user.byblogger.blog.use-case';
 import { CreateBlogUseCase } from './use-case/create.blog.use-case';
 import { CreatePostByBlogUseCase } from './use-case/create.post.by.blog.use-case';
@@ -47,6 +48,7 @@ import { UpdatePostByBlogUseCase } from './use-case/update.post.by.blog.use-case
     DeletePostByBlogUseCase,
     BanUserByBloggerBlogUseCase,
     GetAllBanUsersByBloggerBlogUseCase,
+    BBanBlogBySaUseCase,
     // validation
     ExistBlog,
   ],

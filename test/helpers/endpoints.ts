@@ -29,3 +29,8 @@ export const bloggerEndpoints = {
 export const BLOG_URL = GLOBAL_PREFIX + '/blogs';
 
 export const POST_URL = GLOBAL_PREFIX + '/posts';
+
+export const SABlogsEndpoints = {
+  SA_BAN_BLOG_URL: GLOBAL_PREFIX + '/sa/blogs',
+  SA_GET_ALL_BAN_BLOGS_URL: GLOBAL_PREFIX + '/sa/blogs',
+};
