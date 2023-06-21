@@ -7,7 +7,7 @@ import { errorsData } from './helpers/errors.data';
 import { BlogTest, PostTest, UserTest } from './helpers/fabrica';
 import { myBeforeAll } from './helpers/my.before.all';
 
-const { BLOGGER_BLOGS_URL } = bloggerEndpoints;
+const { BLOGGER_BLOGS_URL, BLOGGER_USERS_URL } = bloggerEndpoints;
 
 describe('blogger e2e', () => {
   let server: any;
@@ -640,6 +640,55 @@ describe('blogger e2e', () => {
         .auth(user0.accessToken, { type: 'bearer' });
 
       expect(res.status).toBe(HttpStatus.NOT_FOUND);
+    });
+  });
+
+  describe('ban user for blog by blogger', () => {
+    it('shoul be banned user for blog', async () => {
+      const [user0, user1] = await userTest.createLoginUsers(2);
+
+      const [blog0] = await blogTest.createBlogs(1, user0.accessToken);
+
+      const res = await request(server)
+        .put(BLOGGER_USERS_URL + `/${user1.id}/ban`)
+        .auth(user0.accessToken, { type: 'bearer' })
+        .send({
+          isBanned: true,
+          banReason: 'test ban user for blog by blogger',
+          blogId: blog0.id,
+        });
+
+      //TODO add check logic for create comment by ban user for blog
+
+      expect(res.status).toBe(HttpStatus.NO_CONTENT);
+    });
+
+    it("shouldn't ban user wiyh incorrect data", async () => {
+      const [user0, user1] = await userTest.createLoginUsers(2);
+
+      await blogTest.createBlogs(1, user0.accessToken);
+
+      const res = await request(server)
+        .put(BLOGGER_USERS_URL + `/${user1.id}/ban`)
+        .auth(user0.accessToken, { type: 'bearer' })
+        .send({ isBanned: true });
+
+      const errors = errorsData('banReason', 'blogId');
+
+      expect(res.status).toBe(HttpStatus.BAD_REQUEST);
+      expect(res.body).toEqual(errors);
+    });
+
+    it("shouldn't ban user if not auth", async () => {
+      const [user0, user1] = await userTest.createLoginUsers(2);
+
+      await blogTest.createBlogs(1, user0.accessToken);
+
+      const res = await request(server).put(
+        BLOGGER_USERS_URL + `/${user1.id}/ban`,
+      );
+
+      expect(res.status).toBe(HttpStatus.UNAUTHORIZED);
     });
   });
 });

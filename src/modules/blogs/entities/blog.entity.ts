@@ -9,6 +9,7 @@ import {
 
 import { Post } from '../../posts/entities/post.entity';
 import { User } from '../../users/entities/user.entity';
+import { BanUsersForBlog } from './ban.users.for.blog.entity';
 
 @Entity({ name: 'blogs' })
 export class Blog {
@@ -45,4 +46,7 @@ export class Blog {
 
   @OneToMany(() => Post, posts => posts.blog)
   posts: Post[];
+
+  @OneToMany(() => BanUsersForBlog, user => user.blog)
+  bannedUsers: BanUsersForBlog[];
 }

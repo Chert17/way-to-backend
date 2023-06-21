@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { CqrsModule } from '@nestjs/cqrs';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
+import { ExistBlog } from '../../infra/decorators/blog/exist.blog';
 import { JwtService } from '../auth/jwt.service';
 import { PostsQueryRepo } from '../posts/repositories/post.query.repo';
 import { PostsRepo } from '../posts/repositories/post.repo';
@@ -13,6 +14,7 @@ import { BlogsService } from './blogs.service';
 import { Blog } from './entities/blog.entity';
 import { BlogsQueryRepo } from './repositories/blogs.query.repo';
 import { BlogsRepo } from './repositories/blogs.repo';
+import { BanUserByBloggerBlogUseCase } from './use-case/ban.user.byblogger.blog.use-case';
 import { CreateBlogUseCase } from './use-case/create.blog.use-case';
 import { CreatePostByBlogUseCase } from './use-case/create.post.by.blog.use-case';
 import { DeleteBlogUseCase } from './use-case/delete.blog.use-case';
@@ -42,6 +44,9 @@ import { UpdatePostByBlogUseCase } from './use-case/update.post.by.blog.use-case
     CreatePostByBlogUseCase,
     UpdatePostByBlogUseCase,
     DeletePostByBlogUseCase,
+    BanUserByBloggerBlogUseCase,
+    // validation
+    ExistBlog,
   ],
   imports: [TypeOrmModule.forFeature([Blog]), CqrsModule],
 })

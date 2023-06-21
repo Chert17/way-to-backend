@@ -4,11 +4,12 @@ import { Injectable } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
 
 import { BlogSqlTables } from '../../../utils/tables/blogs.sql.tables';
+import { BanUserByBloggerBlogDbDto } from '../dto/ban.user.by.blogger.blog.dto';
 import { CreateBlogDbDto } from '../dto/create.blog.dto';
 import { UpdateBlogDbDto } from '../dto/update.blog.dto';
 import { BlogDb } from '../types/blog.types';
 
-const { BLOGS_TABLE } = BlogSqlTables;
+const { BLOGS_TABLE, BANNED_BLOG_USERS } = BlogSqlTables;
 
 @Injectable()
 export class BlogsRepo {
@@ -48,6 +49,23 @@ export class BlogsRepo {
     delete from ${BLOGS_TABLE} where id = $1
     `,
       [blogId],
+    );
+  }
+
+  async banUserByBloggerBlog(dto: BanUserByBloggerBlogDbDto) {
+    const { banUserId, blogId, isBanned, banReason, banDate } = dto;
+
+    return this.dataSource.query(
+      `
+    DO $$
+      BEGIN
+        IF ${isBanned} THEN
+          INSERT INTO ${BANNED_BLOG_USERS} (ban_user_id, blog_id, ban_reason, ban_date)
+          VALUES ('${banUserId}', '${blogId}', '${banReason}', '${banDate}');
+      ELSE
+          DELETE FROM ${BANNED_BLOG_USERS} WHERE ban_user_id = '${banUserId}' and blog_id = '${blogId}';
+      END IF;
+    END $$;`,
     );
   }
 
