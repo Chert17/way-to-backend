@@ -3,6 +3,7 @@ import request from 'supertest';
 import { HttpStatus } from '@nestjs/common';
 
 import { POST_URL } from './helpers/endpoints';
+import { errorsData } from './helpers/errors.data';
 import { BlogTest, PostTest, UserTest } from './helpers/fabrica';
 import { myBeforeAll } from './helpers/my.before.all';
 
@@ -141,6 +142,119 @@ describe('posts e2e', () => {
           },
         ],
       });
+    });
+  });
+
+  describe('create comment for post', () => {
+    it('should be create comment', async () => {
+      const [user0] = await userTest.createLoginUsers(1);
+
+      const [blog0] = await blogTest.createBlogs(1, user0.accessToken);
+
+      const [post0] = await postTest.createPosts(
+        1,
+        user0.accessToken,
+        blog0.id,
+      );
+
+      const res = await request(server)
+        .post(POST_URL + `/${post0.id}/comments`)
+        .auth(user0.accessToken, { type: 'bearer' })
+        .send({ content: 'create comment create comment' });
+
+      expect(res.status).toBe(HttpStatus.CREATED);
+      expect(res.body).toEqual({
+        id: expect.any(String),
+        content: 'create comment create comment',
+        commentatorInfo: {
+          userId: user0.id,
+          userLogin: user0.login,
+        },
+        createdAt: expect.any(String),
+        likesInfo: {
+          likesCount: 0,
+          dislikesCount: 0,
+          myStatus: 'None',
+        },
+      });
+    });
+
+    it("shouldn't create comment with icnorrect data", async () => {
+      const [user0] = await userTest.createLoginUsers(1);
+
+      const [blog0] = await blogTest.createBlogs(1, user0.accessToken);
+
+      const [post0] = await postTest.createPosts(
+        1,
+        user0.accessToken,
+        blog0.id,
+      );
+
+      const res = await request(server)
+        .post(POST_URL + `/${post0.id}/comments`)
+        .auth(user0.accessToken, { type: 'bearer' })
+        .send({ content: '' });
+
+      const errors = errorsData('content');
+
+      expect(res.status).toBe(HttpStatus.BAD_REQUEST);
+      expect(res.body).toEqual(errors);
+    });
+
+    it("shouldn't create comment if not auth", async () => {
+      const [user0] = await userTest.createLoginUsers(1);
+
+      const [blog0] = await blogTest.createBlogs(1, user0.accessToken);
+
+      const [post0] = await postTest.createPosts(
+        1,
+        user0.accessToken,
+        blog0.id,
+      );
+
+      const res = await request(server)
+        .post(POST_URL + `/${post0.id}/comments`)
+        .send({ content: 'create comment create comment' });
+
+      expect(res.status).toBe(HttpStatus.UNAUTHORIZED);
+    });
+
+    it("shouldn't create comment if not exist post", async () => {
+      const [user0] = await userTest.createLoginUsers(1);
+
+      const [blog0] = await blogTest.createBlogs(1, user0.accessToken);
+
+      await postTest.createPosts(1, user0.accessToken, blog0.id);
+
+      const res = await request(server)
+        .post(POST_URL + `/8eb3bb41-99b3-4b00-bd23-2fd410dab21f/comments`)
+        .auth(user0.accessToken, { type: 'bearer' })
+        .send({ content: 'create comment create comment' });
+
+      expect(res.status).toBe(HttpStatus.NOT_FOUND);
+    });
+
+    it("shouldn't create comment if banned user for current blog", async () => {
+      const [user0] = await userTest.createLoginUsers(1);
+
+      const [blog0] = await blogTest.createBlogs(1, user0.accessToken);
+
+      await blogTest.createBanUsersForBlog(1, user0.accessToken, blog0.id, [
+        user0.id,
+      ]);
+
+      const [post0] = await postTest.createPosts(
+        1,
+        user0.accessToken,
+        blog0.id,
+      );
+
+      const res = await request(server)
+        .post(POST_URL + `/${post0.id}/comments`)
+        .auth(user0.accessToken, { type: 'bearer' })
+        .send({ content: 'create comment create comment' });
+
+      expect(res.status).toBe(HttpStatus.FORBIDDEN);
     });
   });
 });

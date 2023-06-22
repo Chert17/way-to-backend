@@ -14,6 +14,7 @@ import { EmailModule } from './modules/email/email.module';
 import { TestingModule } from './modules/testing/testing.module';
 import { UsersModule } from './modules/users/users.module';
 import { PostsModule } from './modules/posts/posts.module';
+import { CommentsModule } from './modules/comments/comments.module';
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { PostsModule } from './modules/posts/posts.module';
     DevicesModule,
     BlogsModule,
     PostsModule,
+    CommentsModule,
   ],
 
   // providers: [...controllers, ...services, ...repositories, ...useCase],

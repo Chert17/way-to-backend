@@ -106,8 +106,24 @@ export class BlogsRepo {
       [postId],
     );
 
-    console.log(result[0]);
-
     return result[0];
+  }
+
+  async checkBanUserByBlog(
+    userId: string,
+    postId: string,
+  ): Promise<{ is_banned: boolean }> {
+    const result = await this.dataSource.query(
+      `
+    select b_u.ban_user_id
+    from ${POSTS_TABLE} p
+    left join ${BLOGS_TABLE} b on p.blog_id = b.id
+    left join ${BANNED_BLOG_USERS} b_u on b.user_id = b_u.ban_user_id
+    where p.id = $2 and b.user_id = $1
+    `,
+      [userId, postId],
+    );
+
+    return { is_banned: result[0]?.ban_user_id === userId };
   }
 }

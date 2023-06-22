@@ -3,10 +3,12 @@ import {
   Entity,
   JoinColumn,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 
 import { Blog } from '../../blogs/entities/blog.entity';
+import { Comment } from '../../comments/entities/comment.entity';
 
 @Entity({ name: 'posts' })
 export class Post {
@@ -31,4 +33,7 @@ export class Post {
   })
   @JoinColumn({ name: 'blog_id' })
   blog: Blog;
+
+  @OneToMany(() => Comment, comments => comments.post)
+  comments: Comment[];
 }
