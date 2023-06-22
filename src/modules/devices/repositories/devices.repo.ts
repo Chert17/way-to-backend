@@ -70,4 +70,13 @@ export class DevicesRepo {
       [userId, deviceId],
     );
   }
+
+  async deleteAllDevicesIfBanUser(userId: string) {
+    return this.dataSource.query(
+      `
+      delete from ${USERS_DEVICES_TABLE} where user_id = $1
+    `,
+      [userId],
+    );
+  }
 }
