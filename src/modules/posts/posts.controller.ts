@@ -2,8 +2,11 @@ import {
   Body,
   Controller,
   Get,
+  HttpCode,
+  HttpStatus,
   Param,
   Post,
+  Put,
   Query,
   UseGuards,
 } from '@nestjs/common';
@@ -13,6 +16,7 @@ import { ReqUser } from '../../infra/decorators/params/req.user.decorator';
 import { UserId } from '../../infra/decorators/params/req.userId.decorator';
 import { JwtAuthGuard } from '../../infra/guards/jwt.auth.guard';
 import { UserIdFromToken } from '../../infra/guards/userId.from.token.guard';
+import { LikeStatusDto } from '../../types/like.info.interface';
 import { ReqUserIdType } from '../../types/req.user.interface';
 import { PostQueryPagination } from '../../utils/pagination/pagination';
 import { User } from '../users/entities/user.entity';
@@ -20,6 +24,7 @@ import { createCommentDto } from './dto/create.comment.dto';
 import { PostsQueryRepo } from './repositories/post.query.repo';
 import { CreateCommentByPostCommand } from './use-case/create.comment.by.post.use-case';
 import { GetPostsByIdCommand } from './use-case/get.post.by.id.use-case';
+import { SetLikeInfoByPostCommand } from './use-case/post.like.info.use-case';
 
 @Controller('posts')
 export class PostsController {
@@ -29,6 +34,7 @@ export class PostsController {
   ) {}
 
   @Get()
+  @UseGuards(UserIdFromToken)
   getAll(
     @Query() pagination: PostQueryPagination,
     @UserId() userId: ReqUserIdType,
@@ -57,6 +63,23 @@ export class PostsController {
         userId: user.id,
         postId,
         content: dto.content,
+      }),
+    );
+  }
+
+  @Put('/:postId/like-status')
+  @UseGuards(JwtAuthGuard)
+  @HttpCode(HttpStatus.NO_CONTENT)
+  setPostLike(
+    @Param('postId') postId: string,
+    @Body() dto: LikeStatusDto,
+    @ReqUser() user: User,
+  ) {
+    return this.commandBus.execute(
+      new SetLikeInfoByPostCommand({
+        userId: user.id,
+        postId,
+        likeStatus: dto.likeStatus,
       }),
     );
   }

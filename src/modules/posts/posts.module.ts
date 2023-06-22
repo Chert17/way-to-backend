@@ -14,6 +14,7 @@ import { PostsQueryRepo } from './repositories/post.query.repo';
 import { PostsRepo } from './repositories/post.repo';
 import { CreateCommentByPostUseCase } from './use-case/create.comment.by.post.use-case';
 import { GetPostsByIdUseCase } from './use-case/get.post.by.id.use-case';
+import { SetLikeInfoByPostUseCase } from './use-case/post.like.info.use-case';
 
 @Module({
   controllers: [PostsController],
@@ -30,6 +31,7 @@ import { GetPostsByIdUseCase } from './use-case/get.post.by.id.use-case';
     // use-case
     GetPostsByIdUseCase,
     CreateCommentByPostUseCase,
+    SetLikeInfoByPostUseCase,
   ],
   imports: [TypeOrmModule.forFeature([Post]), CqrsModule],
 })

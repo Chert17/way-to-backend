@@ -9,6 +9,7 @@ import {
 
 import { Blog } from '../../blogs/entities/blog.entity';
 import { Comment } from '../../comments/entities/comment.entity';
+import { PostsReactions } from './post.reaction.entity';
 
 @Entity({ name: 'posts' })
 export class Post {
@@ -36,4 +37,7 @@ export class Post {
 
   @OneToMany(() => Comment, comments => comments.post)
   comments: Comment[];
+
+  @OneToMany(() => PostsReactions, reactions => reactions.post)
+  posts_reactions: PostsReactions[];
 }
