@@ -2,9 +2,10 @@ import request from 'supertest';
 
 import { HttpStatus } from '@nestjs/common';
 
-import { POST_URL } from './helpers/endpoints';
+import { LikeStatus } from '../src/utils/like.status';
+import { POST_URL, SA_URL } from './helpers/endpoints';
 import { errorsData } from './helpers/errors.data';
-import { BlogTest, PostTest, UserTest } from './helpers/fabrica';
+import { BlogTest, PostTest, UserTest, admin } from './helpers/fabrica';
 import { myBeforeAll } from './helpers/my.before.all';
 
 describe('posts e2e', () => {
@@ -56,8 +57,8 @@ describe('posts e2e', () => {
         extendedLikesInfo: {
           likesCount: 0,
           dislikesCount: 0,
-          myStatus: 'None',
-          newestLikes: post0.extendedLikesInfo.newestLikes,
+          myStatus: LikeStatus.None,
+          newestLikes: [],
         },
       });
     });
@@ -101,7 +102,14 @@ describe('posts e2e', () => {
         blog0.id,
       );
 
-      const res = await request(server).get(POST_URL);
+      await request(server)
+        .put(POST_URL + `/${post0.id}/like-status`)
+        .auth(user0.accessToken, { type: 'bearer' })
+        .send({ likeStatus: LikeStatus.Like });
+
+      const res = await request(server)
+        .get(POST_URL)
+        .auth(user0.accessToken, { type: 'bearer' });
 
       expect(res.status).toBe(HttpStatus.OK);
       expect(res.body).toEqual({
@@ -121,7 +129,7 @@ describe('posts e2e', () => {
             extendedLikesInfo: {
               likesCount: 0,
               dislikesCount: 0,
-              myStatus: 'None',
+              myStatus: LikeStatus.None,
               newestLikes: [],
             },
           },
@@ -134,14 +142,234 @@ describe('posts e2e', () => {
             blogName: blog0.name,
             createdAt: post0.createdAt,
             extendedLikesInfo: {
-              likesCount: 0,
+              likesCount: 1,
               dislikesCount: 0,
-              myStatus: 'None',
-              newestLikes: [],
+              myStatus: LikeStatus.Like,
+              newestLikes: [
+                {
+                  addedAt: expect.any(String),
+                  userId: user0.id,
+                  login: user0.login,
+                },
+              ],
             },
           },
         ],
       });
+    });
+  });
+
+  describe('posts likes', () => {
+    it('should be like and dislike post', async () => {
+      const [user0] = await userTest.createLoginUsers(1);
+
+      const [blog0] = await blogTest.createBlogs(1, user0.accessToken);
+
+      const [post0] = await postTest.createPosts(
+        1,
+        user0.accessToken,
+        blog0.id,
+      );
+
+      const res = await request(server)
+        .put(POST_URL + `/${post0.id}/like-status`)
+        .auth(user0.accessToken, { type: 'bearer' })
+        .send({ likeStatus: LikeStatus.Like });
+
+      const likeRes = await request(server)
+        .get(POST_URL + `/${post0.id}`)
+        .auth(user0.accessToken, { type: 'bearer' });
+
+      const res1 = await request(server)
+        .put(POST_URL + `/${post0.id}/like-status`)
+        .auth(user0.accessToken, { type: 'bearer' })
+        .send({ likeStatus: LikeStatus.Dislike });
+
+      const disLikeRes = await request(server)
+        .get(POST_URL + `/${post0.id}`)
+        .auth(user0.accessToken, { type: 'bearer' });
+
+      expect(res.status).toBe(HttpStatus.NO_CONTENT);
+      expect(likeRes.status).toBe(HttpStatus.OK);
+      expect(likeRes.body).toEqual({
+        id: post0.id,
+        title: post0.title,
+        shortDescription: post0.shortDescription,
+        content: post0.content,
+        blogId: blog0.id,
+        blogName: blog0.name,
+        createdAt: post0.createdAt,
+        extendedLikesInfo: {
+          likesCount: 1,
+          dislikesCount: 0,
+          myStatus: LikeStatus.Like,
+          newestLikes: [
+            {
+              addedAt: expect.any(String),
+              userId: user0.id,
+              login: user0.login,
+            },
+          ],
+        },
+      });
+      expect(res1.status).toBe(HttpStatus.NO_CONTENT);
+      expect(disLikeRes.status).toBe(HttpStatus.OK);
+      expect(disLikeRes.body).toEqual({
+        id: post0.id,
+        title: post0.title,
+        shortDescription: post0.shortDescription,
+        content: post0.content,
+        blogId: blog0.id,
+        blogName: blog0.name,
+        createdAt: post0.createdAt,
+        extendedLikesInfo: {
+          likesCount: 0,
+          dislikesCount: 1,
+          myStatus: LikeStatus.Dislike,
+          newestLikes: [],
+        },
+      });
+    });
+
+    it('should be like post but get other user mystatus should be None', async () => {
+      const [user0, user1] = await userTest.createLoginUsers(2);
+
+      const [blog0] = await blogTest.createBlogs(1, user0.accessToken);
+
+      const [post0] = await postTest.createPosts(
+        1,
+        user0.accessToken,
+        blog0.id,
+      );
+
+      const res = await request(server)
+        .put(POST_URL + `/${post0.id}/like-status`)
+        .auth(user0.accessToken, { type: 'bearer' })
+        .send({ likeStatus: LikeStatus.Like });
+
+      const likeRes = await request(server)
+        .get(POST_URL + `/${post0.id}`)
+        .auth(user1.accessToken, { type: 'bearer' });
+
+      expect(res.status).toBe(HttpStatus.NO_CONTENT);
+      expect(likeRes.status).toBe(HttpStatus.OK);
+      expect(likeRes.body).toEqual({
+        id: post0.id,
+        title: post0.title,
+        shortDescription: post0.shortDescription,
+        content: post0.content,
+        blogId: blog0.id,
+        blogName: blog0.name,
+        createdAt: post0.createdAt,
+        extendedLikesInfo: {
+          likesCount: 1,
+          dislikesCount: 0,
+          myStatus: LikeStatus.None,
+          newestLikes: [
+            {
+              addedAt: expect.any(String),
+              userId: user0.id,
+              login: user0.login,
+            },
+          ],
+        },
+      });
+    });
+
+    it('should be like post with ban user returned like info without ban user', async () => {
+      const [user0, user1, user2] = await userTest.createLoginUsers(3);
+
+      const [blog0] = await blogTest.createBlogs(1, user0.accessToken);
+
+      const [post0] = await postTest.createPosts(
+        1,
+        user0.accessToken,
+        blog0.id,
+      );
+
+      await request(server)
+        .put(POST_URL + `/${post0.id}/like-status`)
+        .auth(user0.accessToken, { type: 'bearer' })
+        .send({ likeStatus: LikeStatus.Like });
+
+      await request(server)
+        .put(POST_URL + `/${post0.id}/like-status`)
+        .auth(user1.accessToken, { type: 'bearer' })
+        .send({ likeStatus: LikeStatus.Like });
+
+      const beforeGetRes = await request(server)
+        .get(POST_URL + `/${post0.id}`)
+        .auth(user2.accessToken, { type: 'bearer' });
+
+      await request(server)
+        .put(SA_URL + `/${user0.id}/ban`)
+        .auth(admin.login, admin.password, { type: 'basic' })
+        .send({ isBanned: true, banReason: 'banned user banned user' });
+
+      const afterGetRes = await request(server)
+        .get(POST_URL + `/${post0.id}`)
+        .auth(user2.accessToken, { type: 'bearer' });
+
+      expect(beforeGetRes.status).toBe(HttpStatus.OK);
+      expect(beforeGetRes.body.extendedLikesInfo.likesCount).toBe(2);
+      expect(beforeGetRes.body.extendedLikesInfo.newestLikes).toHaveLength(2);
+      expect(afterGetRes.body.extendedLikesInfo.likesCount).toBe(1);
+      expect(afterGetRes.body.extendedLikesInfo.newestLikes).toHaveLength(1);
+    });
+
+    it("shouldn't like posts with incorrect data", async () => {
+      const [user0] = await userTest.createLoginUsers(1);
+
+      const [blog0] = await blogTest.createBlogs(1, user0.accessToken);
+
+      const [post0] = await postTest.createPosts(
+        1,
+        user0.accessToken,
+        blog0.id,
+      );
+
+      const res = await request(server)
+        .put(POST_URL + `/${post0.id}/like-status`)
+        .auth(user0.accessToken, { type: 'bearer' })
+        .send({ likeStatus: 'qweqwe' });
+
+      const errors = errorsData('likeStatus');
+
+      expect(res.status).toBe(HttpStatus.BAD_REQUEST);
+      expect(res.body).toEqual(errors);
+    });
+
+    it("shouldn't like post if not auth", async () => {
+      const [user0] = await userTest.createLoginUsers(1);
+
+      const [blog0] = await blogTest.createBlogs(1, user0.accessToken);
+
+      const [post0] = await postTest.createPosts(
+        1,
+        user0.accessToken,
+        blog0.id,
+      );
+
+      const res = await request(server)
+        .put(POST_URL + `/${post0.id}/like-status`)
+        .send({ likeStatus: LikeStatus.Like });
+
+      expect(res.status).toBe(HttpStatus.UNAUTHORIZED);
+    });
+
+    it("shouldn't like post if not exist post", async () => {
+      const [user0] = await userTest.createLoginUsers(1);
+
+      const [blog0] = await blogTest.createBlogs(1, user0.accessToken);
+
+      await postTest.createPosts(1, user0.accessToken, blog0.id);
+
+      const res = await request(server)
+        .put(POST_URL + `/8eb3bb41-99b3-4b00-bd23-2fd410dab21f/like-status`)
+        .auth(user0.accessToken, { type: 'bearer' })
+        .send({ likeStatus: LikeStatus.Like });
+
+      expect(res.status).toBe(HttpStatus.NOT_FOUND);
     });
   });
 

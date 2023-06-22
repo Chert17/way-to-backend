@@ -6,6 +6,7 @@ import { BanUsersForBlog } from '../modules/blogs/entities/ban.users.for.blog.en
 import { Blog } from '../modules/blogs/entities/blog.entity';
 import { Comment } from '../modules/comments/entities/comment.entity';
 import { Post } from '../modules/posts/entities/post.entity';
+import { PostsReactions } from '../modules/posts/entities/post.reaction.entity';
 import { BanUser } from '../modules/users/entities/ban.user';
 import { ConfirmEmail } from '../modules/users/entities/confirm.email';
 import { Device } from '../modules/users/entities/devices';
@@ -35,6 +36,7 @@ export class TypeOrmConfig {
         Post,
         BanUsersForBlog,
         Comment,
+        PostsReactions,
       ],
       // entities: ['src/modules/**/entity/*.ts'],
       // autoLoadEntities: true,
