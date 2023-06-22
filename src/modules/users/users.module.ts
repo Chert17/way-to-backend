@@ -3,6 +3,7 @@ import { CqrsModule } from '@nestjs/cqrs';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
 import { ExistUserByLoginOrEmail } from '../../infra/decorators/user/exist.user.by.login-email';
+import { DevicesRepo } from '../devices/repositories/devices.repo';
 import { User } from './entities/user.entity';
 import { UsersQueryRepo } from './repositories/users.query.repo';
 import { UsersRepo } from './repositories/users.repo';
@@ -18,6 +19,7 @@ import { UsersService } from './users.service';
     UsersService,
     UsersQueryRepo,
     UsersRepo,
+    DevicesRepo,
     CreateUserUseCase,
     BanUserUseCase,
     DeleteUserUseCase,
