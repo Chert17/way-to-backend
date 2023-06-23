@@ -13,7 +13,6 @@ import { PostsService } from './posts.service';
 import { PostsQueryRepo } from './repositories/post.query.repo';
 import { PostsRepo } from './repositories/post.repo';
 import { CreateCommentByPostUseCase } from './use-case/create.comment.by.post.use-case';
-import { GetPostsByIdUseCase } from './use-case/get.post.by.id.use-case';
 import { SetLikeInfoByPostUseCase } from './use-case/post.like.info.use-case';
 
 @Module({
@@ -29,7 +28,6 @@ import { SetLikeInfoByPostUseCase } from './use-case/post.like.info.use-case';
     CommentsQueryRepo,
     CommentsRepo,
     // use-case
-    GetPostsByIdUseCase,
     CreateCommentByPostUseCase,
     SetLikeInfoByPostUseCase,
   ],

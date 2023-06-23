@@ -4,6 +4,7 @@ import {
   Get,
   HttpCode,
   HttpStatus,
+  NotFoundException,
   Param,
   Post,
   Put,
@@ -23,7 +24,6 @@ import { User } from '../users/entities/user.entity';
 import { createCommentDto } from './dto/create.comment.dto';
 import { PostsQueryRepo } from './repositories/post.query.repo';
 import { CreateCommentByPostCommand } from './use-case/create.comment.by.post.use-case';
-import { GetPostsByIdCommand } from './use-case/get.post.by.id.use-case';
 import { SetLikeInfoByPostCommand } from './use-case/post.like.info.use-case';
 
 @Controller('posts')
@@ -44,11 +44,15 @@ export class PostsController {
 
   @Get('/:postId')
   @UseGuards(UserIdFromToken)
-  getPostById(
+  async getPostById(
     @Param('postId') postId: string,
     @UserId() userId: ReqUserIdType,
   ) {
-    return this.commandBus.execute(new GetPostsByIdCommand(userId, postId));
+    const result = await this.postsQueryRepo.getPostById(userId, postId);
+
+    if (!result) throw new NotFoundException(); // If specified post doesn't exists
+
+    return result;
   }
 
   @Post('/:postId/comments')

@@ -9,6 +9,7 @@ import { UsersSqlTables } from '../../src/utils/tables/users.sql.tables';
 import {
   authEndpoints,
   bloggerEndpoints,
+  POST_URL,
   SA_URL,
   SABlogsEndpoints,
 } from './endpoints';
@@ -63,8 +64,8 @@ interface Post {
   blogName: string;
   createdAt: string;
   extendedLikesInfo: {
-    likesCount: 0;
-    dislikesCount: 0;
+    likesCount: number;
+    dislikesCount: number;
     myStatus: LikeStatus;
     newestLikes: [
       {
@@ -73,6 +74,21 @@ interface Post {
         login: string;
       },
     ];
+  };
+}
+
+interface Comment {
+  id: string;
+  content: string;
+  commentatorInfo: {
+    userId: string;
+    userLogin: string;
+  };
+  createdAt: string;
+  likesInfo: {
+    likesCount: number;
+    dislikesCount: number;
+    myStatus: LikeStatus;
   };
 }
 
@@ -308,5 +324,37 @@ export class PostTest {
       shortDescription: faker.person.firstName(),
       content: faker.lorem.paragraph(),
     };
+  }
+}
+
+export class CommentTest {
+  constructor(
+    private readonly server: any,
+    private dataSource?: EntityManager,
+  ) {}
+
+  async createComments(
+    quantity: number,
+    postId: string,
+    accessToken: string,
+  ): Promise<Comment[]> {
+    const comments: Comment[] = [];
+
+    for (let i = 0; i < quantity; i++) {
+      const res = await request(this.server)
+        .post(POST_URL + `/${postId}/comments`)
+        .auth(accessToken, { type: 'bearer' })
+        .send({ content: `create comment create comment${i}` });
+
+      comments.push({
+        id: res.body.id,
+        content: res.body.content,
+        commentatorInfo: res.body.commentatorInfo,
+        createdAt: res.body.createdAt,
+        likesInfo: res.body.likesInfo,
+      });
+    }
+
+    return comments;
   }
 }

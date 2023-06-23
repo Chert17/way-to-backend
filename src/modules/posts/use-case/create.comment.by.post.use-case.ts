@@ -43,6 +43,6 @@ export class CreateCommentByPostUseCase
       createdAt: new Date().toISOString(),
     });
 
-    return this.commentsQueryRepo.getCommentById(commentId);
+    return this.commentsQueryRepo.getCommentById(commentId, userId);
   }
 }
