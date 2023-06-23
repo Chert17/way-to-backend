@@ -5,6 +5,7 @@ import { TypeOrmModuleOptions } from '@nestjs/typeorm';
 import { BanUsersForBlog } from '../modules/blogs/entities/ban.users.for.blog.entity';
 import { Blog } from '../modules/blogs/entities/blog.entity';
 import { Comment } from '../modules/comments/entities/comment.entity';
+import { CommentsReactions } from '../modules/comments/entities/comment.reaction.entity';
 import { Post } from '../modules/posts/entities/post.entity';
 import { PostsReactions } from '../modules/posts/entities/post.reaction.entity';
 import { BanUser } from '../modules/users/entities/ban.user';
@@ -37,6 +38,7 @@ export class TypeOrmConfig {
         BanUsersForBlog,
         Comment,
         PostsReactions,
+        CommentsReactions,
       ],
       // entities: ['src/modules/**/entity/*.ts'],
       // autoLoadEntities: true,

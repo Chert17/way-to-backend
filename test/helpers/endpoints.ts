@@ -34,3 +34,5 @@ export const SABlogsEndpoints = {
   SA_BAN_BLOG_URL: GLOBAL_PREFIX + '/sa/blogs',
   SA_GET_ALL_BAN_BLOGS_URL: GLOBAL_PREFIX + '/sa/blogs',
 };
+
+export const COMMENT_URL = GLOBAL_PREFIX + '/comments';
