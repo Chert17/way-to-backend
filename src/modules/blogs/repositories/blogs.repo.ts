@@ -63,7 +63,7 @@ export class BlogsRepo {
     DO $$
       BEGIN
         IF ${isBanned} THEN
-          INSERT INTO ${BANNED_BLOG_USERS} (ban_user_id, blog_id, ban_reason, ban_date)
+          INSERT INTO ${BANNED_BLOG_USERS} ("ban_user_id", "blog_id", "ban_reason", "ban_date")
           VALUES ('${banUserId}', '${blogId}', '${banReason}', '${banDate}');
       ELSE
           DELETE FROM ${BANNED_BLOG_USERS} WHERE ban_user_id = '${banUserId}' and blog_id = '${blogId}';
@@ -109,19 +109,15 @@ export class BlogsRepo {
     return result[0];
   }
 
-  async checkBanUserByBlog(
-    userId: string,
-    postId: string,
-  ): Promise<{ is_banned: boolean }> {
+  async checkBanUserByBlog(userId: string): Promise<{ is_banned: boolean }> {
     const result = await this.dataSource.query(
       `
-    select b_u.ban_user_id
-    from ${POSTS_TABLE} p
-    left join ${BLOGS_TABLE} b on p.blog_id = b.id
-    left join ${BANNED_BLOG_USERS} b_u on b.user_id = b_u.ban_user_id
-    where p.id = $2 and b.user_id = $1
+    SELECT bu.ban_user_id
+    FROM ${BANNED_BLOG_USERS} bu
+    LEFT JOIN ${BLOGS_TABLE} b ON bu.blog_id = b.id
+    WHERE bu.ban_user_id = $1
     `,
-      [userId, postId],
+      [userId],
     );
 
     return { is_banned: result[0]?.ban_user_id === userId };
