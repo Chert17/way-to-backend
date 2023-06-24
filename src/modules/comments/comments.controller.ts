@@ -18,8 +18,10 @@ import { UserIdFromToken } from '../../infra/guards/userId.from.token.guard';
 import { LikeStatusDto } from '../../types/like.info.interface';
 import { ReqUserIdType } from '../../types/req.user.interface';
 import { User } from '../users/entities/user.entity';
+import { UpdateCommentDto } from './dto/update.comment.dto';
 import { CommentsQueryRepo } from './repositories/comment.query.repo';
 import { SetLikeInfoByCommentCommand } from './use-case/comment.like.info.use-case';
+import { UpdateCommentCommand } from './use-case/update.comment.use-case';
 
 @Controller('comments')
 export class CommentsController {
@@ -57,6 +59,23 @@ export class CommentsController {
         userId: user.id,
         commentId,
         likeStatus: dto.likeStatus,
+      }),
+    );
+  }
+
+  @Put('/:commentId')
+  @UseGuards(JwtAuthGuard)
+  @HttpCode(HttpStatus.NO_CONTENT)
+  updateComment(
+    @Param('commentId') commentId: string,
+    @Body() dto: UpdateCommentDto,
+    @ReqUser() user: User,
+  ) {
+    return this.commandBus.execute(
+      new UpdateCommentCommand({
+        userId: user.id,
+        commentId,
+        content: dto.content,
       }),
     );
   }

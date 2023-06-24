@@ -4,6 +4,7 @@ import { HttpStatus } from '@nestjs/common';
 
 import { LikeStatus } from '../src/utils/like.status';
 import { COMMENT_URL, SA_URL } from './helpers/endpoints';
+import { errorsData } from './helpers/errors.data';
 import {
   BlogTest,
   CommentTest,
@@ -343,6 +344,135 @@ describe('posts e2e', () => {
       await blogTest.createBanBlogs(1, [blog0.id]);
 
       const res = await request(server).get(COMMENT_URL + `/${comment0.id}`);
+
+      expect(res.status).toBe(HttpStatus.NOT_FOUND);
+    });
+  });
+
+  describe('update comment', () => {
+    it('should be update comment', async () => {
+      const [user0] = await userTest.createLoginUsers(1);
+
+      const [blog0] = await blogTest.createBlogs(1, user0.accessToken);
+
+      const [post0] = await postTest.createPosts(
+        1,
+        user0.accessToken,
+        blog0.id,
+      );
+
+      const [comment0] = await commentTest.createComments(
+        1,
+        post0.id,
+        user0.accessToken,
+      );
+
+      const res = await request(server)
+        .put(COMMENT_URL + `/${comment0.id}`)
+        .auth(user0.accessToken, { type: 'bearer' })
+        .send({ content: 'update comment update comment' });
+
+      const getRes = await request(server).get(COMMENT_URL + `/${comment0.id}`);
+
+      expect(res.status).toBe(HttpStatus.NO_CONTENT);
+      expect(getRes.status).toBe(HttpStatus.OK);
+      expect(getRes.body.content).toEqual('update comment update comment');
+    });
+
+    it("shouldn't update comment with incorrect data", async () => {
+      const [user0] = await userTest.createLoginUsers(1);
+
+      const [blog0] = await blogTest.createBlogs(1, user0.accessToken);
+
+      const [post0] = await postTest.createPosts(
+        1,
+        user0.accessToken,
+        blog0.id,
+      );
+
+      const [comment0] = await commentTest.createComments(
+        1,
+        post0.id,
+        user0.accessToken,
+      );
+
+      const res = await request(server)
+        .put(COMMENT_URL + `/${comment0.id}`)
+        .auth(user0.accessToken, { type: 'bearer' })
+        .send({ content: '' });
+
+      const errors = errorsData('content');
+
+      expect(res.status).toBe(HttpStatus.BAD_REQUEST);
+      expect(res.body).toEqual(errors);
+    });
+
+    it("shouldn't update comments if not auth", async () => {
+      const [user0] = await userTest.createLoginUsers(1);
+
+      const [blog0] = await blogTest.createBlogs(1, user0.accessToken);
+
+      const [post0] = await postTest.createPosts(
+        1,
+        user0.accessToken,
+        blog0.id,
+      );
+
+      const [comment0] = await commentTest.createComments(
+        1,
+        post0.id,
+        user0.accessToken,
+      );
+
+      const res = await request(server)
+        .put(COMMENT_URL + `/${comment0.id}`)
+        .send({ content: 'update comment update comment' });
+
+      expect(res.status).toBe(HttpStatus.UNAUTHORIZED);
+    });
+
+    it("shouldn't update comment if other owner", async () => {
+      const [user0, user1] = await userTest.createLoginUsers(2);
+
+      const [blog0] = await blogTest.createBlogs(1, user0.accessToken);
+
+      const [post0] = await postTest.createPosts(
+        1,
+        user0.accessToken,
+        blog0.id,
+      );
+
+      const [comment0] = await commentTest.createComments(
+        1,
+        post0.id,
+        user0.accessToken,
+      );
+
+      const res = await request(server)
+        .put(COMMENT_URL + `/${comment0.id}`)
+        .auth(user1.accessToken, { type: 'bearer' })
+        .send({ content: 'update comment update comment' });
+
+      expect(res.status).toBe(HttpStatus.FORBIDDEN);
+    });
+
+    it("shouldn't update comment if not exist", async () => {
+      const [user0] = await userTest.createLoginUsers(1);
+
+      const [blog0] = await blogTest.createBlogs(1, user0.accessToken);
+
+      const [post0] = await postTest.createPosts(
+        1,
+        user0.accessToken,
+        blog0.id,
+      );
+
+      await commentTest.createComments(1, post0.id, user0.accessToken);
+
+      const res = await request(server)
+        .put(COMMENT_URL + `/8eb3bb41-99b3-4b00-bd23-2fd410dab21f`)
+        .auth(user0.accessToken, { type: 'bearer' })
+        .send({ content: 'update comment update comment' });
 
       expect(res.status).toBe(HttpStatus.NOT_FOUND);
     });

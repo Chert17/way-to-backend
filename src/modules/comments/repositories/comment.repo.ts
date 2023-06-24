@@ -6,7 +6,8 @@ import { InjectDataSource } from '@nestjs/typeorm';
 import { CommentsSqlTables } from '../../../utils/tables/comments.sql.tables';
 import { CreateCommentDbDto } from '../../posts/dto/create.comment.dto';
 import { CommentsLikeStatusDbDto } from '../dto/comment.like.status';
-import { Comment } from '../entities/comment.entity';
+import { UpdateCommentDbDto } from '../dto/update.comment.dto';
+import { CommentDb } from '../types/comment.types';
 
 const { COMMENTS_TABLE, COMMENTS_REACTIONS } = CommentsSqlTables;
 
@@ -46,7 +47,20 @@ export class CommentsRepo {
       end $$;`);
   }
 
-  async checkCommentById(commentId: string): Promise<Comment> {
+  async updateComment(dto: UpdateCommentDbDto) {
+    const { commentId, content } = dto;
+
+    return this.dataSource.query(
+      `
+    update ${COMMENTS_TABLE}
+    set content = $2
+    where id = $1
+    `,
+      [commentId, content],
+    );
+  }
+
+  async checkCommentById(commentId: string): Promise<CommentDb> {
     const result = await this.dataSource.query(
       `
     select * from ${COMMENTS_TABLE} where id = $1
