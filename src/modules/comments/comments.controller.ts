@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   HttpCode,
   HttpStatus,
@@ -21,6 +22,7 @@ import { User } from '../users/entities/user.entity';
 import { UpdateCommentDto } from './dto/update.comment.dto';
 import { CommentsQueryRepo } from './repositories/comment.query.repo';
 import { SetLikeInfoByCommentCommand } from './use-case/comment.like.info.use-case';
+import { DeleteCommentCommand } from './use-case/delete.comment.use-case';
 import { UpdateCommentCommand } from './use-case/update.comment.use-case';
 
 @Controller('comments')
@@ -77,6 +79,15 @@ export class CommentsController {
         commentId,
         content: dto.content,
       }),
+    );
+  }
+
+  @Delete('/:commentId')
+  @UseGuards(JwtAuthGuard)
+  @HttpCode(HttpStatus.NO_CONTENT)
+  deleteComment(@Param('commentId') commentId: string, @ReqUser() user: User) {
+    return this.commandBus.execute(
+      new DeleteCommentCommand(user.id, commentId),
     );
   }
 }
