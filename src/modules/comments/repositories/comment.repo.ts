@@ -52,11 +52,20 @@ export class CommentsRepo {
 
     return this.dataSource.query(
       `
-    update ${COMMENTS_TABLE}
-    set content = $2
-    where id = $1
+    UPDATE ${COMMENTS_TABLE} SET content = $2
+    WHERE id = $1
     `,
       [commentId, content],
+    );
+  }
+
+  async deleteComment(commentId: string) {
+    return this.dataSource.query(
+      `
+    DELETE
+    FROM ${COMMENTS_TABLE}
+    WHERE id = $1     `,
+      [commentId],
     );
   }
 

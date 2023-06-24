@@ -477,4 +477,109 @@ describe('posts e2e', () => {
       expect(res.status).toBe(HttpStatus.NOT_FOUND);
     });
   });
+
+  describe('delete comment', () => {
+    it('should be delete comment', async () => {
+      const [user0] = await userTest.createLoginUsers(1);
+
+      const [blog0] = await blogTest.createBlogs(1, user0.accessToken);
+
+      const [post0] = await postTest.createPosts(
+        1,
+        user0.accessToken,
+        blog0.id,
+      );
+
+      const [comment0] = await commentTest.createComments(
+        1,
+        post0.id,
+        user0.accessToken,
+      );
+
+      const beforeGetRes = await request(server).get(
+        COMMENT_URL + `/${comment0.id}`,
+      );
+
+      const res = await request(server)
+        .delete(COMMENT_URL + `/${comment0.id}`)
+        .auth(user0.accessToken, { type: 'bearer' });
+
+      const afterGetRes = await request(server).get(
+        COMMENT_URL + `/${comment0.id}`,
+      );
+
+      expect(res.status).toBe(HttpStatus.NO_CONTENT);
+      expect(beforeGetRes.status).toBe(HttpStatus.OK);
+      expect(beforeGetRes.body).toBeDefined();
+      expect(afterGetRes.status).toBe(HttpStatus.NOT_FOUND);
+    });
+
+    it("shouldn't delete comments if not auth", async () => {
+      const [user0] = await userTest.createLoginUsers(1);
+
+      const [blog0] = await blogTest.createBlogs(1, user0.accessToken);
+
+      const [post0] = await postTest.createPosts(
+        1,
+        user0.accessToken,
+        blog0.id,
+      );
+
+      const [comment0] = await commentTest.createComments(
+        1,
+        post0.id,
+        user0.accessToken,
+      );
+
+      const res = await request(server).delete(COMMENT_URL + `/${comment0.id}`);
+
+      expect(res.status).toBe(HttpStatus.UNAUTHORIZED);
+    });
+
+    it("shouldn't delete comment if other owner", async () => {
+      const [user0, user1] = await userTest.createLoginUsers(2);
+
+      const [blog0] = await blogTest.createBlogs(1, user0.accessToken);
+
+      const [post0] = await postTest.createPosts(
+        1,
+        user0.accessToken,
+        blog0.id,
+      );
+
+      const [comment0] = await commentTest.createComments(
+        1,
+        post0.id,
+        user0.accessToken,
+      );
+
+      const res = await request(server)
+        .delete(COMMENT_URL + `/${comment0.id}`)
+        .auth(user1.accessToken, { type: 'bearer' });
+
+      expect(res.status).toBe(HttpStatus.FORBIDDEN);
+    });
+
+    it("shouldn't delete comment if not exist", async () => {
+      const [user0] = await userTest.createLoginUsers(1);
+
+      const [blog0] = await blogTest.createBlogs(1, user0.accessToken);
+
+      const [post0] = await postTest.createPosts(
+        1,
+        user0.accessToken,
+        blog0.id,
+      );
+
+      await commentTest.createComments(1, post0.id, user0.accessToken);
+
+      const res = await request(server)
+        .delete(COMMENT_URL + `/8eb3bb41-99b3-4b00-bd23-2fd410dab21f`)
+        .auth(user0.accessToken, { type: 'bearer' });
+
+      console.log(res.body);
+
+      expect(res.status).toBe(HttpStatus.NOT_FOUND);
+    });
+  });
 });
