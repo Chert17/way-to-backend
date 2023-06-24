@@ -57,8 +57,11 @@ LEFT JOIN ${POSTS_TABLE} p
 	ON c.post_id = p.id
 LEFT JOIN ${BLOGS_TABLE} b
 	ON p.blog_id = b.id
+LEFT JOIN ${USERS_BAN_INFO_TABLE} bi
+	ON c.user_id = bi.user_id
 WHERE c.id = $1
 		AND b.is_ban = false
+		AND bi.is_banned IS NULL
       `,
       [commentId, userId],
     );
