@@ -10,6 +10,7 @@ import { Comment } from './entities/comment.entity';
 import { CommentsQueryRepo } from './repositories/comment.query.repo';
 import { CommentsRepo } from './repositories/comment.repo';
 import { SetLikeInfoByCommentUseCase } from './use-case/comment.like.info.use-case';
+import { UpdateCommentUseCase } from './use-case/update.comment.use-case';
 
 @Module({
   controllers: [CommentsController],
@@ -22,6 +23,7 @@ import { SetLikeInfoByCommentUseCase } from './use-case/comment.like.info.use-ca
     UsersRepo,
     // use-case
     SetLikeInfoByCommentUseCase,
+    UpdateCommentUseCase,
   ],
   imports: [TypeOrmModule.forFeature([Comment]), CqrsModule],
 })
