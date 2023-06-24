@@ -19,11 +19,15 @@ import { JwtAuthGuard } from '../../infra/guards/jwt.auth.guard';
 import { UserIdFromToken } from '../../infra/guards/userId.from.token.guard';
 import { LikeStatusDto } from '../../types/like.info.interface';
 import { ReqUserIdType } from '../../types/req.user.interface';
-import { PostQueryPagination } from '../../utils/pagination/pagination';
+import {
+  CommentQueryPagination,
+  PostQueryPagination,
+} from '../../utils/pagination/pagination';
 import { User } from '../users/entities/user.entity';
 import { createCommentDto } from './dto/create.comment.dto';
 import { PostsQueryRepo } from './repositories/post.query.repo';
 import { CreateCommentByPostCommand } from './use-case/create.comment.by.post.use-case';
+import { GetAllCommentsByPostCommand } from './use-case/get.all.comments.by.post.use-case';
 import { SetLikeInfoByPostCommand } from './use-case/post.like.info.use-case';
 
 @Controller('posts')
@@ -53,6 +57,18 @@ export class PostsController {
     if (!result) throw new NotFoundException(); // If specified post doesn't exists
 
     return result;
+  }
+
+  @Get('/:postId/comments')
+  @UseGuards(UserIdFromToken)
+  getCommnetsByPost(
+    @Param('postId') postId: string,
+    @Query() pagination: CommentQueryPagination,
+    @UserId() userId: ReqUserIdType,
+  ) {
+    return this.commandBus.execute(
+      new GetAllCommentsByPostCommand(userId, postId, pagination),
+    );
   }
 
   @Post('/:postId/comments')

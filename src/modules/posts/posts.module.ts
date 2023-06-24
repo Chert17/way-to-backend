@@ -13,6 +13,7 @@ import { PostsService } from './posts.service';
 import { PostsQueryRepo } from './repositories/post.query.repo';
 import { PostsRepo } from './repositories/post.repo';
 import { CreateCommentByPostUseCase } from './use-case/create.comment.by.post.use-case';
+import { GetAllCommentsByPostUseCase } from './use-case/get.all.comments.by.post.use-case';
 import { SetLikeInfoByPostUseCase } from './use-case/post.like.info.use-case';
 
 @Module({
@@ -30,6 +31,7 @@ import { SetLikeInfoByPostUseCase } from './use-case/post.like.info.use-case';
     // use-case
     CreateCommentByPostUseCase,
     SetLikeInfoByPostUseCase,
+    GetAllCommentsByPostUseCase,
   ],
   imports: [TypeOrmModule.forFeature([Post]), CqrsModule],
 })

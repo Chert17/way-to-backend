@@ -5,7 +5,13 @@ import { HttpStatus } from '@nestjs/common';
 import { LikeStatus } from '../src/utils/like.status';
 import { POST_URL, SA_URL } from './helpers/endpoints';
 import { errorsData } from './helpers/errors.data';
-import { BlogTest, PostTest, UserTest, admin } from './helpers/fabrica';
+import {
+  BlogTest,
+  CommentTest,
+  PostTest,
+  UserTest,
+  admin,
+} from './helpers/fabrica';
 import { myBeforeAll } from './helpers/my.before.all';
 
 describe('posts e2e', () => {
@@ -14,6 +20,7 @@ describe('posts e2e', () => {
   let userTest: UserTest;
   let blogTest: BlogTest;
   let postTest: PostTest;
+  let commentTest: CommentTest;
 
   beforeAll(async () => {
     process.env.THROTTLR_LIMIT = 1000 + '';
@@ -25,6 +32,7 @@ describe('posts e2e', () => {
     userTest = new UserTest(server, dataSource);
     blogTest = new BlogTest(server, dataSource);
     postTest = new PostTest(server, dataSource);
+    commentTest = new CommentTest(server, dataSource);
   });
 
   beforeEach(async () => {
@@ -483,6 +491,72 @@ describe('posts e2e', () => {
         .send({ content: 'create comment create comment' });
 
       expect(res.status).toBe(HttpStatus.FORBIDDEN);
+    });
+  });
+
+  describe('get all comments by post', () => {
+    it('should be returned all comments by post', async () => {
+      const [user0] = await userTest.createLoginUsers(1);
+
+      const [blog0] = await blogTest.createBlogs(1, user0.accessToken);
+
+      const [post0] = await postTest.createPosts(
+        1,
+        user0.accessToken,
+        blog0.id,
+      );
+
+      const [comment0] = await commentTest.createComments(
+        1,
+        post0.id,
+        user0.accessToken,
+      );
+
+      const res = await request(server).get(POST_URL + `/${post0.id}/comments`);
+
+      expect(res.status).toBe(HttpStatus.OK);
+      expect(res.body).toEqual({
+        pagesCount: 1,
+        page: 1,
+        pageSize: 10,
+        totalCount: 1,
+        items: [
+          {
+            id: comment0.id,
+            content: comment0.content,
+            commentatorInfo: {
+              userId: user0.id,
+              userLogin: user0.login,
+            },
+            createdAt: comment0.createdAt,
+            likesInfo: {
+              likesCount: 0,
+              dislikesCount: 0,
+              myStatus: LikeStatus.None,
+            },
+          },
+        ],
+      });
+    });
+
+    it("shouldn't returned comments by post if not exist post", async () => {
+      const [user0] = await userTest.createLoginUsers(1);
+
+      const [blog0] = await blogTest.createBlogs(1, user0.accessToken);
+
+      const [post0] = await postTest.createPosts(
+        1,
+        user0.accessToken,
+        blog0.id,
+      );
+
+      await commentTest.createComments(1, post0.id, user0.accessToken);
+
+      const res = await request(server)
+        .get(POST_URL + `/8eb3bb41-99b3-4b00-bd23-2fd410dab21f/comments`)
+        .auth(user0.accessToken, { type: 'bearer' });
+
+      expect(res.status).toBe(HttpStatus.NOT_FOUND);
     });
   });
 });
