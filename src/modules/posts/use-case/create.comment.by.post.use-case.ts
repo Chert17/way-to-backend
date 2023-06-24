@@ -25,10 +25,7 @@ export class CreateCommentByPostUseCase
   async execute({ dto }: CreateCommentByPostCommand) {
     const { userId, postId, content } = dto;
 
-    const { is_banned } = await this.blogsRepo.checkBanUserByBlog(
-      userId,
-      postId,
-    );
+    const { is_banned } = await this.blogsRepo.checkBanUserByBlog(userId);
 
     if (is_banned) throw new ForbiddenException();
 
