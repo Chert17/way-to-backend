@@ -284,9 +284,7 @@ describe('posts e2e', () => {
         user0.accessToken,
       );
 
-      const res = await request(server)
-        .get(COMMENT_URL + `/${comment0.id}`)
-        .auth(user0.accessToken, { type: 'bearer' });
+      const res = await request(server).get(COMMENT_URL + `/${comment0.id}`);
 
       expect(res.status).toBe(HttpStatus.OK);
       expect(res.body).toEqual({
