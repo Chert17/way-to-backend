@@ -136,13 +136,10 @@ export class BlogsBloggerController {
   }
 
   @Get('/blogs/comments')
-  async getAllCommentsByBloggerBlog(
+  getAllCommentsByBloggerBlog(
     @ReqUser() user: User,
     @Query() pagination: CommentQueryPagination,
   ) {
-    return await this.blogsQueryRepo.getAllCommentsByBloggerBlog(
-      user.id,
-      pagination,
-    );
+    return this.blogsQueryRepo.getAllCommentsByBloggerBlog(user.id, pagination);
   }
 }
