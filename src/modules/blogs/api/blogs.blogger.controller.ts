@@ -15,7 +15,10 @@ import { CommandBus } from '@nestjs/cqrs';
 
 import { ReqUser } from '../../../infra/decorators/params/req.user.decorator';
 import { JwtAuthGuard } from '../../../infra/guards/jwt.auth.guard';
-import { BlogQueryPagination } from '../../../utils/pagination/pagination';
+import {
+  BlogQueryPagination,
+  CommentQueryPagination,
+} from '../../../utils/pagination/pagination';
 import { User } from '../../users/entities/user.entity';
 import { BanUserByBloggerBlogDto } from '../dto/ban.user.by.blogger.blog.dto';
 import { CreateBlogDto } from '../dto/create.blog.dto';
@@ -129,6 +132,17 @@ export class BlogsBloggerController {
   ) {
     return this.commandBus.execute(
       new GetAllBanUsersByBloggerBlogCommand(user.id, blogId, pagination),
+    );
+  }
+
+  @Get('/blogs/comments')
+  async getAllCommentsByBloggerBlog(
+    @ReqUser() user: User,
+    @Query() pagination: CommentQueryPagination,
+  ) {
+    return await this.blogsQueryRepo.getAllCommentsByBloggerBlog(
+      user.id,
+      pagination,
     );
   }
 }
