@@ -2,6 +2,7 @@ import request from 'supertest';
 
 import { HttpStatus } from '@nestjs/common';
 
+import { LikeStatus } from '../src/utils/like.status';
 import {
   BLOG_URL,
   bloggerEndpoints,
@@ -9,7 +10,13 @@ import {
   SABlogsEndpoints,
 } from './helpers/endpoints';
 import { errorsData } from './helpers/errors.data';
-import { admin, BlogTest, PostTest, UserTest } from './helpers/fabrica';
+import {
+  admin,
+  BlogTest,
+  CommentTest,
+  PostTest,
+  UserTest,
+} from './helpers/fabrica';
 import { myBeforeAll } from './helpers/my.before.all';
 
 const { BLOGGER_BLOGS_URL, BLOGGER_USERS_URL, GET_ALL_BAN_USERS_BY_BLOG_URL } =
@@ -23,6 +30,7 @@ describe('blogger e2e', () => {
   let userTest: UserTest;
   let blogTest: BlogTest;
   let postTest: PostTest;
+  let commentTest: CommentTest;
 
   beforeAll(async () => {
     process.env.THROTTLR_LIMIT = 1000 + '';
@@ -34,6 +42,7 @@ describe('blogger e2e', () => {
     userTest = new UserTest(server, dataSource);
     blogTest = new BlogTest(server, dataSource);
     postTest = new PostTest(server, dataSource);
+    commentTest = new CommentTest(server, dataSource);
   });
 
   beforeEach(async () => {
@@ -752,6 +761,110 @@ describe('blogger e2e', () => {
       const res = await request(server).get(
         GET_ALL_BAN_USERS_BY_BLOG_URL + `/${blog0.id}`,
       );
+
+      expect(res.status).toBe(HttpStatus.UNAUTHORIZED);
+    });
+  });
+
+  describe('get all comments by blogger blog', () => {
+    it('should be returned all comments by blogger blog', async () => {
+      const [user0] = await userTest.createLoginUsers(1);
+
+      const [blog0, blog1] = await blogTest.createBlogs(2, user0.accessToken);
+
+      const [post0] = await postTest.createPosts(
+        1,
+        user0.accessToken,
+        blog0.id,
+      );
+
+      const [post1] = await postTest.createPosts(
+        1,
+        user0.accessToken,
+        blog1.id,
+      );
+
+      const [comment0] = await commentTest.createComments(
+        1,
+        post0.id,
+        user0.accessToken,
+      );
+
+      const [comment1] = await commentTest.createComments(
+        1,
+        post1.id,
+        user0.accessToken,
+      );
+
+      const res = await request(server)
+        .get(BLOGGER_BLOGS_URL + '/comments')
+        .auth(user0.accessToken, { type: 'bearer' });
+
+      expect(res.status).toBe(HttpStatus.OK);
+      expect(res.body).toEqual({
+        pagesCount: 1,
+        page: 1,
+        pageSize: 10,
+        totalCount: 2,
+        items: [
+          {
+            id: comment1.id,
+            content: comment1.content,
+            commentatorInfo: {
+              userId: user0.id,
+              userLogin: user0.login,
+            },
+            createdAt: comment1.createdAt,
+            likesInfo: {
+              likesCount: 0,
+              dislikesCount: 0,
+              myStatus: LikeStatus.None,
+            },
+            postInfo: {
+              id: post1.id,
+              title: post1.title,
+              blogId: blog1.id,
+              blogName: blog1.name,
+            },
+          },
+          {
+            id: comment0.id,
+            content: comment0.content,
+            commentatorInfo: {
+              userId: user0.id,
+              userLogin: user0.login,
+            },
+            createdAt: comment0.createdAt,
+            likesInfo: {
+              likesCount: 0,
+              dislikesCount: 0,
+              myStatus: LikeStatus.None,
+            },
+            postInfo: {
+              id: post0.id,
+              title: post0.title,
+              blogId: blog0.id,
+              blogName: blog0.name,
+            },
+          },
+        ],
+      });
+    });
+
+    it("shouldn't returned all comments by blogger blog if not auth", async () => {
+      const [user0] = await userTest.createLoginUsers(1);
+
+      const [blog0] = await blogTest.createBlogs(1, user0.accessToken);
+
+      const [post0] = await postTest.createPosts(
+        1,
+        user0.accessToken,
+        blog0.id,
+      );
+
+      await commentTest.createComments(1, post0.id, user0.accessToken);
+
+      const res = await request(server).get(BLOGGER_BLOGS_URL + '/comments');
 
       expect(res.status).toBe(HttpStatus.UNAUTHORIZED);
     });
