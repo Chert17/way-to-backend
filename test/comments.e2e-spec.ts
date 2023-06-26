@@ -14,7 +14,7 @@ import {
 } from './helpers/fabrica';
 import { myBeforeAll } from './helpers/my.before.all';
 
-describe('posts e2e', () => {
+describe('comments e2e', () => {
   let server: any;
 
   let userTest: UserTest;
