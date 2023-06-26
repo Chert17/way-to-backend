@@ -3,7 +3,6 @@ import {
   Entity,
   JoinColumn,
   ManyToOne,
-  OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 
@@ -32,7 +31,10 @@ export class CommentsReactions {
   @JoinColumn({ name: 'comment_id' })
   comment: Comment;
 
-  @OneToOne(() => User, { cascade: true, onDelete: 'CASCADE' })
+  @ManyToOne(() => User, user => user.comments_reactions, {
+    cascade: true,
+    onDelete: 'CASCADE',
+  })
   @JoinColumn({ name: 'user_id' })
   user: User;
 }

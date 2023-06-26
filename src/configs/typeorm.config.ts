@@ -40,7 +40,7 @@ export class TypeOrmConfig {
         PostsReactions,
         CommentsReactions,
       ],
-      // entities: ['src/modules/**/entity/*.ts'],
+      // entities: ['dist/src/modules/**/entity/*.ts'], //? maybe work with dist
       // autoLoadEntities: true,
       synchronize: true,
     };

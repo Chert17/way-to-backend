@@ -1,9 +1,9 @@
 import {
   Column,
   Entity,
+  Index,
   JoinColumn,
   ManyToOne,
-  OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 
@@ -11,6 +11,7 @@ import { LikeStatus } from '../../../utils/like.status';
 import { User } from '../../users/entities/user.entity';
 import { Post } from './post.entity';
 
+@Index(['post_id', 'user_id'], { unique: true })
 @Entity({ name: 'posts_reactions' })
 export class PostsReactions {
   @PrimaryGeneratedColumn('uuid')
@@ -32,7 +33,16 @@ export class PostsReactions {
   @JoinColumn({ name: 'post_id' })
   post: Post;
 
-  @OneToOne(() => User, { cascade: true, onDelete: 'CASCADE' })
+  @Column({ type: 'uuid' })
+  post_id: string;
+
+  @ManyToOne(() => User, user => user.posts_reactions, {
+    cascade: true,
+    onDelete: 'CASCADE',
+  })
   @JoinColumn({ name: 'user_id' })
   user: User;
+
+  @Column({ type: 'uuid' })
+  user_id: string;
 }

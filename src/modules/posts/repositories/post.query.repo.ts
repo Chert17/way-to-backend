@@ -227,7 +227,8 @@ from
   ${POSTS_TABLE} p 
   left join ${BLOGS_TABLE} b on p.blog_id = b.id 
     where b.is_ban = false
-    order by p.${sortBy} ${sortDirection}
+    order by
+    ${sortBy === 'blogName' ? `b.title` : `p.${sortBy}`} ${sortDirection}
     limit ${pageSize} offset ${pagination.skip()}
     `,
       [userId],
