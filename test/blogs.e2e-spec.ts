@@ -1,10 +1,8 @@
-import sharp from 'sharp';
 import request from 'supertest';
 
 import { HttpStatus } from '@nestjs/common';
 
 import { LikeStatus } from '../src/utils/like.status';
-import { SETTINGS } from '../src/utils/settings';
 import { KbIMg, PandaImg } from './helpers/assets';
 import {
   BLOG_URL,
@@ -27,8 +25,6 @@ const { BLOGGER_BLOGS_URL, BLOGGER_USERS_URL, GET_ALL_BAN_USERS_BY_BLOG_URL } =
   bloggerEndpoints;
 
 const { SA_BAN_BLOG_URL, SA_GET_ALL_BAN_BLOGS_URL } = SABlogsEndpoints;
-
-const { SERVEO_URL } = SETTINGS;
 
 describe('blogger e2e', () => {
   let server: any;
