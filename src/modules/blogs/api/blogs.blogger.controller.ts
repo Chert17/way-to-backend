@@ -39,6 +39,7 @@ import { DeletePostByBlogCommand } from '../use-case/delete.post.by.blog.use-cas
 import { GetAllBanUsersByBloggerBlogCommand } from '../use-case/get.all.ban.users.by.blogger.blog.use-case';
 import { UpdateBlogCommand } from '../use-case/update.blog.use-case';
 import { UpdatePostByBlogCommand } from '../use-case/update.post.by.blog.use-case';
+import { UploadBlogWallpaperCommand } from '../use-case/upload.blog.wallpaper.use-case';
 
 @Controller('blogger')
 @UseGuards(JwtAuthGuard)
@@ -150,7 +151,13 @@ export class BlogsBloggerController {
 
   @Post('/blogs/:blogId/images/wallpaper')
   @UseInterceptors(FileInterceptor('file'))
-  uploadWallpaperForBlog(@UploadedFile(FileSizeValidationPipe) file: FileType) {
-    console.log('CONTRELLER', file);
+  uploadWallpaperForBlog(
+    @UploadedFile(FileSizeValidationPipe) file: FileType,
+    @Param('blogId') blogId: string,
+    @ReqUser() user: User,
+  ) {
+    return this.commandBus.execute(
+      new UploadBlogWallpaperCommand(user.id, blogId, file),
+    );
   }
 }

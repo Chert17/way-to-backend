@@ -9,6 +9,7 @@ import {
 
 import { Post } from '../../posts/entities/post.entity';
 import { User } from '../../users/entities/user.entity';
+import { BlogWallpaper } from '../types/blog.types';
 import { BanUsersForBlog } from './ban.users.for.blog.entity';
 
 @Entity({ name: 'blogs' })
@@ -36,6 +37,9 @@ export class Blog {
 
   @Column({ type: 'varchar', nullable: true })
   ban_date: string | null;
+
+  @Column({ type: 'json', nullable: true, default: null })
+  wallpaper: BlogWallpaper | null;
 
   @ManyToOne(() => User, user => user.blogs, {
     cascade: true,

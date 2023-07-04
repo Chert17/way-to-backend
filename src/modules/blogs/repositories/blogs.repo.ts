@@ -1,7 +1,7 @@
-import { DataSource } from 'typeorm';
+import { DataSource, Repository } from 'typeorm';
 
 import { Injectable } from '@nestjs/common';
-import { InjectDataSource } from '@nestjs/typeorm';
+import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
 
 import { BlogSqlTables } from '../../../utils/tables/blogs.sql.tables';
 import { PostSqlTables } from '../../../utils/tables/posts.sql.tables';
@@ -9,14 +9,18 @@ import { BanBlogDbDto } from '../dto/ban.blog.dto';
 import { BanUserByBloggerBlogDbDto } from '../dto/ban.user.by.blogger.blog.dto';
 import { CreateBlogDbDto } from '../dto/create.blog.dto';
 import { UpdateBlogDbDto } from '../dto/update.blog.dto';
-import { BlogDb } from '../types/blog.types';
+import { Blog } from '../entities/blog.entity';
+import { BlogDb, BlogWallpaper } from '../types/blog.types';
 
 const { BLOGS_TABLE, BANNED_BLOG_USERS } = BlogSqlTables;
 const { POSTS_TABLE } = PostSqlTables;
 
 @Injectable()
 export class BlogsRepo {
-  constructor(@InjectDataSource() private dataSource: DataSource) {}
+  constructor(
+    @InjectDataSource() private dataSource: DataSource,
+    @InjectRepository(Blog) private blogRepo: Repository<Blog>,
+  ) {}
 
   async createBlog(dto: CreateBlogDbDto): Promise<{ blogId: string }> {
     const { userId, name, description, websiteUrl, createdAt } = dto;
@@ -83,6 +87,10 @@ export class BlogsRepo {
     `,
       [blogId, isBanned, banDate],
     );
+  }
+
+  async uploadBlogWallpaper(blogId: string, fileData: BlogWallpaper) {
+    return this.blogRepo.update({ id: blogId }, { wallpaper: fileData });
   }
 
   async checkBlogById(blogId: string): Promise<BlogDb> {
