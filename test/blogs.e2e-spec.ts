@@ -1,8 +1,10 @@
+import sharp from 'sharp';
 import request from 'supertest';
 
 import { HttpStatus } from '@nestjs/common';
 
 import { LikeStatus } from '../src/utils/like.status';
+import { SETTINGS } from '../src/utils/settings';
 import {
   BLOG_URL,
   bloggerEndpoints,
@@ -17,12 +19,15 @@ import {
   PostTest,
   UserTest,
 } from './helpers/fabrica';
+import { getImgFromAssets } from './helpers/get-img';
 import { myBeforeAll } from './helpers/my.before.all';
 
 const { BLOGGER_BLOGS_URL, BLOGGER_USERS_URL, GET_ALL_BAN_USERS_BY_BLOG_URL } =
   bloggerEndpoints;
 
 const { SA_BAN_BLOG_URL, SA_GET_ALL_BAN_BLOGS_URL } = SABlogsEndpoints;
+
+const { SERVEO_URL } = SETTINGS;
 
 describe('blogger e2e', () => {
   let server: any;
@@ -867,6 +872,77 @@ describe('blogger e2e', () => {
       const res = await request(server).get(BLOGGER_BLOGS_URL + '/comments');
 
       expect(res.status).toBe(HttpStatus.UNAUTHORIZED);
+    });
+  });
+
+  describe('upload wallpaper for blog and save in db', () => {
+    it('should be upload file and returned view model', async () => {
+      const [u0] = await userTest.createLoginUsers(1);
+      const [b0] = await blogTest.createBlogs(1, u0.accessToken);
+
+      const file = await getImgFromAssets();
+
+      const fileData = await sharp(file).metadata();
+
+      console.log('SHARP', fileData);
+
+      const res = await request(server)
+        .post(BLOGGER_BLOGS_URL + `/${b0.id}/images/wallpaper`)
+        .auth(u0.accessToken, { type: 'bearer' })
+        .attach('file', file);
+
+      expect(res.status).toBe(HttpStatus.CREATED);
+      expect(res.body).toEqual({
+        wallpaper: {
+          url: SERVEO_URL + `/${u0.id}/${b0.id}/pandadis.jpg`,
+          width: 0,
+          height: 0,
+          fileSize: 0,
+        },
+        main: [],
+      });
+    });
+
+    it("shouldn't upload file with incorrect data", async () => {
+      const [u0] = await userTest.createLoginUsers(1);
+      const [b0] = await blogTest.createBlogs(1, u0.accessToken);
+
+      const res = await request(server)
+        .post(BLOGGER_BLOGS_URL + `/${b0.id}/images/wallpaper`)
+        .auth(u0.accessToken, { type: 'bearer' })
+        .attach('file', '');
+
+      const errors = errorsData('file');
+
+      expect(res.status).toBe(HttpStatus.BAD_REQUEST);
+      expect(res.body).toEqual(errors);
+    });
+
+    it("shouldn't upload file if not auth", async () => {
+      const [u0] = await userTest.createLoginUsers(1);
+      const [b0] = await blogTest.createBlogs(1, u0.accessToken);
+
+      const file = await getImgFromAssets();
+
+      const res = await request(server)
+        .post(BLOGGER_BLOGS_URL + `/${b0.id}/images/wallpaper`)
+        .attach('file', file);
+
+      expect(res.status).toBe(HttpStatus.UNAUTHORIZED);
+    });
+
+    it("shouldn't upload file if other owner blog", async () => {
+      const [u0, u1] = await userTest.createLoginUsers(2);
+      const [b0] = await blogTest.createBlogs(1, u0.accessToken);
+
+      const file = await getImgFromAssets();
+
+      const res = await request(server)
+        .post(BLOGGER_BLOGS_URL + `/${b0.id}/images/wallpaper`)
+        .auth(u1.accessToken, { type: 'bearer' })
+        .attach('file', file);
+
+      expect(res.status).toBe(HttpStatus.FORBIDDEN);
     });
   });
 });

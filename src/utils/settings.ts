@@ -24,4 +24,6 @@ export enum SETTINGS {
   THROTTLR_LIMIT = 'THROTTLR_LIMIT',
 
   REFRESH_TOKEN_COOKIE_NAME = 'refreshToken',
+
+  SERVEO_URL = 'SERVEO_URL',
 }
