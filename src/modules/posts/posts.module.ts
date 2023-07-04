@@ -3,6 +3,7 @@ import { CqrsModule } from '@nestjs/cqrs';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
 import { JwtService } from '../auth/jwt.service';
+import { Blog } from '../blogs/entities/blog.entity';
 import { BlogsRepo } from '../blogs/repositories/blogs.repo';
 import { CommentsQueryRepo } from '../comments/repositories/comment.query.repo';
 import { CommentsRepo } from '../comments/repositories/comment.repo';
@@ -33,6 +34,6 @@ import { SetLikeInfoByPostUseCase } from './use-case/post.like.info.use-case';
     SetLikeInfoByPostUseCase,
     GetAllCommentsByPostUseCase,
   ],
-  imports: [TypeOrmModule.forFeature([Post]), CqrsModule],
+  imports: [TypeOrmModule.forFeature([Post, Blog]), CqrsModule],
 })
 export class PostsModule {}
