@@ -9,12 +9,17 @@ import {
   Post,
   Put,
   Query,
+  UploadedFile,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import { CommandBus } from '@nestjs/cqrs';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 import { ReqUser } from '../../../infra/decorators/params/req.user.decorator';
 import { JwtAuthGuard } from '../../../infra/guards/jwt.auth.guard';
+import { FileSizeValidationPipe } from '../../../infra/pipe/file-size.pipe';
+import { FileType } from '../../../types/file.interface';
 import {
   BlogQueryPagination,
   CommentQueryPagination,
@@ -141,5 +146,11 @@ export class BlogsBloggerController {
     @Query() pagination: CommentQueryPagination,
   ) {
     return this.blogsQueryRepo.getAllCommentsByBloggerBlog(user.id, pagination);
+  }
+
+  @Post('/blogs/:blogId/images/wallpaper')
+  @UseInterceptors(FileInterceptor('file'))
+  uploadWallpaperForBlog(@UploadedFile(FileSizeValidationPipe) file: FileType) {
+    console.log('CONTRELLER', file);
   }
 }
