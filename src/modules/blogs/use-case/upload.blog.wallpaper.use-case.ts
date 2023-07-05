@@ -8,7 +8,7 @@ import { FileType } from '../../../types/file.interface';
 import { SETTINGS } from '../../../utils/settings';
 import { BlogsRepo } from '../repositories/blogs.repo';
 
-const { SERVEO_URL, PORT } = SETTINGS;
+const { SERVEO_URL } = SETTINGS;
 
 export class UploadBlogWallpaperCommand {
   constructor(
@@ -47,9 +47,7 @@ export class UploadBlogWallpaperUseCase
 
     return {
       wallpaper: {
-        url:
-          this.configService.get(SERVEO_URL) ??
-          this.configService.get(PORT) + `/${imgUrl}`,
+        url: this.configService.get(SERVEO_URL) + imgUrl,
         width,
         height,
         fileSize: size,
