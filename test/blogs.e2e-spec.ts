@@ -4,7 +4,7 @@ import request from 'supertest';
 import { HttpStatus } from '@nestjs/common';
 
 import { LikeStatus } from '../src/utils/like.status';
-import { KbIMg, PandaImg } from './helpers/assets';
+import { KbIMg, MainBlogImg, PandaImg } from './helpers/assets';
 import {
   BLOG_URL,
   POST_URL,
@@ -15,6 +15,7 @@ import { errorsData } from './helpers/errors.data';
 import {
   BlogTest,
   CommentTest,
+  INVALID_ID,
   PostTest,
   UserTest,
   admin,
@@ -939,6 +940,93 @@ describe('blogger e2e', () => {
         .attach('file', file);
 
       expect(res.status).toBe(HttpStatus.FORBIDDEN);
+    });
+  });
+
+  describe('upload main images for blog', () => {
+    it('should be upload main inmages', async () => {
+      const [u0] = await userTest.createLoginUsers(1);
+      const [b0] = await blogTest.createBlogs(1, u0.accessToken);
+
+      const file = await getImgFromAssets(MainBlogImg);
+
+      const fileData = await sharp(file).metadata();
+
+      const res = await request(server)
+        .post(BLOGGER_BLOGS_URL + `/${b0.id}/images/main`)
+        .auth(u0.accessToken, { type: 'bearer' })
+        .attach('file', file);
+
+      expect(res.status).toBe(HttpStatus.CREATED);
+      expect(res.body).toEqual({
+        wallpaper: null,
+        main: [
+          {
+            url: expect.any(String),
+            width: fileData.width,
+            height: fileData.height,
+            fileSize: fileData.size,
+          },
+        ],
+      });
+    });
+
+    it("shouldn't upload main images with incorrect file", async () => {
+      const [u0] = await userTest.createLoginUsers(1);
+      const [b0] = await blogTest.createBlogs(1, u0.accessToken);
+
+      const file = await getImgFromAssets(PandaImg);
+
+      const res = await request(server)
+        .post(BLOGGER_BLOGS_URL + `/${b0.id}/images/main`)
+        .auth(u0.accessToken, { type: 'bearer' })
+        .attach('file', file);
+
+      const errros = errorsData('file');
+
+      expect(res.status).toBe(HttpStatus.BAD_REQUEST);
+      expect(res.body).toEqual(errros);
+    });
+
+    it("shouldn't upload main images if not auth", async () => {
+      const [u0] = await userTest.createLoginUsers(1);
+      const [b0] = await blogTest.createBlogs(1, u0.accessToken);
+
+      const file = await getImgFromAssets(MainBlogImg);
+
+      const res = await request(server)
+        .post(BLOGGER_BLOGS_URL + `/${b0.id}/images/main`)
+        .attach('file', file);
+
+      expect(res.status).toBe(HttpStatus.UNAUTHORIZED);
+    });
+
+    it("shouldn't upload main images if other owner blog", async () => {
+      const [u0, u1] = await userTest.createLoginUsers(2);
+      const [b0] = await blogTest.createBlogs(1, u0.accessToken);
+
+      const file = await getImgFromAssets(MainBlogImg);
+
+      const res = await request(server)
+        .post(BLOGGER_BLOGS_URL + `/${b0.id}/images/main`)
+        .auth(u1.accessToken, { type: 'bearer' })
+        .attach('file', file);
+
+      expect(res.status).toBe(HttpStatus.FORBIDDEN);
+    });
+
+    it("shouldn't upload main images if blog not exist", async () => {
+      const [u0] = await userTest.createLoginUsers(1);
+      const [b0] = await blogTest.createBlogs(1, u0.accessToken);
+
+      const file = await getImgFromAssets(MainBlogImg);
+
+      const res = await request(server)
+        .post(BLOGGER_BLOGS_URL + `/${INVALID_ID}/images/main`)
+        .auth(u0.accessToken, { type: 'bearer' })
+        .attach('file', file);
+
+      expect(res.status).toBe(HttpStatus.NOT_FOUND);
     });
   });
 });

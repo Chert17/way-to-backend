@@ -31,6 +31,8 @@ export const admin = {
   password: 'qwerty',
 };
 
+export const INVALID_ID = '/8eb3bb41-99b3-4b00-bd23-2fd410dab21f';
+
 interface User {
   id: string;
   login: string;
