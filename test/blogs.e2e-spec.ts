@@ -1,3 +1,4 @@
+import sharp from 'sharp';
 import request from 'supertest';
 
 import { HttpStatus } from '@nestjs/common';
@@ -873,15 +874,27 @@ describe('blogger e2e', () => {
   });
 
   describe('upload wallpaper for blog and save in db', () => {
-     it('should be upload file and returned view model', async () => {
+    it('should be upload file and returned view model', async () => {
       const [u0] = await userTest.createLoginUsers(1);
       const [b0] = await blogTest.createBlogs(1, u0.accessToken);
 
       const file = await getImgFromAssets(PandaImg);
 
+      const fileData = await sharp(file).metadata();
+
+      const res = await request(server)
+        .post(BLOGGER_BLOGS_URL + `/${b0.id}/images/wallpaper`)
+        .auth(u0.accessToken, { type: 'bearer' })
+        .attach('file', file);
+
       expect(res.status).toBe(HttpStatus.CREATED);
       expect(res.body).toEqual({
-        wallpaper: res.body.wallpaper,
+        wallpaper: {
+          url: expect.any(String),
+          width: fileData.width,
+          height: fileData.height,
+          fileSize: fileData.size,
+        },
         main: [],
       });
     });
