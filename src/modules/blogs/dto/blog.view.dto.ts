@@ -1,3 +1,5 @@
+import { ImgData } from '../../../types/img.data.interface';
+
 export class BlogViewDto {
   readonly id: string;
   readonly name: string;
@@ -26,4 +28,9 @@ export class BanUserByBlogViewDto {
     banDate: string;
     banReason: string;
   };
+}
+
+export class BlogImgViewDto {
+  readonly wallpaper: ImgData | null;
+  readonly main: ImgData[];
 }

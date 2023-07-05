@@ -7,6 +7,8 @@ import { FileType } from '../../types/file.interface';
 
 @Injectable()
 export class FileSizeValidationPipe implements PipeTransform {
+  constructor(public widthLimit: number, public heightLimit: number) {}
+
   async transform(file: FileType) {
     try {
       if (!file.originalname.match(/\.(jpg|jpeg|png)$/)) {
@@ -19,11 +21,11 @@ export class FileSizeValidationPipe implements PipeTransform {
 
       const { width, height } = await sharp(file.buffer).metadata();
 
-      if (width !== 1028) {
+      if (width !== this.widthLimit) {
         customBadRequestException('file', 'Not supported width');
       }
 
-      if (height !== 312) {
+      if (height !== this.heightLimit) {
         customBadRequestException('file', 'Not supported height');
       }
 

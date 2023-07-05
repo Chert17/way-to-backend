@@ -1,19 +1,16 @@
-import { readdir } from 'fs/promises';
+import fs from 'fs';
+import { readdir, writeFile } from 'fs/promises';
 import path from 'path';
-import sharp from 'sharp';
 
 import { ForbiddenException, NotFoundException } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 
 import { FileType } from '../../../types/file.interface';
-import { SETTINGS } from '../../../utils/settings';
 import { BlogsService } from '../blogs.service';
+import { BlogsQueryRepo } from '../repositories/blogs.query.repo';
 import { BlogsRepo } from '../repositories/blogs.repo';
 
-const { SERVEO_URL } = SETTINGS;
-
-export class UploadBlogWallpaperCommand {
+export class UploadBlogMainImgCommand {
   constructor(
     public userId: string,
     public blogId: string,
@@ -21,33 +18,22 @@ export class UploadBlogWallpaperCommand {
   ) {}
 }
 
-@CommandHandler(UploadBlogWallpaperCommand)
-export class UploadBlogWallpaperUseCase
-  implements ICommandHandler<UploadBlogWallpaperCommand>
+@CommandHandler(UploadBlogMainImgCommand)
+export class UploadBlogMainImgUseCase
+  implements ICommandHandler<UploadBlogMainImgCommand>
 {
   constructor(
     private blogsRepo: BlogsRepo,
-    private configService: ConfigService,
+    private blogsQueryRepo: BlogsQueryRepo,
     private blogsService: BlogsService,
   ) {}
 
-  async execute({ userId, blogId, file }: UploadBlogWallpaperCommand) {
+  async execute({ userId, blogId, file }: UploadBlogMainImgCommand) {
     const blog = await this.blogsRepo.checkBlogById(blogId);
 
     if (!blog) throw new NotFoundException();
 
     if (blog.user_id !== userId) throw new ForbiddenException();
-
-    const { width, height, size } = await sharp(file.buffer).metadata();
-
-    const imgUrl = `/${userId}/${blogId}/${file.originalname}`;
-
-    await this.blogsRepo.uploadBlogWallpaper(blogId, {
-      url: imgUrl,
-      width,
-      height,
-      fileSize: size,
-    });
 
     const rootDirPath = path.dirname(require.main.filename);
     const dirPath = path.join(
@@ -59,6 +45,12 @@ export class UploadBlogWallpaperUseCase
       `${userId}`,
     );
 
+    if (!fs.existsSync(dirPath)) fs.mkdirSync(dirPath, { recursive: true });
+
+    const imgPath = path.join(dirPath, file.originalname);
+
+    await writeFile(imgPath, file.buffer);
+
     const imagesNames = await readdir(dirPath);
 
     const mainImages = await this.blogsService.getBlogMainImages(
@@ -66,14 +58,13 @@ export class UploadBlogWallpaperUseCase
       dirPath,
     );
 
+    const wallpaper = await this.blogsQueryRepo.getBlogWallpaper(blogId);
+
     return {
-      wallpaper: {
-        url: path.join(this.configService.get(SERVEO_URL) + imgUrl),
-        width,
-        height,
-        fileSize: size,
+      images: {
+        wallpaper,
+        main: mainImages,
       },
-      main: mainImages,
     };
   }
 }
