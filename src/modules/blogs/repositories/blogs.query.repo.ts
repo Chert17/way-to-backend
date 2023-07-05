@@ -1,3 +1,4 @@
+import path from 'path';
 import { DataSource, Repository } from 'typeorm';
 
 import { Injectable } from '@nestjs/common';
@@ -67,7 +68,7 @@ export class BlogsQueryRepo {
         )
       END AS "images"
     FROM ${BLOGS_TABLE}
-    WHERE ${BLOGS_TABLE}.id = $1 AND ${BLOGS_TABLE}.is_ban = false
+    WHERE id = $1 AND is_ban = false
 `,
       [blogId],
     );
@@ -481,5 +482,30 @@ WHERE b.user_id = $1
       totalCount: +totalCount[0].count,
       items: result,
     };
+  }
+
+  async getBlogWallpaper(blogId: string) {
+    const result = await this.dataSource.query(
+      `
+ SELECT
+      CASE
+        WHEN wallpaper IS NULL THEN JSONB_BUILD_OBJECT('wallpaper', NULL)
+        ELSE 
+          JSONB_BUILD_OBJECT(
+            'url', wallpaper->>'url',
+            'width', (wallpaper->>'width')::integer,
+            'height', (wallpaper->>'height')::integer,
+            'fileSize', (wallpaper->>'fileSize')::integer
+          ) END AS "wallpaper" 
+    FROM ${BLOGS_TABLE}
+    WHERE id = $1 AND is_ban = false
+`,
+      [blogId],
+    );
+
+    const wallpaper = result[0].wallpaper;
+    const imageUrl = path.join(this._baseImgUrl, wallpaper.url);
+
+    return { ...wallpaper, url: imageUrl };
   }
 }

@@ -24,6 +24,7 @@ import { GetAllBanUsersByBloggerBlogUseCase } from './use-case/get.all.ban.users
 import { GetAllPostsByBlogUseCase } from './use-case/get.all.posts.by.blog.use-case';
 import { UpdateBlogUseCase } from './use-case/update.blog.use-case';
 import { UpdatePostByBlogUseCase } from './use-case/update.post.by.blog.use-case';
+import { UploadBlogMainImgUseCase } from './use-case/upload.blog.main.img.use-case';
 import { UploadBlogWallpaperUseCase } from './use-case/upload.blog.wallpaper.use-case';
 
 @Module({
@@ -53,6 +54,7 @@ import { UploadBlogWallpaperUseCase } from './use-case/upload.blog.wallpaper.use
     BanBlogBySaUseCase,
     GetAllPostsByBlogUseCase,
     UploadBlogWallpaperUseCase,
+    UploadBlogMainImgUseCase,
     // validation
     ExistBlog,
   ],

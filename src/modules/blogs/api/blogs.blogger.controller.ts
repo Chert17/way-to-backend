@@ -39,6 +39,7 @@ import { DeletePostByBlogCommand } from '../use-case/delete.post.by.blog.use-cas
 import { GetAllBanUsersByBloggerBlogCommand } from '../use-case/get.all.ban.users.by.blogger.blog.use-case';
 import { UpdateBlogCommand } from '../use-case/update.blog.use-case';
 import { UpdatePostByBlogCommand } from '../use-case/update.post.by.blog.use-case';
+import { UploadBlogMainImgCommand } from '../use-case/upload.blog.main.img.use-case';
 import { UploadBlogWallpaperCommand } from '../use-case/upload.blog.wallpaper.use-case';
 
 @Controller('blogger')
@@ -152,12 +153,24 @@ export class BlogsBloggerController {
   @Post('/blogs/:blogId/images/wallpaper')
   @UseInterceptors(FileInterceptor('file'))
   uploadWallpaperForBlog(
-    @UploadedFile(FileSizeValidationPipe) file: FileType,
+    @UploadedFile(new FileSizeValidationPipe(1028, 312)) file: FileType,
     @Param('blogId') blogId: string,
     @ReqUser() user: User,
   ) {
     return this.commandBus.execute(
       new UploadBlogWallpaperCommand(user.id, blogId, file),
+    );
+  }
+
+  @Post('/blogs/:blogId/images/main')
+  @UseInterceptors(FileInterceptor('file'))
+  uploadMainImgForBlog(
+    @UploadedFile(new FileSizeValidationPipe(156, 156)) file: FileType,
+    @Param('blogId') blogId: string,
+    @ReqUser() user: User,
+  ) {
+    return this.commandBus.execute(
+      new UploadBlogMainImgCommand(user.id, blogId, file),
     );
   }
 }
