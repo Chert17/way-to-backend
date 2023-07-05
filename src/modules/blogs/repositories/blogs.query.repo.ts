@@ -84,20 +84,38 @@ export class BlogsQueryRepo {
 
     const blogs = await this.dataSource.query(
       `
-    select id, title as "name", descr as "description", web_url as "websiteUrl", created_at as "createdAt", is_membership as "isMembership"
-    from ${BLOGS_TABLE}
-    where user_id = $1 and title ilike $2
-    order by ${sortBy} ${sortDirection}
-    limit ${pageSize} offset ${pagination.skip()}
-    `,
+    SELECT
+      id,
+      title AS "name",
+      descr AS "description",
+      web_url AS "websiteUrl",
+      created_at AS "createdAt",
+      is_membership AS "isMembership",
+      CASE
+        WHEN wallpaper IS NULL THEN JSONB_BUILD_OBJECT('wallpaper', NULL)
+        ELSE JSONB_BUILD_OBJECT(
+          'wallpaper',
+          JSONB_BUILD_OBJECT(
+            'url', CONCAT('${this._baseImgUrl}', wallpaper->>'url'),
+            'width', (wallpaper->>'width')::integer,
+            'height', (wallpaper->>'height')::integer,
+            'fileSize', (wallpaper->>'fileSize')::integer
+          )
+        )
+      END AS "images"
+    FROM ${BLOGS_TABLE}
+    WHERE user_id = $1 AND title ILIKE $2
+    ORDER BY ${sortBy} ${sortDirection}
+    LIMIT ${pageSize} OFFSET ${pagination.skip()}
+`,
       [userId, `%${searchNameTerm}%`],
     );
 
     const totalCount = await this.dataSource.query(
       `
-    select count(*) from ${BLOGS_TABLE}
-    where user_id = $1 and title ilike $2
-    `,
+    SELECT count(*) FROM ${BLOGS_TABLE}
+    WHERE user_id = $1 AND title ILIKE $2
+`,
       [userId, `%${searchNameTerm}%`],
     );
 
