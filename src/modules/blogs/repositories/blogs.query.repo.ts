@@ -1,7 +1,8 @@
-import { DataSource } from 'typeorm';
+import { DataSource, Repository } from 'typeorm';
 
 import { Injectable } from '@nestjs/common';
-import { InjectDataSource } from '@nestjs/typeorm';
+import { ConfigService } from '@nestjs/config';
+import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
 
 import { WithPagination } from '../../../types/pagination.interface';
 import { LikeStatus } from '../../../utils/like.status';
@@ -10,6 +11,7 @@ import {
   CommentQueryPagination,
   PostQueryPagination,
 } from '../../../utils/pagination/pagination';
+import { SETTINGS } from '../../../utils/settings';
 import { BlogSqlTables } from '../../../utils/tables/blogs.sql.tables';
 import { CommentsSqlTables } from '../../../utils/tables/comments.sql.tables';
 import { PostSqlTables } from '../../../utils/tables/posts.sql.tables';
@@ -21,23 +23,52 @@ import {
   BlogViewBySADto,
   BlogViewDto,
 } from '../dto/blog.view.dto';
+import { Blog } from '../entities/blog.entity';
 
 const { BLOGS_TABLE, BANNED_BLOG_USERS } = BlogSqlTables;
 const { USERS_TABLE, USERS_BAN_INFO_TABLE } = UsersSqlTables;
 const { POSTS_TABLE, POSTS_REACTION_TABLE } = PostSqlTables;
 const { COMMENTS_TABLE, COMMENTS_REACTIONS } = CommentsSqlTables;
 
+const { SERVEO_URL } = SETTINGS;
+
 @Injectable()
 export class BlogsQueryRepo {
-  constructor(@InjectDataSource() private dataSource: DataSource) {}
+  private _baseImgUrl: string;
+
+  constructor(
+    @InjectDataSource() private dataSource: DataSource,
+    @InjectRepository(Blog) private blogRepo: Repository<Blog>,
+    private configService: ConfigService,
+  ) {
+    this._baseImgUrl = this.configService.get(SERVEO_URL);
+  }
 
   async getBlogById(blogId: string): Promise<BlogViewDto> {
     const result = await this.dataSource.query(
       `
-    select id, title as "name", descr as "description", web_url as "websiteUrl", created_at as "createdAt", is_membership as "isMembership"
-    from ${BLOGS_TABLE}
-    where id = $1 and is_ban = false
-    `,
+    SELECT
+      id,
+      title AS "name",
+      descr AS "description",
+      web_url AS "websiteUrl",
+      created_at AS "createdAt",
+      is_membership AS "isMembership",
+      CASE
+        WHEN wallpaper IS NULL THEN JSONB_BUILD_OBJECT('wallpaper', NULL)
+        ELSE JSONB_BUILD_OBJECT(
+          'wallpaper',
+          JSONB_BUILD_OBJECT(
+            'url', CONCAT('${this._baseImgUrl}', wallpaper->>'url'),
+            'width', (wallpaper->>'width')::integer,
+            'height', (wallpaper->>'height')::integer,
+            'fileSize', (wallpaper->>'fileSize')::integer
+          )
+        )
+      END AS "images"
+    FROM ${BLOGS_TABLE}
+    WHERE ${BLOGS_TABLE}.id = $1 AND ${BLOGS_TABLE}.is_ban = false
+`,
       [blogId],
     );
 
@@ -179,20 +210,38 @@ export class BlogsQueryRepo {
 
     const result = await this.dataSource.query(
       `
-    select id, title as "name", descr as "description", web_url as "websiteUrl", created_at as "createdAt", is_membership as "isMembership"
-    from ${BLOGS_TABLE}
-    where title ilike $1 and is_ban = false
-    order by ${sortBy} ${sortDirection}
-    limit ${pageSize} offset ${pagination.skip()}
-    `,
+    SELECT
+      id,
+      title AS "name",
+      descr AS "description",
+      web_url AS "websiteUrl",
+      created_at AS "createdAt",
+      is_membership AS "isMembership",
+      CASE
+        WHEN wallpaper IS NULL THEN JSONB_BUILD_OBJECT('wallpaper', NULL)
+        ELSE JSONB_BUILD_OBJECT(
+          'wallpaper',
+          JSONB_BUILD_OBJECT(
+            'url', CONCAT('${this._baseImgUrl}', wallpaper->>'url'),
+            'width', (wallpaper->>'width')::integer,
+            'height', (wallpaper->>'height')::integer,
+            'fileSize', (wallpaper->>'fileSize')::integer
+          )
+        )
+      END AS "images"
+    FROM ${BLOGS_TABLE}
+    WHERE title ILIKE $1 AND is_ban = false
+    ORDER BY ${sortBy} ${sortDirection}
+    LIMIT ${pageSize} OFFSET ${pagination.skip()}
+`,
       [`%${searchNameTerm}%`],
     );
 
     const totalCount = await this.dataSource.query(
       `
-    select count(*) from ${BLOGS_TABLE}
-    where title ilike $1 and is_ban = false
-    `,
+    SELECT COUNT(*) FROM ${BLOGS_TABLE}
+    WHERE title ILIKE $1 AND is_ban = false
+`,
       [`%${searchNameTerm}%`],
     );
 
