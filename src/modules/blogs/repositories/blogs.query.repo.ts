@@ -234,17 +234,13 @@ export class BlogsQueryRepo {
       created_at AS "createdAt",
       is_membership AS "isMembership",
       CASE
-        WHEN wallpaper IS NULL THEN JSONB_BUILD_OBJECT('wallpaper', NULL)
+        WHEN wallpaper IS NULL THEN NULL
         ELSE JSONB_BUILD_OBJECT(
-          'wallpaper',
-          JSONB_BUILD_OBJECT(
-            'url', CONCAT('${this._baseImgUrl}', wallpaper->>'url'),
-            'width', (wallpaper->>'width')::integer,
-            'height', (wallpaper->>'height')::integer,
-            'fileSize', (wallpaper->>'fileSize')::integer
-          )
-        )
-      END AS "images"
+          'url', wallpaper->>'url',
+          'width', (wallpaper->>'width')::integer,
+          'height', (wallpaper->>'height')::integer,
+          'fileSize', (wallpaper->>'fileSize')::integer
+        ) END AS "wallpaper"
     FROM ${BLOGS_TABLE}
     WHERE title ILIKE $1 AND is_ban = false
     ORDER BY ${sortBy} ${sortDirection}
@@ -268,7 +264,13 @@ export class BlogsQueryRepo {
       page: pageNumber,
       pageSize: pageSize,
       totalCount: +totalCount[0].count,
-      items: result,
+      items: result.map(b => {
+        if (!b.wallpaper) return { ...b, wallpaper: b.wallpaper };
+
+        const { imageUrl } = this._getBlogWallpaperPath(b.wallpaper);
+
+        return { ...b, wallpaper: { ...b.wallpaper, url: imageUrl } };
+      }),
     };
   }
 

@@ -22,6 +22,7 @@ import { DeleteBlogUseCase } from './use-case/delete.blog.use-case';
 import { DeletePostByBlogUseCase } from './use-case/delete.post.by.blog.use-case';
 import { GetAllBanUsersByBloggerBlogUseCase } from './use-case/get.all.ban.users.by.blogger.blog.use-case';
 import { GetAllBlogsByUserUseCase } from './use-case/get.all.blogs.by.user.use-case';
+import { GetAllBlogsUseCase } from './use-case/get.all.blogs.use-case';
 import { GetAllPostsByBlogUseCase } from './use-case/get.all.posts.by.blog.use-case';
 import { GetBlogByIdUseCase } from './use-case/get.blog.by.id.use-case';
 import { UpdateBlogUseCase } from './use-case/update.blog.use-case';
@@ -59,6 +60,7 @@ import { UploadBlogWallpaperUseCase } from './use-case/upload.blog.wallpaper.use
     UploadBlogMainImgUseCase,
     GetAllBlogsByUserUseCase,
     GetBlogByIdUseCase,
+    GetAllBlogsUseCase,
     // validation
     ExistBlog,
   ],
