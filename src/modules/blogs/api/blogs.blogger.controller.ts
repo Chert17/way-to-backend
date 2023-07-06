@@ -42,6 +42,7 @@ import { UpdateBlogCommand } from '../use-case/update.blog.use-case';
 import { UpdatePostByBlogCommand } from '../use-case/update.post.by.blog.use-case';
 import { UploadBlogMainImgCommand } from '../use-case/upload.blog.main.img.use-case';
 import { UploadBlogWallpaperCommand } from '../use-case/upload.blog.wallpaper.use-case';
+import { UploadPostMainImgCommand } from '../use-case/upload.post.main.img.use-case';
 
 @Controller('blogger')
 @UseGuards(JwtAuthGuard)
@@ -174,6 +175,19 @@ export class BlogsBloggerController {
   ) {
     return this.commandBus.execute(
       new UploadBlogMainImgCommand(user.id, blogId, file),
+    );
+  }
+
+  @Post('/blogs/:blogId/posts/:postId/images/main')
+  @UseInterceptors(FileInterceptor('file'))
+  uploadMainImgForPost(
+    @UploadedFile(new FileSizeValidationPipe(940, 432)) file: FileType,
+    @Param('blogId') blogId: string,
+    @Param('postId') postId: string,
+    @ReqUser() user: User,
+  ) {
+    return this.commandBus.execute(
+      new UploadPostMainImgCommand(user.id, blogId, postId, file),
     );
   }
 }
