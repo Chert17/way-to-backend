@@ -4,7 +4,7 @@ import request from 'supertest';
 import { HttpStatus } from '@nestjs/common';
 
 import { LikeStatus } from '../src/utils/like.status';
-import { KbIMg, MainBlogImg, PandaImg } from './helpers/assets';
+import { KbIMg, MainBlogImg, MainPostImg, PandaImg } from './helpers/assets';
 import {
   BLOG_URL,
   POST_URL,
@@ -1023,6 +1023,112 @@ describe('blogger e2e', () => {
 
       const res = await request(server)
         .post(BLOGGER_BLOGS_URL + `/${INVALID_ID}/images/main`)
+        .auth(u0.accessToken, { type: 'bearer' })
+        .attach('file', file);
+
+      expect(res.status).toBe(HttpStatus.NOT_FOUND);
+    });
+  });
+
+  describe('upload post main images', () => {
+    it('should be upload images', async () => {
+      const [u0] = await userTest.createLoginUsers(1);
+      const [b0] = await blogTest.createBlogs(1, u0.accessToken);
+      const [p0] = await postTest.createPosts(1, u0.accessToken, b0.id);
+
+      const file = await getImgFromAssets(MainPostImg);
+
+      const fileData = await sharp(file).metadata();
+
+      const res = await request(server)
+        .post(BLOGGER_BLOGS_URL + `/${b0.id}/posts/${p0.id}/images/main`)
+        .auth(u0.accessToken, { type: 'bearer' })
+        .attach('file', file);
+
+      expect(res.status).toBe(HttpStatus.CREATED);
+      expect(res.body).toEqual({
+        main: [
+          {
+            url: expect.any(String),
+            width: fileData.width,
+            height: fileData.height,
+            fileSize: fileData.size,
+          },
+        ],
+      });
+    });
+
+    it("shouldn't upload img with incorrect data", async () => {
+      const [u0] = await userTest.createLoginUsers(1);
+      const [b0] = await blogTest.createBlogs(1, u0.accessToken);
+      const [p0] = await postTest.createPosts(1, u0.accessToken, b0.id);
+
+      const file = await getImgFromAssets(PandaImg);
+
+      const res = await request(server)
+        .post(BLOGGER_BLOGS_URL + `/${b0.id}/posts/${p0.id}/images/main`)
+        .auth(u0.accessToken, { type: 'bearer' })
+        .attach('file', file);
+
+      const errors = errorsData('file');
+
+      expect(res.status).toBe(HttpStatus.BAD_REQUEST);
+      expect(res.body).toEqual(errors);
+    });
+
+    it("shouldn't upload img if not auth", async () => {
+      const [u0] = await userTest.createLoginUsers(1);
+      const [b0] = await blogTest.createBlogs(1, u0.accessToken);
+      const [p0] = await postTest.createPosts(1, u0.accessToken, b0.id);
+
+      const file = await getImgFromAssets(MainPostImg);
+
+      const res = await request(server)
+        .post(BLOGGER_BLOGS_URL + `/${b0.id}/posts/${p0.id}/images/main`)
+        .attach('file', file);
+
+      expect(res.status).toBe(HttpStatus.UNAUTHORIZED);
+    });
+
+    it("shouldn't upload img if other owner blog", async () => {
+      const [u0, u1] = await userTest.createLoginUsers(2);
+      const [b0] = await blogTest.createBlogs(1, u0.accessToken);
+      const [p0] = await postTest.createPosts(1, u0.accessToken, b0.id);
+
+      const file = await getImgFromAssets(MainPostImg);
+
+      const res = await request(server)
+        .post(BLOGGER_BLOGS_URL + `/${b0.id}/posts/${p0.id}/images/main`)
+        .auth(u1.accessToken, { type: 'bearer' })
+        .attach('file', file);
+
+      expect(res.status).toBe(HttpStatus.FORBIDDEN);
+    });
+
+    it("shouldn't upload file if not exist blog", async () => {
+      const [u0] = await userTest.createLoginUsers(1);
+      const [b0] = await blogTest.createBlogs(1, u0.accessToken);
+      const [p0] = await postTest.createPosts(1, u0.accessToken, b0.id);
+
+      const file = await getImgFromAssets(MainPostImg);
+
+      const res = await request(server)
+        .post(BLOGGER_BLOGS_URL + `/${INVALID_ID}/posts/${p0.id}/images/main`)
+        .auth(u0.accessToken, { type: 'bearer' })
+        .attach('file', file);
+
+      expect(res.status).toBe(HttpStatus.NOT_FOUND);
+    });
+
+    it("shouldn't upload file if not exist post", async () => {
+      const [u0] = await userTest.createLoginUsers(1);
+      const [b0] = await blogTest.createBlogs(1, u0.accessToken);
+      await postTest.createPosts(1, u0.accessToken, b0.id);
+
+      const file = await getImgFromAssets(MainPostImg);
+
+      const res = await request(server)
+        .post(BLOGGER_BLOGS_URL + `/${b0.id}/posts/${INVALID_ID}/images/main`)
         .auth(u0.accessToken, { type: 'bearer' })
         .attach('file', file);
 
