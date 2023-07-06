@@ -1,4 +1,3 @@
-import { readdir } from 'fs/promises';
 import path from 'path';
 import sharp from 'sharp';
 
@@ -49,21 +48,9 @@ export class UploadBlogWallpaperUseCase
       fileSize: size,
     });
 
-    const rootDirPath = path.dirname(require.main.filename);
-    const dirPath = path.join(
-      rootDirPath,
-      'assets',
-      'blogs',
-      'main',
-      `${blogId}`,
-      `${userId}`,
-    );
-
-    const imagesNames = await readdir(dirPath);
-
     const mainImages = await this.blogsService.getBlogMainImages(
-      imagesNames,
-      dirPath,
+      blogId,
+      userId,
     );
 
     return {

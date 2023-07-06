@@ -9,6 +9,14 @@ export class BlogViewDto {
   readonly isMembership: boolean;
 }
 
+export class BlogViewWithWallpaperDto extends BlogViewDto {
+  readonly images: { wallpaper: ImgData };
+}
+
+export class BlogViewWithImagesDto extends BlogViewDto {
+  readonly images: { wallpaper: ImgData; main: ImgData[] };
+}
+
 export class BlogViewBySADto {
   readonly id: string;
   readonly name: string;

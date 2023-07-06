@@ -37,6 +37,7 @@ import { CreatePostByBlogCommand } from '../use-case/create.post.by.blog.use-cas
 import { DeleteBlogCommand } from '../use-case/delete.blog.use-case';
 import { DeletePostByBlogCommand } from '../use-case/delete.post.by.blog.use-case';
 import { GetAllBanUsersByBloggerBlogCommand } from '../use-case/get.all.ban.users.by.blogger.blog.use-case';
+import { GetAllBlogsByUserCommand } from '../use-case/get.all.blogs.by.user.use-case';
 import { UpdateBlogCommand } from '../use-case/update.blog.use-case';
 import { UpdatePostByBlogCommand } from '../use-case/update.post.by.blog.use-case';
 import { UploadBlogMainImgCommand } from '../use-case/upload.blog.main.img.use-case';
@@ -55,7 +56,9 @@ export class BlogsBloggerController {
     @ReqUser() user: User,
     @Query() pagination: BlogQueryPagination,
   ) {
-    return this.blogsQueryRepo.getAllBlogsByUserId(user.id, pagination);
+    return this.commandBus.execute(
+      new GetAllBlogsByUserCommand(user.id, pagination),
+    );
   }
 
   @Post('/blogs')

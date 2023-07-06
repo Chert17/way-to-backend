@@ -1,5 +1,5 @@
 import fs from 'fs';
-import { readdir, writeFile } from 'fs/promises';
+import { writeFile } from 'fs/promises';
 import path from 'path';
 
 import { ForbiddenException, NotFoundException } from '@nestjs/common';
@@ -35,15 +35,7 @@ export class UploadBlogMainImgUseCase
 
     if (blog.user_id !== userId) throw new ForbiddenException();
 
-    const rootDirPath = path.dirname(require.main.filename);
-    const dirPath = path.join(
-      rootDirPath,
-      'assets',
-      'blogs',
-      'main',
-      `${blogId}`,
-      `${userId}`,
-    );
+    const dirPath = this.blogsService._getPathToBlogMinImages(blogId, userId);
 
     if (!fs.existsSync(dirPath)) fs.mkdirSync(dirPath, { recursive: true });
 
@@ -51,11 +43,9 @@ export class UploadBlogMainImgUseCase
 
     await writeFile(imgPath, file.buffer);
 
-    const imagesNames = await readdir(dirPath);
-
     const mainImages = await this.blogsService.getBlogMainImages(
-      imagesNames,
-      dirPath,
+      blogId,
+      userId,
     );
 
     const wallpaper = await this.blogsQueryRepo.getBlogWallpaper(blogId);
