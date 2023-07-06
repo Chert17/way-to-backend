@@ -1,11 +1,4 @@
-import {
-  Controller,
-  Get,
-  NotFoundException,
-  Param,
-  Query,
-  UseGuards,
-} from '@nestjs/common';
+import { Controller, Get, Param, Query, UseGuards } from '@nestjs/common';
 import { CommandBus } from '@nestjs/cqrs';
 
 import { UserId } from '../../../infra/decorators/params/req.userId.decorator';
@@ -17,6 +10,7 @@ import {
 } from '../../../utils/pagination/pagination';
 import { BlogsQueryRepo } from '../repositories/blogs.query.repo';
 import { GetAllPostsByBlogCommand } from '../use-case/get.all.posts.by.blog.use-case';
+import { GetBlogByIdCommand } from '../use-case/get.blog.by.id.use-case';
 
 @Controller('blogs')
 export class BlogsPublicController {
@@ -32,11 +26,7 @@ export class BlogsPublicController {
 
   @Get(':blogId')
   async getBlogById(@Param('blogId') blogId: string) {
-    const result = await this.blogsQueryRepo.getBlogById(blogId);
-
-    if (!result) throw new NotFoundException();
-
-    return result;
+    return this.commandBus.execute(new GetBlogByIdCommand(blogId));
   }
 
   @Get('/:blogId/posts')

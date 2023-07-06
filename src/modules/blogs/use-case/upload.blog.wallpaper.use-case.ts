@@ -48,10 +48,7 @@ export class UploadBlogWallpaperUseCase
       fileSize: size,
     });
 
-    const mainImages = await this.blogsService.getBlogMainImages(
-      blogId,
-      userId,
-    );
+    const mainImages = await this.blogsService.getBlogMainImages(blogId);
 
     return {
       wallpaper: {

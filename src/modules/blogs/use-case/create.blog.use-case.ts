@@ -29,7 +29,7 @@ export class CreateBlogUseCase implements ICommandHandler<CreateBlogCommand> {
     return {
       ...blogWithWallpaper,
       images: {
-        wallpaper: blogWithWallpaper.images.wallpaper,
+        wallpaper: blogWithWallpaper.wallpaper,
         main: [],
       },
     };

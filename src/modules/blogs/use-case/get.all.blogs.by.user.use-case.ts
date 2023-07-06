@@ -25,28 +25,25 @@ export class GetAllBlogsByUserUseCase
       pagination,
     );
 
-    const blogMainImg = await this._getViewBlogMainImg(blogs.items, userId);
+    const blogMainImg = await this._getViewBlogMainImg(blogs.items);
 
     return {
       ...blogs,
       items: blogs.items.map(b => ({
         ...b,
         images: {
-          wallpaper: b.images.wallpaper,
+          wallpaper: b.wallpaper,
           main: blogMainImg,
         },
       })),
     };
   }
 
-  private async _getViewBlogMainImg(
-    items: BlogViewWithWallpaperDto[],
-    userId: string,
-  ) {
+  private async _getViewBlogMainImg(items: BlogViewWithWallpaperDto[]) {
     let imgs: ImgData[] = [];
 
     items.forEach(async b => {
-      const result = await this.blogsService.getBlogMainImages(b.id, userId);
+      const result = await this.blogsService.getBlogMainImages(b.id);
 
       if (result) imgs = result;
     });
