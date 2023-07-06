@@ -1,4 +1,4 @@
-import { readFile } from 'fs/promises';
+import { readdir, readFile } from 'fs/promises';n
 import path from 'path';
 import sharp from 'sharp';
 
@@ -18,14 +18,22 @@ export class BlogsService {
     this._baseImgUrl = this.configService.get(SERVEO_URL);
   }
 
-  async getBlogMainImages(
-    mainImages: string[],
-    dirPath: string,
-  ): Promise<ImgData[]> {
+  async getBlogMainImages(blogId: string, userId: string): Promise<ImgData[]> {
+    const dirPath = this._getPathToBlogMinImages(blogId, userId);
+
+    let mainImgNames: string[];
+    try {
+      const imagesNames = await readdir(dirPath);
+      mainImgNames = imagesNames;
+    } catch (error) {
+      return;
+    }
+
     return Promise.all(
-      mainImages.map(async n => {
+      mainImgNames.map(async n => {
         const pathToImg = path.join(dirPath, n);
         const buffer = await readFile(pathToImg);
+
         const { width, height, size } = await sharp(buffer).metadata();
         return {
           url: path.join(this._baseImgUrl, path.join(dirPath, n)),
@@ -34,6 +42,19 @@ export class BlogsService {
           fileSize: size,
         };
       }),
+    );
+  }
+
+  _getPathToBlogMinImages(blogId: string, userId: string) {
+    const rootDirPath = path.dirname(require.main.filename);
+
+    return path.join(
+      rootDirPath,
+      'assets',
+      'blogs',
+      'main',
+      `${blogId}`,
+      `${userId}`,
     );
   }
 }

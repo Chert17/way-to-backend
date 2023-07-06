@@ -22,7 +22,7 @@ import { AllCommentsByBloggerBlogViewDto } from '../dto/all.comments.by.blogger.
 import {
   BanUserByBlogViewDto,
   BlogViewBySADto,
-  BlogViewDto,
+  BlogViewWithWallpaperDto,
 } from '../dto/blog.view.dto';
 import { Blog } from '../entities/blog.entity';
 
@@ -45,7 +45,7 @@ export class BlogsQueryRepo {
     this._baseImgUrl = this.configService.get(SERVEO_URL);
   }
 
-  async getBlogById(blogId: string): Promise<BlogViewDto> {
+  async getBlogById(blogId: string): Promise<BlogViewWithWallpaperDto> {
     const result = await this.dataSource.query(
       `
     SELECT
@@ -79,7 +79,7 @@ export class BlogsQueryRepo {
   async getAllBlogsByUserId(
     userId: string,
     pagination: BlogQueryPagination,
-  ): Promise<WithPagination<BlogViewDto>> {
+  ): Promise<WithPagination<BlogViewWithWallpaperDto>> {
     const { pageNumber, pageSize, searchNameTerm, sortBy, sortDirection } =
       pagination;
 
@@ -223,7 +223,7 @@ export class BlogsQueryRepo {
 
   async getAllBlogs(
     pagination: BlogQueryPagination,
-  ): Promise<WithPagination<BlogViewDto>> {
+  ): Promise<WithPagination<BlogViewWithWallpaperDto>> {
     const { pageNumber, pageSize, searchNameTerm, sortBy, sortDirection } =
       pagination;
 
