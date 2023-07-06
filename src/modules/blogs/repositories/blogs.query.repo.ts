@@ -71,6 +71,7 @@ export class BlogsQueryRepo {
     );
 
     const wallpaper = result[0].wallpaper;
+    if (!wallpaper.url) return result[0];
     const { imageUrl } = this._getBlogWallpaperPath(wallpaper);
 
     return { ...result[0], wallpaper: { ...wallpaper, url: imageUrl } };
@@ -503,6 +504,7 @@ WHERE b.user_id = $1
     );
 
     const wallpaper = result[0].wallpaper;
+    if (!wallpaper.url) return result[0];
     const { imageUrl } = this._getBlogWallpaperPath(wallpaper);
 
     return { ...wallpaper, url: imageUrl };

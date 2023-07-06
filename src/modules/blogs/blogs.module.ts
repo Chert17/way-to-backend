@@ -4,6 +4,8 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 
 import { ExistBlog } from '../../infra/decorators/blog/exist.blog';
 import { JwtService } from '../auth/jwt.service';
+import { AwsS3BucketService } from '../aws/aws.bucke.service';
+import { PostsService } from '../posts/posts.service';
 import { PostsQueryRepo } from '../posts/repositories/post.query.repo';
 import { PostsRepo } from '../posts/repositories/post.repo';
 import { UsersRepo } from '../users/repositories/users.repo';
@@ -29,6 +31,7 @@ import { UpdateBlogUseCase } from './use-case/update.blog.use-case';
 import { UpdatePostByBlogUseCase } from './use-case/update.post.by.blog.use-case';
 import { UploadBlogMainImgUseCase } from './use-case/upload.blog.main.img.use-case';
 import { UploadBlogWallpaperUseCase } from './use-case/upload.blog.wallpaper.use-case';
+import { UploadPostMainImgUseCase } from './use-case/upload.post.main.img.use-case';
 
 @Module({
   controllers: [
@@ -45,6 +48,7 @@ import { UploadBlogWallpaperUseCase } from './use-case/upload.blog.wallpaper.use
     UsersRepo,
     PostsRepo,
     PostsQueryRepo,
+    PostsService,
     // use-case
     CreateBlogUseCase,
     UpdateBlogUseCase,
@@ -61,8 +65,11 @@ import { UploadBlogWallpaperUseCase } from './use-case/upload.blog.wallpaper.use
     GetAllBlogsByUserUseCase,
     GetBlogByIdUseCase,
     GetAllBlogsUseCase,
+    UploadPostMainImgUseCase,
     // validation
     ExistBlog,
+    // aws
+    AwsS3BucketService,
   ],
   imports: [TypeOrmModule.forFeature([Blog]), CqrsModule],
 })

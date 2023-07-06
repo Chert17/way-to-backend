@@ -1,6 +1,11 @@
+import path from 'path';
+import { Readable } from 'stream';
+
 import {
   CreateBucketCommand,
+  GetObjectCommand,
   HeadBucketCommand,
+  ListObjectsCommand,
   PutObjectCommand,
   S3Client,
 } from '@aws-sdk/client-s3';
@@ -8,6 +13,7 @@ import { Injectable, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 
 import { SETTINGS } from '../../utils/settings';
+import { GetFileDto } from './dto/get.file.dto';
 import { UploadFileDto } from './dto/upload.file.dto';
 
 const { POST_MAIN_IMAGES_BUCKET, AWS_ACCESS_KEY_ID, AWS_SECRET_KEY } = SETTINGS;
@@ -28,14 +34,36 @@ export class AwsS3BucketService implements OnModuleInit {
     });
   }
 
+  async getFiles(Bucket: string, Prefix: string): Promise<GetFileDto[]> {
+    const command = new ListObjectsCommand({ Bucket, Prefix });
+
+    try {
+      const response = await this.s3Client.send(command);
+      return Promise.all(
+        response.Contents.map(async f => {
+          const Key = path.join(f.Key);
+
+          const getObjectCommand = new GetObjectCommand({ Bucket, Key });
+
+          const fileData = await this.s3Client.send(getObjectCommand);
+
+          const fileBuffer = await this._getFileBuffer(fileData.Body);
+
+          return { path: Key, size: f.Size, buffer: fileBuffer };
+        }),
+      );
+    } catch (err) {
+      console.error('ERROR READ FILE', err);
+    }
+  }
+
   async uploadFile(dto: UploadFileDto) {
     const { Bucket, Key, Body } = dto;
 
     const command = new PutObjectCommand({ Bucket, Key, Body });
 
     try {
-      const response = await this.s3Client.send(command);
-      console.log('SUCCESS UPLOAD FILE', response);
+      await this.s3Client.send(command);
     } catch (err) {
       console.error('ERROR UPLOAD FILE', err);
     }
@@ -47,6 +75,7 @@ export class AwsS3BucketService implements OnModuleInit {
       const headBucketCommand = new HeadBucketCommand({
         Bucket: this.bucketName,
       });
+
       await this.s3Client.send(headBucketCommand);
 
       console.log('Bucket already exists:', this.bucketName);
@@ -63,6 +92,22 @@ export class AwsS3BucketService implements OnModuleInit {
 
         console.log('Bucket created successfully:', this.bucketName);
       }
+    }
+  }
+
+  private async _getFileBuffer(
+    response: Readable | ReadableStream<any> | Blob,
+  ): Promise<Buffer> {
+    if (response instanceof Readable) {
+      const chunks: Uint8Array[] = [];
+      for await (const chunk of response) {
+        chunks.push(chunk);
+      }
+
+      const fileBuffer = Buffer.concat(chunks);
+      return fileBuffer;
+    } else {
+      throw new Error('Response body is not a readable stream');
     }
   }
 }
