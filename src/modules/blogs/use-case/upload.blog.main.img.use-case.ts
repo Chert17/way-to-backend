@@ -35,7 +35,7 @@ export class UploadBlogMainImgUseCase
 
     if (blog.user_id !== userId) throw new ForbiddenException();
 
-    const dirPath = this.blogsService._getPathToBlogMinImages(blogId, userId);
+    const dirPath = this.blogsService._getPathToBlogMinImages(blogId);
 
     if (!fs.existsSync(dirPath)) fs.mkdirSync(dirPath, { recursive: true });
 
@@ -43,10 +43,7 @@ export class UploadBlogMainImgUseCase
 
     await writeFile(imgPath, file.buffer);
 
-    const mainImages = await this.blogsService.getBlogMainImages(
-      blogId,
-      userId,
-    );
+    const mainImages = await this.blogsService.getBlogMainImages(blogId);
 
     const wallpaper = await this.blogsQueryRepo.getBlogWallpaper(blogId);
 

@@ -10,7 +10,7 @@ export class BlogViewDto {
 }
 
 export class BlogViewWithWallpaperDto extends BlogViewDto {
-  readonly images: { wallpaper: ImgData };
+  readonly wallpaper: ImgData;
 }
 
 export class BlogViewWithImagesDto extends BlogViewDto {

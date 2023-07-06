@@ -18,8 +18,8 @@ export class BlogsService {
     this._baseImgUrl = this.configService.get(SERVEO_URL);
   }
 
-  async getBlogMainImages(blogId: string, userId: string): Promise<ImgData[]> {
-    const dirPath = this._getPathToBlogMinImages(blogId, userId);
+  async getBlogMainImages(blogId: string): Promise<ImgData[]> {
+    const dirPath = this._getPathToBlogMinImages(blogId);
 
     let mainImgNames: string[];
     try {
@@ -45,16 +45,9 @@ export class BlogsService {
     );
   }
 
-  _getPathToBlogMinImages(blogId: string, userId: string) {
+  _getPathToBlogMinImages(blogId: string) {
     const rootDirPath = path.dirname(require.main.filename);
 
-    return path.join(
-      rootDirPath,
-      'assets',
-      'blogs',
-      'main',
-      `${blogId}`,
-      `${userId}`,
-    );
+    return path.join(rootDirPath, 'assets', 'blogs', 'main', `${blogId}`);
   }
 }
