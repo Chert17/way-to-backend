@@ -9,6 +9,7 @@ import {
   PostQueryPagination,
 } from '../../../utils/pagination/pagination';
 import { BlogsQueryRepo } from '../repositories/blogs.query.repo';
+import { GetAllBlogsCommand } from '../use-case/get.all.blogs.use-case';
 import { GetAllPostsByBlogCommand } from '../use-case/get.all.posts.by.blog.use-case';
 import { GetBlogByIdCommand } from '../use-case/get.blog.by.id.use-case';
 
@@ -21,7 +22,7 @@ export class BlogsPublicController {
 
   @Get()
   getAllBlogs(@Query() pagination: BlogQueryPagination) {
-    return this.blogsQueryRepo.getAllBlogs(pagination);
+    return this.commandBus.execute(new GetAllBlogsCommand(pagination));
   }
 
   @Get(':blogId')
