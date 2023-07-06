@@ -8,13 +8,14 @@ import { MailerConfigService } from './configs/mailer.config';
 import { ThrottleConfigService } from './configs/throttle.config';
 import { TypeOrmConfig } from './configs/typeorm.config';
 import { AuthModule } from './modules/auth/auth.module';
+import { AwsModule } from './modules/aws/aws.module';
 import { BlogsModule } from './modules/blogs/blogs.module';
+import { CommentsModule } from './modules/comments/comments.module';
 import { DevicesModule } from './modules/devices/devices.module';
 import { EmailModule } from './modules/email/email.module';
+import { PostsModule } from './modules/posts/posts.module';
 import { TestingModule } from './modules/testing/testing.module';
 import { UsersModule } from './modules/users/users.module';
-import { PostsModule } from './modules/posts/posts.module';
-import { CommentsModule } from './modules/comments/comments.module';
 
 @Module({
   imports: [
@@ -32,6 +33,7 @@ import { CommentsModule } from './modules/comments/comments.module';
     BlogsModule,
     PostsModule,
     CommentsModule,
+    AwsModule,
   ],
 
   // providers: [...controllers, ...services, ...repositories, ...useCase],
