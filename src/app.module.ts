@@ -1,6 +1,9 @@
+import path from 'path';
+
 import { MailerModule } from '@nestjs-modules/mailer';
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { ServeStaticModule } from '@nestjs/serve-static';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
@@ -23,6 +26,9 @@ import { UsersModule } from './modules/users/users.module';
     TypeOrmModule.forRootAsync({ useClass: TypeOrmConfig }),
     MailerModule.forRootAsync({ useClass: MailerConfigService }),
     ThrottlerModule.forRootAsync({ useClass: ThrottleConfigService }),
+    ServeStaticModule.forRoot({
+      rootPath: path.resolve(__dirname, 'static'),
+    }),
     // CqrsModule,
 
     TestingModule,
