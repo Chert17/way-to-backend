@@ -5,6 +5,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { ExistBlog } from '../../infra/decorators/blog/exist.blog';
 import { JwtService } from '../auth/jwt.service';
 import { AwsS3BucketService } from '../aws/aws.bucke.service';
+import { FilesService } from '../files/files.service';
 import { PostsService } from '../posts/posts.service';
 import { PostsQueryRepo } from '../posts/repositories/post.query.repo';
 import { PostsRepo } from '../posts/repositories/post.repo';
@@ -49,6 +50,7 @@ import { UploadPostMainImgUseCase } from './use-case/upload.post.main.img.use-ca
     PostsRepo,
     PostsQueryRepo,
     PostsService,
+    FilesService,
     // use-case
     CreateBlogUseCase,
     UpdateBlogUseCase,

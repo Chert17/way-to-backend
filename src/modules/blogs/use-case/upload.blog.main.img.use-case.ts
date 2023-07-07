@@ -45,11 +45,9 @@ export class UploadBlogMainImgUseCase
 
     const mainImages = await this.blogsService.getBlogMainImages(blogId);
 
-    const wallpaper = await this.blogsQueryRepo.getBlogWallpaper(blogId);
-
     return {
       images: {
-        wallpaper,
+        wallpaper: '',
         main: mainImages,
       },
     };

@@ -6,17 +6,10 @@ import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 
 import { ImgData } from '../../types/img.data.interface';
-import { SETTINGS } from '../../utils/settings';
-
-const { SERVEO_URL } = SETTINGS;
 
 @Injectable()
 export class BlogsService {
-  private _baseImgUrl: string;
-
-  constructor(private configService: ConfigService) {
-    this._baseImgUrl = this.configService.get(SERVEO_URL);
-  }
+  constructor(private configService: ConfigService) {}
 
   async getBlogMainImages(blogId: string): Promise<ImgData[]> {
     const dirPath = this._getPathToBlogMinImages(blogId);
@@ -36,7 +29,7 @@ export class BlogsService {
 
         const { width, height, size } = await sharp(buffer).metadata();
         return {
-          url: path.join(this._baseImgUrl, path.join(dirPath, n)),
+          url: path.join(dirPath, n),
           width,
           height,
           fileSize: size,

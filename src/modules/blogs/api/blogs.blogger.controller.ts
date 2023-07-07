@@ -162,7 +162,7 @@ export class BlogsBloggerController {
     @ReqUser() user: User,
   ) {
     return this.commandBus.execute(
-      new UploadBlogWallpaperCommand(user.id, blogId, file),
+      new UploadBlogWallpaperCommand({ userId: user.id, blogId, file }),
     );
   }
 

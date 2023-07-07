@@ -1,11 +1,8 @@
-import path from 'path';
 import { DataSource } from 'typeorm';
 
 import { Injectable } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import { InjectDataSource } from '@nestjs/typeorm';
 
-import { ImgData } from '../../../types/img.data.interface';
 import { WithPagination } from '../../../types/pagination.interface';
 import { LikeStatus } from '../../../utils/like.status';
 import {
@@ -13,7 +10,6 @@ import {
   CommentQueryPagination,
   PostQueryPagination,
 } from '../../../utils/pagination/pagination';
-import { SETTINGS } from '../../../utils/settings';
 import { BlogSqlTables } from '../../../utils/tables/blogs.sql.tables';
 import { CommentsSqlTables } from '../../../utils/tables/comments.sql.tables';
 import { PostSqlTables } from '../../../utils/tables/posts.sql.tables';
@@ -31,18 +27,9 @@ const { USERS_TABLE, USERS_BAN_INFO_TABLE } = UsersSqlTables;
 const { POSTS_TABLE, POSTS_REACTION_TABLE } = PostSqlTables;
 const { COMMENTS_TABLE, COMMENTS_REACTIONS } = CommentsSqlTables;
 
-const { SERVEO_URL } = SETTINGS;
-
 @Injectable()
 export class BlogsQueryRepo {
-  private _baseImgUrl: string;
-
-  constructor(
-    @InjectDataSource() private dataSource: DataSource,
-    private configService: ConfigService,
-  ) {
-    this._baseImgUrl = this.configService.get(SERVEO_URL);
-  }
+  constructor(@InjectDataSource() private dataSource: DataSource) {}
 
   async getBlogById(blogId: string): Promise<BlogViewWithWallpaperDto> {
     const result = await this.dataSource.query(
@@ -53,16 +40,7 @@ export class BlogsQueryRepo {
       descr AS "description",
       web_url AS "websiteUrl",
       created_at AS "createdAt",
-      is_membership AS "isMembership",
-      CASE
-        WHEN wallpaper IS NULL THEN JSONB_BUILD_OBJECT('wallpaper', NULL)
-        ELSE JSONB_BUILD_OBJECT(
-          'url', wallpaper->>'url',
-          'width', (wallpaper->>'width')::integer,
-          'height', (wallpaper->>'height')::integer,
-          'fileSize', (wallpaper->>'fileSize')::integer
-        )
-      END AS "wallpaper"
+      is_membership AS "isMembership"
     FROM ${BLOGS_TABLE}
     WHERE id = $1 AND is_ban = false
 
@@ -70,11 +48,7 @@ export class BlogsQueryRepo {
       [blogId],
     );
 
-    const wallpaper = result[0].wallpaper;
-    if (!wallpaper.url) return result[0];
-    const { imageUrl } = this._getBlogWallpaperPath(wallpaper);
-
-    return { ...result[0], wallpaper: { ...wallpaper, url: imageUrl } };
+    return result[0];
   }
 
   async getAllBlogsByUserId(
@@ -233,15 +207,7 @@ export class BlogsQueryRepo {
       descr AS "description",
       web_url AS "websiteUrl",
       created_at AS "createdAt",
-      is_membership AS "isMembership",
-      CASE
-        WHEN wallpaper IS NULL THEN NULL
-        ELSE JSONB_BUILD_OBJECT(
-          'url', wallpaper->>'url',
-          'width', (wallpaper->>'width')::integer,
-          'height', (wallpaper->>'height')::integer,
-          'fileSize', (wallpaper->>'fileSize')::integer
-        ) END AS "wallpaper"
+      is_membership AS "isMembership"
     FROM ${BLOGS_TABLE}
     WHERE title ILIKE $1 AND is_ban = false
     ORDER BY ${sortBy} ${sortDirection}
@@ -265,13 +231,7 @@ export class BlogsQueryRepo {
       page: pageNumber,
       pageSize: pageSize,
       totalCount: +totalCount[0].count,
-      items: result.map(b => {
-        if (!b.wallpaper) return { ...b, wallpaper: b.wallpaper };
-
-        const { imageUrl } = this._getBlogWallpaperPath(b.wallpaper);
-
-        return { ...b, wallpaper: { ...b.wallpaper, url: imageUrl } };
-      }),
+      items: result,
     };
   }
 
@@ -482,35 +442,5 @@ WHERE b.user_id = $1
       totalCount: +totalCount[0].count,
       items: result,
     };
-  }
-
-  async getBlogWallpaper(blogId: string) {
-    const result = await this.dataSource.query(
-      `
- SELECT
-      CASE
-        WHEN wallpaper IS NULL THEN JSONB_BUILD_OBJECT('wallpaper', NULL)
-        ELSE 
-          JSONB_BUILD_OBJECT(
-            'url', wallpaper->>'url',
-            'width', (wallpaper->>'width')::integer,
-            'height', (wallpaper->>'height')::integer,
-            'fileSize', (wallpaper->>'fileSize')::integer
-          ) END AS "wallpaper" 
-    FROM ${BLOGS_TABLE}
-    WHERE id = $1 AND is_ban = false
-`,
-      [blogId],
-    );
-
-    const wallpaper = result[0].wallpaper;
-    if (!wallpaper.url) return result[0];
-    const { imageUrl } = this._getBlogWallpaperPath(wallpaper);
-
-    return { ...wallpaper, url: imageUrl };
-  }
-
-  private _getBlogWallpaperPath(wallpaper: ImgData) {
-    return { imageUrl: path.join(this._baseImgUrl, wallpaper.url) };
   }
 }
