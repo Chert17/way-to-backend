@@ -5,7 +5,7 @@ import { ForbiddenException, NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 
-import { FileType } from '../../../types/file.interface';
+import { MulterFileType } from '../../../types/file.interface';
 import { SETTINGS } from '../../../utils/settings';
 import { BlogsService } from '../blogs.service';
 import { BlogsRepo } from '../repositories/blogs.repo';
@@ -16,7 +16,7 @@ export class UploadBlogWallpaperCommand {
   constructor(
     public userId: string,
     public blogId: string,
-    public file: FileType,
+    public file: MulterFileType,
   ) {}
 }
 

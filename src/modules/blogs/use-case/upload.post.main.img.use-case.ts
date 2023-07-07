@@ -4,7 +4,7 @@ import { ForbiddenException, NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 
-import { FileType } from '../../../types/file.interface';
+import { MulterFileType } from '../../../types/file.interface';
 import { ImgData } from '../../../types/img.data.interface';
 import { SETTINGS } from '../../../utils/settings';
 import { AwsS3BucketService } from '../../aws/aws.bucke.service';
@@ -19,7 +19,7 @@ export class UploadPostMainImgCommand {
     public userId: string,
     public blogId: string,
     public postId: string,
-    public file: FileType,
+    public file: MulterFileType,
   ) {}
 }
 

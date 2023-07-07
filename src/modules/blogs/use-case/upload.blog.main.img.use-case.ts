@@ -5,7 +5,7 @@ import path from 'path';
 import { ForbiddenException, NotFoundException } from '@nestjs/common';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 
-import { FileType } from '../../../types/file.interface';
+import { MulterFileType } from '../../../types/file.interface';
 import { BlogsService } from '../blogs.service';
 import { BlogsQueryRepo } from '../repositories/blogs.query.repo';
 import { BlogsRepo } from '../repositories/blogs.repo';
@@ -14,7 +14,7 @@ export class UploadBlogMainImgCommand {
   constructor(
     public userId: string,
     public blogId: string,
-    public file: FileType,
+    public file: MulterFileType,
   ) {}
 }
 
