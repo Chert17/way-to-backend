@@ -10,7 +10,7 @@ import { BanUserByBloggerBlogDbDto } from '../dto/ban.user.by.blogger.blog.dto';
 import { CreateBlogDbDto } from '../dto/create.blog.dto';
 import { UpdateBlogDbDto } from '../dto/update.blog.dto';
 import { Blog } from '../entities/blog.entity';
-import { BlogDb, BlogWallpaper } from '../types/blog.types';
+import { BlogDb } from '../types/blog.types';
 
 const { BLOGS_TABLE, BANNED_BLOG_USERS } = BlogSqlTables;
 const { POSTS_TABLE } = PostSqlTables;
@@ -87,10 +87,6 @@ export class BlogsRepo {
     `,
       [blogId, isBanned, banDate],
     );
-  }
-
-  async uploadBlogWallpaper(blogId: string, fileData: BlogWallpaper) {
-    return this.blogRepo.update({ id: blogId }, { wallpaper: fileData });
   }
 
   async checkBlogById(blogId: string): Promise<BlogDb> {

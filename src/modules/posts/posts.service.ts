@@ -5,18 +5,13 @@ import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 
 import { ImgData } from '../../types/img.data.interface';
-import { SETTINGS } from '../../utils/settings';
 import { GetFileDto } from '../aws/dto/get.file.dto';
-
-const { SERVEO_URL } = SETTINGS;
 
 @Injectable()
 export class PostsService {
   private _baseImgUrl: string;
 
-  constructor(private configService: ConfigService) {
-    this._baseImgUrl = this.configService.get(SERVEO_URL);
-  }
+  constructor(private configService: ConfigService) {}
   async getPostMainImages(files: GetFileDto[]): Promise<ImgData[]> {
     return Promise.all(
       files.map(async f => {

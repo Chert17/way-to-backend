@@ -1,23 +1,15 @@
-import path from 'path';
 import sharp from 'sharp';
 
 import { ForbiddenException, NotFoundException } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 
-import { MulterFileType } from '../../../types/file.interface';
-import { SETTINGS } from '../../../utils/settings';
-import { BlogsService } from '../blogs.service';
+import { FilesService } from '../../files/files.service';
+import { ImgFileType } from '../../files/types/img.file.type';
+import { UploadBlogWallpaperDto } from '../dto/blog.img.dto';
 import { BlogsRepo } from '../repositories/blogs.repo';
 
-const { SERVEO_URL } = SETTINGS;
-
 export class UploadBlogWallpaperCommand {
-  constructor(
-    public userId: string,
-    public blogId: string,
-    public file: MulterFileType,
-  ) {}
+  constructor(public dto: UploadBlogWallpaperDto) {}
 }
 
 @CommandHandler(UploadBlogWallpaperCommand)
@@ -26,38 +18,35 @@ export class UploadBlogWallpaperUseCase
 {
   constructor(
     private blogsRepo: BlogsRepo,
-    private configService: ConfigService,
-    private blogsService: BlogsService,
+    private filesService: FilesService,
   ) {}
 
-  async execute({ userId, blogId, file }: UploadBlogWallpaperCommand) {
+  async execute({ dto }: UploadBlogWallpaperCommand) {
+    const { blogId, userId, file } = dto;
+
     const blog = await this.blogsRepo.checkBlogById(blogId);
 
     if (!blog) throw new NotFoundException();
 
     if (blog.user_id !== userId) throw new ForbiddenException();
 
+    const wallpaperUrl = this.filesService.uploadFile(
+      file,
+      ImgFileType.BlogWallpaper + `/${blogId}`,
+    );
+
     const { width, height, size } = await sharp(file.buffer).metadata();
 
-    const imgUrl = `/${userId}/${blogId}/${file.originalname}`;
-
-    await this.blogsRepo.uploadBlogWallpaper(blogId, {
-      url: imgUrl,
-      width,
-      height,
-      fileSize: size,
-    });
-
-    const mainImages = await this.blogsService.getBlogMainImages(blogId);
+    // const mainImages = await this.blogsService.getBlogMainImages(blogId);
 
     return {
       wallpaper: {
-        url: path.join(this.configService.get(SERVEO_URL) + imgUrl),
+        url: wallpaperUrl,
         width,
         height,
         fileSize: size,
       },
-      main: mainImages,
+      main: [],
     };
   }
 }
