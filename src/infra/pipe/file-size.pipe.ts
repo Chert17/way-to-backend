@@ -3,13 +3,13 @@ import sharp from 'sharp';
 import { Injectable, PipeTransform } from '@nestjs/common';
 
 import { customBadRequestException } from '../../helpers/exceptions/custom-bad-request';
-import { FileType } from '../../types/file.interface';
+import { MulterFileType } from '../../types/file.interface';
 
 @Injectable()
 export class FileSizeValidationPipe implements PipeTransform {
   constructor(public widthLimit: number, public heightLimit: number) {}
 
-  async transform(file: FileType) {
+  async transform(file: MulterFileType) {
     if (!file.originalname.match(/\.(jpg|jpeg|png)$/)) {
       customBadRequestException('file', 'Not supported format');
     }

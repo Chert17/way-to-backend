@@ -19,6 +19,7 @@ import { EmailModule } from './modules/email/email.module';
 import { PostsModule } from './modules/posts/posts.module';
 import { TestingModule } from './modules/testing/testing.module';
 import { UsersModule } from './modules/users/users.module';
+import { FilesModule } from './modules/files/files.module';
 
 @Module({
   imports: [
@@ -40,6 +41,7 @@ import { UsersModule } from './modules/users/users.module';
     PostsModule,
     CommentsModule,
     AwsModule,
+    FilesModule,
   ],
 
   // providers: [...controllers, ...services, ...repositories, ...useCase],

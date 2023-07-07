@@ -19,7 +19,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { ReqUser } from '../../../infra/decorators/params/req.user.decorator';
 import { JwtAuthGuard } from '../../../infra/guards/jwt.auth.guard';
 import { FileSizeValidationPipe } from '../../../infra/pipe/file-size.pipe';
-import { FileType } from '../../../types/file.interface';
+import { MulterFileType } from '../../../types/file.interface';
 import {
   BlogQueryPagination,
   CommentQueryPagination,
@@ -157,7 +157,7 @@ export class BlogsBloggerController {
   @Post('/blogs/:blogId/images/wallpaper')
   @UseInterceptors(FileInterceptor('file'))
   uploadWallpaperForBlog(
-    @UploadedFile(new FileSizeValidationPipe(1028, 312)) file: FileType,
+    @UploadedFile(new FileSizeValidationPipe(1028, 312)) file: MulterFileType,
     @Param('blogId') blogId: string,
     @ReqUser() user: User,
   ) {
@@ -169,7 +169,7 @@ export class BlogsBloggerController {
   @Post('/blogs/:blogId/images/main')
   @UseInterceptors(FileInterceptor('file'))
   uploadMainImgForBlog(
-    @UploadedFile(new FileSizeValidationPipe(156, 156)) file: FileType,
+    @UploadedFile(new FileSizeValidationPipe(156, 156)) file: MulterFileType,
     @Param('blogId') blogId: string,
     @ReqUser() user: User,
   ) {
@@ -181,7 +181,7 @@ export class BlogsBloggerController {
   @Post('/blogs/:blogId/posts/:postId/images/main')
   @UseInterceptors(FileInterceptor('file'))
   uploadMainImgForPost(
-    @UploadedFile(new FileSizeValidationPipe(940, 432)) file: FileType,
+    @UploadedFile(new FileSizeValidationPipe(940, 432)) file: MulterFileType,
     @Param('blogId') blogId: string,
     @Param('postId') postId: string,
     @ReqUser() user: User,
