@@ -34,15 +34,8 @@ export class UploadBlogMainImgUseCase
 
     this.filesService.uploadFile(file, ImgFileType.BlogMain + `/${blogId}`);
 
-    const mainImages = await this.blogsService.getBlogMainImages(blogId);
+    const images = await this.blogsService.getBlogImages(blogId);
 
-    const blogWallpaper = await this.blogsService.getBlogWallpaper(blogId);
-
-    return {
-      images: {
-        wallpaper: blogWallpaper,
-        main: mainImages,
-      },
-    };
+    return images;
   }
 }
