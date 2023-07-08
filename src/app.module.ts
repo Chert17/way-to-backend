@@ -20,7 +20,6 @@ import { FilesModule } from './modules/files/files.module';
 import { PostsModule } from './modules/posts/posts.module';
 import { TestingModule } from './modules/testing/testing.module';
 import { UsersModule } from './modules/users/users.module';
-import { FilesModule } from './modules/files/files.module';
 
 @Module({
   imports: [
@@ -28,7 +27,10 @@ import { FilesModule } from './modules/files/files.module';
     TypeOrmModule.forRootAsync({ useClass: TypeOrmConfig }),
     MailerModule.forRootAsync({ useClass: MailerConfigService }),
     ThrottlerModule.forRootAsync({ useClass: ThrottleConfigService }),
-    ServeStaticModule.forRoot({ rootPath: path.resolve(__dirname, 'static') }),
+    ServeStaticModule.forRoot({
+      rootPath: path.resolve(__dirname, 'static'),
+      serveStaticOptions: { index: false },
+    }),
     // CqrsModule,
 
     TestingModule,

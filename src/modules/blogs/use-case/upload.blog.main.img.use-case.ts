@@ -1,13 +1,10 @@
-import fs from 'fs';
-import { writeFile } from 'fs/promises';
-import path from 'path';
-
 import { ForbiddenException, NotFoundException } from '@nestjs/common';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 
 import { MulterFileType } from '../../../types/file.interface';
+import { FilesService } from '../../files/files.service';
+import { ImgFileType } from '../../files/types/img.file.type';
 import { BlogsService } from '../blogs.service';
-import { BlogsQueryRepo } from '../repositories/blogs.query.repo';
 import { BlogsRepo } from '../repositories/blogs.repo';
 
 export class UploadBlogMainImgCommand {
@@ -24,8 +21,8 @@ export class UploadBlogMainImgUseCase
 {
   constructor(
     private blogsRepo: BlogsRepo,
-    private blogsQueryRepo: BlogsQueryRepo,
     private blogsService: BlogsService,
+    private filesService: FilesService,
   ) {}
 
   async execute({ userId, blogId, file }: UploadBlogMainImgCommand) {
@@ -35,19 +32,15 @@ export class UploadBlogMainImgUseCase
 
     if (blog.user_id !== userId) throw new ForbiddenException();
 
-    const dirPath = this.blogsService._getPathToBlogMinImages(blogId);
-
-    if (!fs.existsSync(dirPath)) fs.mkdirSync(dirPath, { recursive: true });
-
-    const imgPath = path.join(dirPath, file.originalname);
-
-    await writeFile(imgPath, file.buffer);
+    this.filesService.uploadFile(file, ImgFileType.BlogMain + `/${blogId}`);
 
     const mainImages = await this.blogsService.getBlogMainImages(blogId);
 
+    const blogWallpaper = await this.blogsService.getBlogWallpaper(blogId);
+
     return {
       images: {
-        wallpaper: '',
+        wallpaper: blogWallpaper,
         main: mainImages,
       },
     };
