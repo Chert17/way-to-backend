@@ -3,12 +3,21 @@ import path from 'path';
 import sharp from 'sharp';
 
 import { Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 
 import { ImgData } from '../../types/img.data.interface';
+import { SETTINGS } from '../../utils/settings';
 import { ImgFileType } from '../files/types/img.file.type';
+
+const { SERVEO_URL } = SETTINGS;
 
 @Injectable()
 export class BlogsService {
+  private _serveoUrl: string;
+  constructor(private configService: ConfigService) {
+    this._serveoUrl = this.configService.get(SERVEO_URL);
+  }
+
   async getBlogWallpaper(blogId: string): Promise<ImgData | null> {
     try {
       const dirPath = this._getDirPath(blogId, ImgFileType.BlogWallpaper);
@@ -22,7 +31,7 @@ export class BlogsService {
       const { width, height, size } = await sharp(buffer).metadata();
 
       return {
-        url: ImgFileType.BlogWallpaper + `/${blogId}` + '/' + imageName[0],
+        url: `${this._serveoUrl}/${ImgFileType.BlogWallpaper}/${blogId}/${imageName[0]}`,
         width,
         height,
         fileSize: size,
@@ -47,7 +56,7 @@ export class BlogsService {
           const { width, height, size } = await sharp(buffer).metadata();
 
           return {
-            url: ImgFileType.BlogMain + `/${blogId}` + '/' + n,
+            url: `${this._serveoUrl}/${ImgFileType.BlogMain}/${blogId}/${n}`,
             width,
             height,
             fileSize: size,

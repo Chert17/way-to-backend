@@ -1,5 +1,3 @@
-import sharp from 'sharp';
-
 import { ForbiddenException, NotFoundException } from '@nestjs/common';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 
@@ -32,23 +30,13 @@ export class UploadBlogWallpaperUseCase
 
     if (blog.user_id !== userId) throw new ForbiddenException();
 
-    const wallpaperUrl = this.filesService.uploadFile(
+    this.filesService.uploadFile(
       file,
       ImgFileType.BlogWallpaper + `/${blogId}`,
     );
 
-    const { width, height, size } = await sharp(file.buffer).metadata();
+    const images = await this.blogsService.getBlogImages(blogId);
 
-    const mainImages = await this.blogsService.getBlogMainImages(blogId);
-
-    return {
-      wallpaper: {
-        url: wallpaperUrl,
-        width,
-        height,
-        fileSize: size,
-      },
-      main: mainImages,
-    };
+    return images;
   }
 }
