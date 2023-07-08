@@ -20,6 +20,7 @@ import { FilesModule } from './modules/files/files.module';
 import { PostsModule } from './modules/posts/posts.module';
 import { TestingModule } from './modules/testing/testing.module';
 import { UsersModule } from './modules/users/users.module';
+import { FilesModule } from './modules/files/files.module';
 
 @Module({
   imports: [
