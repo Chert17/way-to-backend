@@ -5,6 +5,7 @@ import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 
 import { FilesService } from '../../files/files.service';
 import { ImgFileType } from '../../files/types/img.file.type';
+import { BlogsService } from '../blogs.service';
 import { UploadBlogWallpaperDto } from '../dto/blog.img.dto';
 import { BlogsRepo } from '../repositories/blogs.repo';
 
@@ -19,6 +20,7 @@ export class UploadBlogWallpaperUseCase
   constructor(
     private blogsRepo: BlogsRepo,
     private filesService: FilesService,
+    private blogsService: BlogsService,
   ) {}
 
   async execute({ dto }: UploadBlogWallpaperCommand) {
@@ -37,7 +39,7 @@ export class UploadBlogWallpaperUseCase
 
     const { width, height, size } = await sharp(file.buffer).metadata();
 
-    // const mainImages = await this.blogsService.getBlogMainImages(blogId);
+    const mainImages = await this.blogsService.getBlogMainImages(blogId);
 
     return {
       wallpaper: {
@@ -46,7 +48,7 @@ export class UploadBlogWallpaperUseCase
         height,
         fileSize: size,
       },
-      main: [],
+      main: mainImages,
     };
   }
 }

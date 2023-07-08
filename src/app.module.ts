@@ -27,7 +27,10 @@ import { UsersModule } from './modules/users/users.module';
     TypeOrmModule.forRootAsync({ useClass: TypeOrmConfig }),
     MailerModule.forRootAsync({ useClass: MailerConfigService }),
     ThrottlerModule.forRootAsync({ useClass: ThrottleConfigService }),
-    ServeStaticModule.forRoot({ rootPath: path.resolve(__dirname, 'static') }),
+    ServeStaticModule.forRoot({
+      rootPath: path.resolve(__dirname, 'static'),
+      serveStaticOptions: { index: false },
+    }),
     // CqrsModule,
 
     TestingModule,

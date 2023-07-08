@@ -1,46 +1,65 @@
-import { readdir, readFile } from 'fs/promises';
+import fs from 'fs/promises';
 import path from 'path';
 import sharp from 'sharp';
 
-import { Injectable } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 
 import { ImgData } from '../../types/img.data.interface';
+import { ImgFileType } from '../files/types/img.file.type';
 
 @Injectable()
 export class BlogsService {
-  constructor(private configService: ConfigService) {}
-
-  async getBlogMainImages(blogId: string): Promise<ImgData[]> {
-    const dirPath = this._getPathToBlogMinImages(blogId);
-
-    let mainImgNames: string[];
+  async getBlogWallpaper(blogId: string): Promise<ImgData> {
     try {
-      const imagesNames = await readdir(dirPath);
-      mainImgNames = imagesNames;
-    } catch (error) {
-      return;
+      const dirPath = this._getDirPath(blogId, ImgFileType.BlogWallpaper);
+
+      const imageName = await fs.readdir(dirPath);
+
+      const pathToImg = path.resolve(dirPath, imageName[0]);
+
+      const buffer = await fs.readFile(pathToImg);
+
+      const { width, height, size } = await sharp(buffer).metadata();
+
+      return {
+        url: ImgFileType.BlogWallpaper + `/${blogId}` + '/' + imageName[0],
+        width,
+        height,
+        fileSize: size,
+      };
+    } catch (e) {
+      throw new HttpException(e.message, HttpStatus.INTERNAL_SERVER_ERROR);
     }
-
-    return Promise.all(
-      mainImgNames.map(async n => {
-        const pathToImg = path.join(dirPath, n);
-        const buffer = await readFile(pathToImg);
-
-        const { width, height, size } = await sharp(buffer).metadata();
-        return {
-          url: path.join(dirPath, n),
-          width,
-          height,
-          fileSize: size,
-        };
-      }),
-    );
   }
 
-  _getPathToBlogMinImages(blogId: string) {
-    const rootDirPath = path.dirname(require.main.filename);
+  async getBlogMainImages(blogId: string): Promise<ImgData[]> {
+    try {
+      const dirPath = this._getDirPath(blogId, ImgFileType.BlogMain);
 
-    return path.join(rootDirPath, 'assets', 'blogs', 'main', `${blogId}`);
+      const imagesNames = await fs.readdir(dirPath);
+
+      return Promise.all(
+        imagesNames.map(async n => {
+          const pathToImg = path.resolve(dirPath, n);
+
+          const buffer = await fs.readFile(pathToImg);
+
+          const { width, height, size } = await sharp(buffer).metadata();
+
+          return {
+            url: ImgFileType.BlogMain + `/${blogId}` + '/' + n,
+            width,
+            height,
+            fileSize: size,
+          };
+        }),
+      );
+    } catch (e) {
+      throw new HttpException(e.message, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
+
+  private _getDirPath(blogId: string, type: ImgFileType) {
+    return path.resolve(__dirname, '../..', 'static', type, blogId);
   }
 }

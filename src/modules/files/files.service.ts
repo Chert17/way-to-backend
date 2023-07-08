@@ -10,9 +10,9 @@ import { MulterFileType } from '../../types/file.interface';
 export class FilesService {
   uploadFile(file: MulterFileType, type: string) {
     try {
-      const fileExtension = file.originalname;
+      const fileExtension = file.originalname.split('.').pop();
 
-      const fileName = randomUUID() + fileExtension;
+      const fileName = randomUUID() + '.' + fileExtension;
 
       const filePath = path.resolve(__dirname, '../..', 'static', type);
 
