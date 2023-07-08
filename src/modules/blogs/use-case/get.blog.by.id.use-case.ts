@@ -23,24 +23,8 @@ export class GetBlogByIdUseCase implements ICommandHandler<GetBlogByIdCommand> {
 
     if (!blog) throw new NotFoundException();
 
-    const blogMainImg = await this._getViewBlogMainImg(blogId);
+    const images = await this.blogsService.getBlogImages(blogId);
 
-    return {
-      id: blog.id,
-      name: blog.name,
-      description: blog.description,
-      websiteUrl: blog.websiteUrl,
-      createdAt: blog.createdAt,
-      isMembership: blog.isMembership,
-      images: { wallpaper: blog.wallpaper, main: blogMainImg },
-    };
-  }
-
-  private async _getViewBlogMainImg(blogId: string) {
-    const result = await this.blogsService.getBlogMainImages(blogId);
-
-    if (!result) return [];
-
-    return result;
+    return { ...blog, images };
   }
 }

@@ -2,14 +2,14 @@ import fs from 'fs/promises';
 import path from 'path';
 import sharp from 'sharp';
 
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 
 import { ImgData } from '../../types/img.data.interface';
 import { ImgFileType } from '../files/types/img.file.type';
 
 @Injectable()
 export class BlogsService {
-  async getBlogWallpaper(blogId: string): Promise<ImgData> {
+  async getBlogWallpaper(blogId: string): Promise<ImgData | null> {
     try {
       const dirPath = this._getDirPath(blogId, ImgFileType.BlogWallpaper);
 
@@ -28,7 +28,7 @@ export class BlogsService {
         fileSize: size,
       };
     } catch (e) {
-      throw new HttpException(e.message, HttpStatus.INTERNAL_SERVER_ERROR);
+      return null;
     }
   }
 
@@ -55,8 +55,20 @@ export class BlogsService {
         }),
       );
     } catch (e) {
-      throw new HttpException(e.message, HttpStatus.INTERNAL_SERVER_ERROR);
+      return [];
     }
+  }
+
+  async getBlogImages(blogId: string) {
+    const blogWallpaper = await this.getBlogWallpaper(blogId);
+    const mainImages = await this.getBlogMainImages(blogId);
+
+    const images = {
+      wallpaper: blogWallpaper,
+      main: mainImages,
+    };
+
+    return images;
   }
 
   private _getDirPath(blogId: string, type: ImgFileType) {

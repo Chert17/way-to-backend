@@ -39,7 +39,7 @@ export class UploadBlogWallpaperUseCase
 
     const { width, height, size } = await sharp(file.buffer).metadata();
 
-    // const mainImages = await this.blogsService.getBlogMainImages(blogId);
+    const mainImages = await this.blogsService.getBlogMainImages(blogId);
 
     return {
       wallpaper: {
@@ -48,7 +48,7 @@ export class UploadBlogWallpaperUseCase
         height,
         fileSize: size,
       },
-      main: [],
+      main: mainImages,
     };
   }
 }

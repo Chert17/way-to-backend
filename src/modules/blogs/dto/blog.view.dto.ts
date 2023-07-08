@@ -9,10 +9,6 @@ export class BlogViewDto {
   readonly isMembership: boolean;
 }
 
-export class BlogViewWithWallpaperDto extends BlogViewDto {
-  readonly wallpaper: ImgData;
-}
-
 export class BlogViewWithImagesDto extends BlogViewDto {
   readonly images: { wallpaper: ImgData; main: ImgData[] };
 }

@@ -24,12 +24,12 @@ export class CreateBlogUseCase implements ICommandHandler<CreateBlogCommand> {
       createdAt: new Date().toISOString(),
     });
 
-    const blogWithWallpaper = await this.blogsQueryRepo.getBlogById(blogId);
+    const blog = await this.blogsQueryRepo.getBlogById(blogId);
 
     return {
-      ...blogWithWallpaper,
+      ...blog,
       images: {
-        wallpaper: blogWithWallpaper.wallpaper,
+        wallpaper: null,
         main: [],
       },
     };
