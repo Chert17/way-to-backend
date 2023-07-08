@@ -19,7 +19,7 @@ import { AllCommentsByBloggerBlogViewDto } from '../dto/all.comments.by.blogger.
 import {
   BanUserByBlogViewDto,
   BlogViewBySADto,
-  BlogViewWithWallpaperDto,
+  BlogViewDto,
 } from '../dto/blog.view.dto';
 
 const { BLOGS_TABLE, BANNED_BLOG_USERS } = BlogSqlTables;
@@ -31,7 +31,7 @@ const { COMMENTS_TABLE, COMMENTS_REACTIONS } = CommentsSqlTables;
 export class BlogsQueryRepo {
   constructor(@InjectDataSource() private dataSource: DataSource) {}
 
-  async getBlogById(blogId: string): Promise<BlogViewWithWallpaperDto> {
+  async getBlogById(blogId: string): Promise<BlogViewDto> {
     const result = await this.dataSource.query(
       `
       SELECT
@@ -54,7 +54,7 @@ export class BlogsQueryRepo {
   async getAllBlogsByUserId(
     userId: string,
     pagination: BlogQueryPagination,
-  ): Promise<WithPagination<BlogViewWithWallpaperDto>> {
+  ): Promise<WithPagination<BlogViewDto>> {
     const { pageNumber, pageSize, searchNameTerm, sortBy, sortDirection } =
       pagination;
 
@@ -66,16 +66,7 @@ export class BlogsQueryRepo {
       descr AS "description",
       web_url AS "websiteUrl",
       created_at AS "createdAt",
-      is_membership AS "isMembership",
-      CASE
-        WHEN wallpaper IS NULL THEN JSONB_BUILD_OBJECT('wallpaper', NULL)
-        ELSE JSONB_BUILD_OBJECT(
-          'url', wallpaper->>'url',
-          'width', (wallpaper->>'width')::integer,
-          'height', (wallpaper->>'height')::integer,
-          'fileSize', (wallpaper->>'fileSize')::integer
-        )
-      END AS "wallpaper"
+      is_membership AS "isMembership"
     FROM ${BLOGS_TABLE}
     WHERE user_id = $1 AND title ILIKE $2
     ORDER BY ${sortBy} ${sortDirection}
@@ -195,7 +186,7 @@ export class BlogsQueryRepo {
 
   async getAllBlogs(
     pagination: BlogQueryPagination,
-  ): Promise<WithPagination<BlogViewWithWallpaperDto>> {
+  ): Promise<WithPagination<BlogViewDto>> {
     const { pageNumber, pageSize, searchNameTerm, sortBy, sortDirection } =
       pagination;
 
