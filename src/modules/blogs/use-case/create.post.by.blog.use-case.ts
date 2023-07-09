@@ -37,6 +37,8 @@ export class CreatePostByBlogUseCase
       createdAt: new Date().toISOString(),
     });
 
-    return this.postsQueryRepo.getPostById(userId, postId);
+    const post = await this.postsQueryRepo.getPostById(userId, postId);
+
+    return { ...post, images: { main: [] } };
   }
 }
