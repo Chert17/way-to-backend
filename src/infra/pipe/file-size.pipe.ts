@@ -14,7 +14,7 @@ export class FileSizeValidationPipe implements PipeTransform {
       customBadRequestException('file', 'Not supported format');
     }
 
-    if (file.size > 1024) {
+    if (file.size > 100000) {
       customBadRequestException('file', 'Not supported size');
     }
 

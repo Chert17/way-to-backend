@@ -193,7 +193,7 @@ export class BlogsBloggerController {
     );
   }
 
-  @Get('/:blogId/posts')
+  @Get('/blogs/:blogId/posts')
   getPostsByBlog(
     @Param('blogId') blogId: string,
     @Query() pagination: PostQueryPagination,
