@@ -1,5 +1,7 @@
 import { LikeInfoViewModel } from 'src/types/like.info.interface';
 
+import { ImgData } from '../../../types/img.data.interface';
+
 export class PostViewDto {
   readonly id: string;
   readonly title: string;
@@ -17,4 +19,8 @@ class NewestLikes {
   readonly addedAt: string;
   readonly userId: string;
   readonly login: string;
+}
+
+export class PostWithImagesViewDto extends PostViewDto {
+  readonly images: { main: ImgData[] };
 }
