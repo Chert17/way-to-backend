@@ -20,6 +20,7 @@ import { FilesModule } from './modules/files/files.module';
 import { PostsModule } from './modules/posts/posts.module';
 import { TestingModule } from './modules/testing/testing.module';
 import { UsersModule } from './modules/users/users.module';
+import { TelegramModule } from './modules/telegram/telegram.module';
 
 @Module({
   imports: [
@@ -43,6 +44,7 @@ import { UsersModule } from './modules/users/users.module';
     CommentsModule,
     AwsModule,
     FilesModule,
+    TelegramModule,
   ],
 
   // providers: [...controllers, ...services, ...repositories, ...useCase],
