@@ -1,3 +1,4 @@
+import path from 'path';
 import sharp from 'sharp';
 
 import { Injectable } from '@nestjs/common';
