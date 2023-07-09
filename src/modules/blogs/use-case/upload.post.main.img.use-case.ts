@@ -1,3 +1,4 @@
+import { randomUUID } from 'crypto';
 import path from 'path';
 
 import { ForbiddenException, NotFoundException } from '@nestjs/common';
@@ -51,8 +52,10 @@ export class UploadPostMainImgUseCase
 
     if (!post) throw new NotFoundException();
 
+    const fileName = this._getFileName(file);
+
+    const Key = path.join(postId, fileName);
     const Bucket = this.configService.get(POST_MAIN_IMAGES_BUCKET);
-    const Key = path.join(postId, file.originalname);
     const Body = file.buffer;
 
     await this.s3Service.uploadFile({ Bucket, Key, Body });
@@ -62,5 +65,10 @@ export class UploadPostMainImgUseCase
     const viewPostMainImg = await this.postsService.getPostMainImages(files);
 
     return { main: viewPostMainImg };
+  }
+
+  private _getFileName(file: MulterFileType) {
+    const fileExtension = file.originalname.split('.').pop();
+    return randomUUID() + '.' + fileExtension;
   }
 }
