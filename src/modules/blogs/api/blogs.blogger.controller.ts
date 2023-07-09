@@ -19,7 +19,6 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { ReqUser } from '../../../infra/decorators/params/req.user.decorator';
 import { JwtAuthGuard } from '../../../infra/guards/jwt.auth.guard';
 import { FileSizeValidationPipe } from '../../../infra/pipe/file-size.pipe';
-import { PostMainImgValidationPipe } from '../../../infra/pipe/posts.main.img.pipe';
 import { MulterFileType } from '../../../types/file.interface';
 import {
   BlogQueryPagination,
@@ -184,7 +183,7 @@ export class BlogsBloggerController {
   @Post('/blogs/:blogId/posts/:postId/images/main')
   @UseInterceptors(FileInterceptor('file'))
   uploadMainImgForPost(
-    @UploadedFile(PostMainImgValidationPipe) file: MulterFileType,
+    @UploadedFile(new FileSizeValidationPipe(940, 432)) file: MulterFileType,
     @Param('blogId') blogId: string,
     @Param('postId') postId: string,
     @ReqUser() user: User,

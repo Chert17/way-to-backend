@@ -1,5 +1,6 @@
 import { randomUUID } from 'crypto';
 import path from 'path';
+import sharp from 'sharp';
 
 import { ForbiddenException, NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
@@ -52,13 +53,21 @@ export class UploadPostMainImgUseCase
 
     if (!post) throw new NotFoundException();
 
-    const fileName = this._getFileName(file);
+    const resizedImages = await this._resizeImages(file);
 
-    const Key = path.join(postId, fileName);
     const Bucket = this.configService.get(POST_MAIN_IMAGES_BUCKET);
-    const Body = file.buffer;
 
-    await this.s3Service.uploadFile({ Bucket, Key, Body });
+    await Promise.all(
+      resizedImages.map(async image => {
+        const fileName = this._getFileName(file);
+
+        const Key = path.join(postId, fileName);
+
+        const Body = await image.toBuffer();
+
+        await this.s3Service.uploadFile({ Bucket, Key, Body });
+      }),
+    );
 
     const files = await this.s3Service.getFiles(Bucket, path.join(postId));
 
@@ -70,5 +79,17 @@ export class UploadPostMainImgUseCase
   private _getFileName(file: MulterFileType) {
     const fileExtension = file.originalname.split('.').pop();
     return randomUUID() + '.' + fileExtension;
+  }
+
+  private async _resizeImages(file: MulterFileType) {
+    const originalSize = { width: 940, height: 432 };
+    const middleSize = { width: 300, height: 180 };
+    const smallSize = { width: 149, height: 96 };
+
+    return await Promise.all([
+      sharp(file.buffer).resize(originalSize),
+      sharp(file.buffer).resize(middleSize),
+      sharp(file.buffer).resize(smallSize),
+    ]);
   }
 }
