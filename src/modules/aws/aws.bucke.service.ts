@@ -1,4 +1,3 @@
-import path from 'path';
 import { Readable } from 'stream';
 
 import {
@@ -9,6 +8,7 @@ import {
   PutObjectCommand,
   S3Client,
 } from '@aws-sdk/client-s3';
+import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { Injectable, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 
@@ -39,17 +39,24 @@ export class AwsS3BucketService implements OnModuleInit {
 
     try {
       const response = await this.s3Client.send(command);
+
       return Promise.all(
         response.Contents.map(async f => {
-          const Key = path.join(f.Key);
+          const Key = f.Key;
 
           const getObjectCommand = new GetObjectCommand({ Bucket, Key });
+
+          const signedUrl = await getSignedUrl(this.s3Client, getObjectCommand);
 
           const fileData = await this.s3Client.send(getObjectCommand);
 
           const fileBuffer = await this._getFileBuffer(fileData.Body);
 
-          return { path: Key, size: f.Size, buffer: fileBuffer };
+          return {
+            path: signedUrl.split('?')[0],
+            size: f.Size,
+            buffer: fileBuffer,
+          };
         }),
       );
     } catch (err) {
