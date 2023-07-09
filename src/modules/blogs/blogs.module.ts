@@ -27,6 +27,7 @@ import { GetAllBanUsersByBloggerBlogUseCase } from './use-case/get.all.ban.users
 import { GetAllBlogsByUserUseCase } from './use-case/get.all.blogs.by.user.use-case';
 import { GetAllBlogsUseCase } from './use-case/get.all.blogs.use-case';
 import { GetAllPostsByBlogUseCase } from './use-case/get.all.posts.by.blog.use-case';
+import { GetAllPostsByBloggerBlogUseCase } from './use-case/get.all.posts.by.blogger.blog.use-case';
 import { GetBlogByIdUseCase } from './use-case/get.blog.by.id.use-case';
 import { UpdateBlogUseCase } from './use-case/update.blog.use-case';
 import { UpdatePostByBlogUseCase } from './use-case/update.post.by.blog.use-case';
@@ -68,6 +69,7 @@ import { UploadPostMainImgUseCase } from './use-case/upload.post.main.img.use-ca
     GetBlogByIdUseCase,
     GetAllBlogsUseCase,
     UploadPostMainImgUseCase,
+    GetAllPostsByBloggerBlogUseCase,
     // validation
     ExistBlog,
     // aws

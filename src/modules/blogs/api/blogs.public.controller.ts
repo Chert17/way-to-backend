@@ -8,17 +8,13 @@ import {
   BlogQueryPagination,
   PostQueryPagination,
 } from '../../../utils/pagination/pagination';
-import { BlogsQueryRepo } from '../repositories/blogs.query.repo';
 import { GetAllBlogsCommand } from '../use-case/get.all.blogs.use-case';
 import { GetAllPostsByBlogCommand } from '../use-case/get.all.posts.by.blog.use-case';
 import { GetBlogByIdCommand } from '../use-case/get.blog.by.id.use-case';
 
 @Controller('blogs')
 export class BlogsPublicController {
-  constructor(
-    private readonly blogsQueryRepo: BlogsQueryRepo,
-    private readonly commandBus: CommandBus,
-  ) {}
+  constructor(private readonly commandBus: CommandBus) {}
 
   @Get()
   getAllBlogs(@Query() pagination: BlogQueryPagination) {
