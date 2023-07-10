@@ -14,6 +14,7 @@ import { JwtAuthGuard } from '../../infra/guards/jwt.auth.guard';
 import { User } from '../users/entities/user.entity';
 import { TelegramUpdateMessage } from './dto/update.message.dto';
 import { AuthTelegramBotCommand } from './use-case/auth.bot.use-case';
+import { SetAuthTelegramBotCommand } from './use-case/set.auth.bot.use-case';
 
 @Controller('integrations/telegram')
 export class TelegramController {
@@ -22,9 +23,7 @@ export class TelegramController {
   @Post('/webhook')
   @HttpCode(HttpStatus.NO_CONTENT)
   connect(@Body() payload: TelegramUpdateMessage) {
-    console.log("I'M HERE", payload);
-
-    return { payload };
+    return this.commandBus.execute(new SetAuthTelegramBotCommand(payload));
   }
 
   @Get('/auth-bot-link')

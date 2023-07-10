@@ -6,6 +6,7 @@ import { UsersRepo } from '../users/repositories/users.repo';
 import { TelegramController } from './telegram.controller';
 import { TelegramService } from './telegram.service';
 import { AuthTelegramBotUseCase } from './use-case/auth.bot.use-case';
+import { SetAuthTelegramBotUseCase } from './use-case/set.auth.bot.use-case';
 
 @Module({
   controllers: [TelegramController],
@@ -16,6 +17,7 @@ import { AuthTelegramBotUseCase } from './use-case/auth.bot.use-case';
     JwtService,
     // use-case
     AuthTelegramBotUseCase,
+    SetAuthTelegramBotUseCase,
   ],
   imports: [CqrsModule],
 })
