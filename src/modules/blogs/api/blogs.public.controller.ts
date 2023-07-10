@@ -1,5 +1,6 @@
 import {
   Controller,
+  Delete,
   Get,
   HttpCode,
   HttpStatus,
@@ -21,6 +22,7 @@ import {
 } from '../../../utils/pagination/pagination';
 import { User } from '../../users/entities/user.entity';
 import { BlogSubscriptionCommand } from '../use-case/blog.subscription.use-case';
+import { BlogUnsubscriptionCommand } from '../use-case/blog.unsubscription.use-case';
 import { GetAllBlogsCommand } from '../use-case/get.all.blogs.use-case';
 import { GetAllPostsByBlogCommand } from '../use-case/get.all.posts.by.blog.use-case';
 import { GetBlogByIdCommand } from '../use-case/get.blog.by.id.use-case';
@@ -57,6 +59,15 @@ export class BlogsPublicController {
   blogSubscription(@ReqUser() user: User, @Param('blogId') blogId: string) {
     return this.commandBus.execute(
       new BlogSubscriptionCommand(user.id, blogId),
+    );
+  }
+
+  @Delete('/:blogId/subscription')
+  @UseGuards(JwtAuthGuard)
+  @HttpCode(HttpStatus.NO_CONTENT)
+  blogUnsubscription(@ReqUser() user: User, @Param('blogId') blogId: string) {
+    return this.commandBus.execute(
+      new BlogUnsubscriptionCommand(user.id, blogId),
     );
   }
 }
