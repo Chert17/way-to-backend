@@ -5,6 +5,7 @@ import { InjectDataSource } from '@nestjs/typeorm';
 
 import { BlogSqlTables } from '../../../utils/tables/blogs.sql.tables';
 import { PostSqlTables } from '../../../utils/tables/posts.sql.tables';
+import { UsersSqlTables } from '../../../utils/tables/users.sql.tables';
 import { BanBlogDbDto } from '../dto/ban.blog.dto';
 import { BanUserByBloggerBlogDbDto } from '../dto/ban.user.by.blogger.blog.dto';
 import { CreateBlogDbDto } from '../dto/create.blog.dto';
@@ -13,6 +14,7 @@ import { BlogDb } from '../types/blog.types';
 
 const { BLOGS_TABLE, BANNED_BLOG_USERS } = BlogSqlTables;
 const { POSTS_TABLE } = PostSqlTables;
+const { USERS_BLOGS_SUBSCRIPTIONS } = UsersSqlTables;
 
 @Injectable()
 export class BlogsRepo {
@@ -82,6 +84,16 @@ export class BlogsRepo {
     where id = $1
     `,
       [blogId, isBanned, banDate],
+    );
+  }
+
+  async blogSubscription(userId: string, blogId: string) {
+    await this.dataSource.query(
+      `
+    INSERT INTO ${USERS_BLOGS_SUBSCRIPTIONS} ("user_id", "blog_id")
+    VALUES ($1, $2)
+    `,
+      [userId, blogId],
     );
   }
 

@@ -5,4 +5,5 @@ export enum UsersSqlTables {
   USERS_DEVICES_TABLE = 'users_devices',
   USERS_RECOVERY_PASS_TABLE = 'users_recovery_password',
   USERS_CONFIRM_TELEGRAM_TABLE = 'users_telegram_confirm',
+  USERS_BLOGS_SUBSCRIPTIONS = 'users_blogs_subscriptions',
 }

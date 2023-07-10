@@ -8,6 +8,7 @@ import {
 } from 'typeorm';
 
 import { Post } from '../../posts/entities/post.entity';
+import { BlogSubscription } from '../../users/entities/blog.subscribes';
 import { User } from '../../users/entities/user.entity';
 import { BanUsersForBlog } from './ban.users.for.blog.entity';
 
@@ -49,4 +50,7 @@ export class Blog {
 
   @OneToMany(() => BanUsersForBlog, user => user.blog)
   bannedUsers: BanUsersForBlog[];
+
+  @OneToMany(() => BlogSubscription, subscription => subscription.blog)
+  blog_subscriptions: BlogSubscription[];
 }
