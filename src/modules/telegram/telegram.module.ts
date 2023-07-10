@@ -1,9 +1,11 @@
 import { Module } from '@nestjs/common';
+import { CqrsModule } from '@nestjs/cqrs';
 
 import { JwtService } from '../auth/jwt.service';
 import { UsersRepo } from '../users/repositories/users.repo';
 import { TelegramController } from './telegram.controller';
 import { TelegramService } from './telegram.service';
+import { AuthTelegramBotUseCase } from './use-case/auth.bot.use-case';
 
 @Module({
   controllers: [TelegramController],
@@ -12,6 +14,9 @@ import { TelegramService } from './telegram.service';
     TelegramService,
     UsersRepo,
     JwtService,
+    // use-case
+    AuthTelegramBotUseCase,
   ],
+  imports: [CqrsModule],
 })
 export class TelegramModule {}

@@ -1,7 +1,7 @@
-import { DataSource, Repository } from 'typeorm';
+import { DataSource } from 'typeorm';
 
 import { Injectable } from '@nestjs/common';
-import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
+import { InjectDataSource } from '@nestjs/typeorm';
 
 import { BlogSqlTables } from '../../../utils/tables/blogs.sql.tables';
 import { PostSqlTables } from '../../../utils/tables/posts.sql.tables';
@@ -9,7 +9,6 @@ import { BanBlogDbDto } from '../dto/ban.blog.dto';
 import { BanUserByBloggerBlogDbDto } from '../dto/ban.user.by.blogger.blog.dto';
 import { CreateBlogDbDto } from '../dto/create.blog.dto';
 import { UpdateBlogDbDto } from '../dto/update.blog.dto';
-import { Blog } from '../entities/blog.entity';
 import { BlogDb } from '../types/blog.types';
 
 const { BLOGS_TABLE, BANNED_BLOG_USERS } = BlogSqlTables;
@@ -17,10 +16,7 @@ const { POSTS_TABLE } = PostSqlTables;
 
 @Injectable()
 export class BlogsRepo {
-  constructor(
-    @InjectDataSource() private dataSource: DataSource,
-    @InjectRepository(Blog) private blogRepo: Repository<Blog>,
-  ) {}
+  constructor(@InjectDataSource() private dataSource: DataSource) {}
 
   async createBlog(dto: CreateBlogDbDto): Promise<{ blogId: string }> {
     const { userId, name, description, websiteUrl, createdAt } = dto;

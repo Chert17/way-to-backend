@@ -10,6 +10,7 @@ import { Post } from '../modules/posts/entities/post.entity';
 import { PostsReactions } from '../modules/posts/entities/post.reaction.entity';
 import { BanUser } from '../modules/users/entities/ban.user';
 import { ConfirmEmail } from '../modules/users/entities/confirm.email';
+import { ConfirmTelegram } from '../modules/users/entities/confirm.telegram';
 import { Device } from '../modules/users/entities/devices';
 import { RecoveryPassword } from '../modules/users/entities/recovery.pass';
 import { User } from '../modules/users/entities/user.entity';
@@ -39,6 +40,7 @@ export class TypeOrmConfig {
         Comment,
         PostsReactions,
         CommentsReactions,
+        ConfirmTelegram,
       ],
       // entities: ['dist/src/modules/**/entity/*.ts'], //? maybe work with dist
       // autoLoadEntities: true,

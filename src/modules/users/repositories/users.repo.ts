@@ -18,6 +18,7 @@ const {
   USERS_TABLE,
   USERS_CONFIRM_EMAIL_TABLE,
   USERS_RECOVERY_PASS_TABLE,
+  USERS_CONFIRM_TELEGRAM_TABLE,
 } = UsersSqlTables;
 
 @Injectable()
@@ -161,6 +162,16 @@ export class UsersRepo {
     where id = $1
     `,
       [userId, passHash],
+    );
+  }
+
+  async addTelegramConfirmCode(userId: string, code: string) {
+    await this.dataSource.query(
+      `
+    INSERT INTO ${USERS_CONFIRM_TELEGRAM_TABLE} ("user_id", "confirm_code")
+    VALUES ($1, $2)
+    `,
+      [userId, code],
     );
   }
 
