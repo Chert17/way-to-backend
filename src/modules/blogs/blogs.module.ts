@@ -19,6 +19,7 @@ import { BlogsQueryRepo } from './repositories/blogs.query.repo';
 import { BlogsRepo } from './repositories/blogs.repo';
 import { BanBlogBySaUseCase } from './use-case/ban.blog.by.sa.use-case';
 import { BanUserByBloggerBlogUseCase } from './use-case/ban.user.byblogger.blog.use-case';
+import { BlogSubscriptionUseCase } from './use-case/blog.subscription.use-case';
 import { CreateBlogUseCase } from './use-case/create.blog.use-case';
 import { CreatePostByBlogUseCase } from './use-case/create.post.by.blog.use-case';
 import { DeleteBlogUseCase } from './use-case/delete.blog.use-case';
@@ -70,6 +71,7 @@ import { UploadPostMainImgUseCase } from './use-case/upload.post.main.img.use-ca
     GetAllBlogsUseCase,
     UploadPostMainImgUseCase,
     GetAllPostsByBloggerBlogUseCase,
+    BlogSubscriptionUseCase,
     // validation
     ExistBlog,
     // aws

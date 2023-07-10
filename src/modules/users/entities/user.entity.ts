@@ -6,6 +6,7 @@ import { Comment } from '../../comments/entities/comment.entity';
 import { CommentsReactions } from '../../comments/entities/comment.reaction.entity';
 import { PostsReactions } from '../../posts/entities/post.reaction.entity';
 import { CreateUserFormat } from '../types/user.types';
+import { BlogSubscription } from './blog.subscribes';
 import { Device } from './devices';
 
 @Entity({ name: 'users' })
@@ -48,4 +49,7 @@ export class User {
 
   @OneToMany(() => CommentsReactions, reactions => reactions.user)
   comments_reactions: CommentsReactions[];
+
+  @OneToMany(() => BlogSubscription, subscription => subscription.user)
+  blog_subscriptions: BlogSubscription[];
 }
