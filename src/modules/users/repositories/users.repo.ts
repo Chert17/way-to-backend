@@ -12,6 +12,7 @@ import { UserWithEmailInfoAndBanInfo } from '../../auth/types/user.types';
 import { BanUserDbDto } from '../dto/ban.user.dto';
 import { CreateUserDbDto } from '../dto/create-user.dto';
 import { User } from '../entities/user.entity';
+import { UserTelegramInfo } from '../types/user.types';
 
 const {
   USERS_BAN_INFO_TABLE,
@@ -173,6 +174,57 @@ export class UsersRepo {
     `,
       [userId, code],
     );
+  }
+
+  async getTelegramConfirmInfoByCode(code: string): Promise<UserTelegramInfo> {
+    const result = await this.dataSource.query(
+      `
+    SELECT *
+    FROM ${USERS_CONFIRM_TELEGRAM_TABLE}
+    WHERE confirm_code = $1
+    `,
+      [code],
+    );
+
+    return result[0];
+  }
+
+  async setTelegramConfirmInfo(telegramId: number) {
+    const queryRunner = this.dataSource.createQueryRunner();
+
+    await queryRunner.startTransaction();
+
+    try {
+      await queryRunner.query(
+        `
+      UPDATE ${USERS_TABLE}
+      SET telegram_id = $1
+      WHERE id IN (
+        SELECT user_id
+        FROM ${USERS_CONFIRM_TELEGRAM_TABLE}
+      )
+      `,
+        [telegramId],
+      );
+
+      await queryRunner.query(
+        `
+      UPDATE ${USERS_CONFIRM_TELEGRAM_TABLE}
+      SET is_confirmed = true
+      WHERE user_id IN (
+        SELECT id
+        FROM ${USERS_TABLE}
+      )
+      `,
+      );
+
+      await queryRunner.commitTransaction();
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+      console.log(error);
+    } finally {
+      await queryRunner.release();
+    }
   }
 
   async checkUserById(userId: string): Promise<User> {

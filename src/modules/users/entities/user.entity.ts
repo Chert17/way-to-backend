@@ -28,6 +28,9 @@ export class User {
   @Column({ type: 'enum', enum: CreateUserFormat })
   format: CreateUserFormat;
 
+  @Column({ type: 'int', nullable: true, default: null })
+  telegram_id: number;
+
   @OneToMany(() => Device, devices => devices.user)
   devices: Device[];
 
