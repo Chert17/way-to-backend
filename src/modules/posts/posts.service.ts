@@ -19,6 +19,8 @@ export class PostsService {
   ) {}
 
   async getPostMainImages(files: GetFileDto[]): Promise<ImgData[]> {
+    if (!files || !files.length) return [];
+
     return Promise.all(
       files.map(async f => {
         const { width, height } = await sharp(f.buffer).metadata();

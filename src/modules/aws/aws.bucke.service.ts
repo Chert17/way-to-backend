@@ -40,17 +40,24 @@ export class AwsS3BucketService implements OnModuleInit {
     try {
       const response = await this.s3Client.send(command);
 
+      if (!response.Contents) return [];
+
       return Promise.all(
         response.Contents.map(async f => {
           const Key = f.Key;
+          console.log(1);
 
           const getObjectCommand = new GetObjectCommand({ Bucket, Key });
+          console.log(2);
 
           const signedUrl = await getSignedUrl(this.s3Client, getObjectCommand);
+          console.log(3);
 
           const fileData = await this.s3Client.send(getObjectCommand);
+          console.log(4);
 
           const fileBuffer = await this._getFileBuffer(fileData.Body);
+          console.log(5);
 
           return {
             path: signedUrl.split('?')[0],
