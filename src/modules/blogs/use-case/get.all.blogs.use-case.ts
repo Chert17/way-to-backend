@@ -5,7 +5,7 @@ import { BlogsService } from '../blogs.service';
 import { BlogsQueryRepo } from '../repositories/blogs.query.repo';
 
 export class GetAllBlogsCommand {
-  constructor(public pagination: BlogQueryPagination) {}
+  constructor(public userId: string, public pagination: BlogQueryPagination) {}
 }
 
 @CommandHandler(GetAllBlogsCommand)
@@ -15,8 +15,8 @@ export class GetAllBlogsUseCase implements ICommandHandler<GetAllBlogsCommand> {
     private blogsQueryRepo: BlogsQueryRepo,
   ) {}
 
-  async execute({ pagination }: GetAllBlogsCommand) {
-    const blogs = await this.blogsQueryRepo.getAllBlogs(pagination);
+  async execute({ userId, pagination }: GetAllBlogsCommand) {
+    const blogs = await this.blogsQueryRepo.getAllBlogs(userId, pagination);
 
     const items = await Promise.all(
       blogs.items.map(async b => ({

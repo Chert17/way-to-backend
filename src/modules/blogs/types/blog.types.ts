@@ -10,3 +10,9 @@ export interface BlogWallpaper {
   height: number;
   fileSize: number;
 }
+
+export enum BlogSub {
+  Subscribed = 'Subscribed',
+  Unsubscribed = 'Unsubscribed',
+  None = 'None',
+}

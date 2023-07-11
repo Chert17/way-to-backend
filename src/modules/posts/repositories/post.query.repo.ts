@@ -9,6 +9,7 @@ import { PostQueryPagination } from '../../../utils/pagination/pagination';
 import { BlogSqlTables } from '../../../utils/tables/blogs.sql.tables';
 import { PostSqlTables } from '../../../utils/tables/posts.sql.tables';
 import { UsersSqlTables } from '../../../utils/tables/users.sql.tables';
+import { BlogSub } from '../../blogs/types/blog.types';
 import { PostViewDto } from '../dto/post.view.dto';
 
 const { POSTS_TABLE, POSTS_REACTION_TABLE } = PostSqlTables;
@@ -134,7 +135,9 @@ where
       pagination;
 
     const whereBlogSub =
-      subscriptionStatus === 'blogSub' ? 'and s.blog_id = p.blog_id' : '';
+      subscriptionStatus === 'blogSub'
+        ? `and s.blog_id = p.blog_id and s.currentUserSubscriptionStatus = ${BlogSub.Subscribed}`
+        : '';
 
     const result = await this.dataSource.query(
       `
