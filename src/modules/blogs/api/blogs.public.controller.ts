@@ -32,13 +32,21 @@ export class BlogsPublicController {
   constructor(private readonly commandBus: CommandBus) {}
 
   @Get()
-  getAllBlogs(@Query() pagination: BlogQueryPagination) {
-    return this.commandBus.execute(new GetAllBlogsCommand(pagination));
+  @UseGuards(UserIdFromToken)
+  getAllBlogs(
+    @Query() pagination: BlogQueryPagination,
+    @UserId() userId: ReqUserIdType,
+  ) {
+    return this.commandBus.execute(new GetAllBlogsCommand(userId, pagination));
   }
 
   @Get(':blogId')
-  async getBlogById(@Param('blogId') blogId: string) {
-    return this.commandBus.execute(new GetBlogByIdCommand(blogId));
+  @UseGuards(UserIdFromToken)
+  async getBlogById(
+    @Param('blogId') blogId: string,
+    @UserId() userId: ReqUserIdType,
+  ) {
+    return this.commandBus.execute(new GetBlogByIdCommand(userId, blogId));
   }
 
   @Get('/:blogId/posts')

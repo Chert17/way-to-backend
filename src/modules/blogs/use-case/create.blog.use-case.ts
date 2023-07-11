@@ -1,6 +1,5 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 
-import { BlogsService } from '../blogs.service';
 import { BlogViewWithImagesDto } from '../dto/blog.view.dto';
 import { CreateBlogServiceDto } from '../dto/create.blog.dto';
 import { BlogsQueryRepo } from '../repositories/blogs.query.repo';
@@ -15,7 +14,6 @@ export class CreateBlogUseCase implements ICommandHandler<CreateBlogCommand> {
   constructor(
     private blogsRepo: BlogsRepo,
     private blogsQueryRepo: BlogsQueryRepo,
-    private blogsService: BlogsService,
   ) {}
 
   async execute({ dto }: CreateBlogCommand): Promise<BlogViewWithImagesDto> {
@@ -24,7 +22,7 @@ export class CreateBlogUseCase implements ICommandHandler<CreateBlogCommand> {
       createdAt: new Date().toISOString(),
     });
 
-    const blog = await this.blogsQueryRepo.getBlogById(blogId);
+    const blog = await this.blogsQueryRepo.getBlogById(dto.userId, blogId);
 
     return {
       ...blog,

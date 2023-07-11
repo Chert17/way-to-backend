@@ -21,9 +21,11 @@ import {
   BlogViewBySADto,
   BlogViewDto,
 } from '../dto/blog.view.dto';
+import { BlogSub } from '../types/blog.types';
 
 const { BLOGS_TABLE, BANNED_BLOG_USERS } = BlogSqlTables;
-const { USERS_TABLE, USERS_BAN_INFO_TABLE } = UsersSqlTables;
+const { USERS_TABLE, USERS_BAN_INFO_TABLE, USERS_BLOGS_SUBSCRIPTIONS } =
+  UsersSqlTables;
 const { POSTS_TABLE, POSTS_REACTION_TABLE } = PostSqlTables;
 const { COMMENTS_TABLE, COMMENTS_REACTIONS } = CommentsSqlTables;
 
@@ -31,21 +33,46 @@ const { COMMENTS_TABLE, COMMENTS_REACTIONS } = CommentsSqlTables;
 export class BlogsQueryRepo {
   constructor(@InjectDataSource() private dataSource: DataSource) {}
 
-  async getBlogById(blogId: string): Promise<BlogViewDto> {
+  async getBlogById(userId: string, blogId: string): Promise<BlogViewDto> {
     const result = await this.dataSource.query(
       `
-      SELECT
-      id,
-      title AS "name",
-      descr AS "description",
-      web_url AS "websiteUrl",
-      created_at AS "createdAt",
-      is_membership AS "isMembership"
-    FROM ${BLOGS_TABLE}
-    WHERE id = $1 AND is_ban = false
-
-  `,
-      [blogId],
+    SELECT 
+  b.id, 
+  b.title AS "name", 
+  b.descr AS "description", 
+  b.web_url AS "websiteUrl", 
+  b.created_at AS "createdAt", 
+  b.is_membership AS "isMembership",
+    coalesce(
+    (
+      select 
+        s.user_sub_status 
+      from 
+        ${USERS_BLOGS_SUBSCRIPTIONS} s 
+      where 
+        s.user_id = $2 
+        and s.blog_id = b.id
+    ), 
+    '${BlogSub.None}'
+  ) AS "currentUserSubscriptionStatus",  
+  (
+    SELECT 
+      COUNT(*) 
+    FROM 
+      ${USERS_BLOGS_SUBSCRIPTIONS} s 
+    WHERE 
+      s.blog_id = b.id
+      AND s.user_sub_status = '${BlogSub.Subscribed}'
+  ):: int AS "subscribersCount" 
+FROM 
+  ${BLOGS_TABLE} b 
+  LEFT JOIN ${USERS_BLOGS_SUBSCRIPTIONS} s ON s.blog_id = b.id 
+  AND s.user_id = $2 
+WHERE 
+  b.id = $1 
+  AND b.is_ban = false
+    `,
+      [blogId, userId],
     );
 
     return result[0];
@@ -185,6 +212,7 @@ export class BlogsQueryRepo {
   }
 
   async getAllBlogs(
+    userId: string,
     pagination: BlogQueryPagination,
   ): Promise<WithPagination<BlogViewDto>> {
     const { pageNumber, pageSize, searchNameTerm, sortBy, sortDirection } =
@@ -192,19 +220,42 @@ export class BlogsQueryRepo {
 
     const result = await this.dataSource.query(
       `
-    SELECT
-      id,
-      title AS "name",
-      descr AS "description",
-      web_url AS "websiteUrl",
-      created_at AS "createdAt",
-      is_membership AS "isMembership"
-    FROM ${BLOGS_TABLE}
-    WHERE title ILIKE $1 AND is_ban = false
+    SELECT 
+  b.id, 
+  b.title AS "name", 
+  b.descr AS "description", 
+  b.web_url AS "websiteUrl", 
+  b.created_at AS "createdAt", 
+  b.is_membership AS "isMembership",
+    coalesce(
+    (
+      select 
+        s.user_sub_status 
+      from 
+        ${USERS_BLOGS_SUBSCRIPTIONS} s 
+      where 
+        s.user_id = $1 
+        and s.blog_id = b.id
+    ), 
+    '${BlogSub.None}'
+  ) AS "currentUserSubscriptionStatus",  
+  (
+    SELECT 
+      COUNT(*) 
+    FROM 
+      ${USERS_BLOGS_SUBSCRIPTIONS} s 
+    WHERE 
+      s.blog_id = b.id
+      AND s.user_sub_status = '${BlogSub.Subscribed}'
+  ):: int AS "subscribersCount" 
+    FROM ${BLOGS_TABLE} b
+    LEFT JOIN ${USERS_BLOGS_SUBSCRIPTIONS} s ON s.blog_id = b.id 
+    AND s.user_id = $1 
+    WHERE title ILIKE $2 AND is_ban = false
     ORDER BY ${sortBy} ${sortDirection}
     LIMIT ${pageSize} OFFSET ${pagination.skip()}
 `,
-      [`%${searchNameTerm}%`],
+      [userId, `%${searchNameTerm}%`],
     );
 
     const totalCount = await this.dataSource.query(

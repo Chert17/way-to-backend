@@ -10,7 +10,7 @@ import { BanBlogDbDto } from '../dto/ban.blog.dto';
 import { BanUserByBloggerBlogDbDto } from '../dto/ban.user.by.blogger.blog.dto';
 import { CreateBlogDbDto } from '../dto/create.blog.dto';
 import { UpdateBlogDbDto } from '../dto/update.blog.dto';
-import { BlogDb } from '../types/blog.types';
+import { BlogDb, BlogSub } from '../types/blog.types';
 
 const { BLOGS_TABLE, BANNED_BLOG_USERS } = BlogSqlTables;
 const { POSTS_TABLE } = PostSqlTables;
@@ -90,10 +90,21 @@ export class BlogsRepo {
   async blogSubscription(userId: string, blogId: string) {
     await this.dataSource.query(
       `
-    INSERT INTO ${USERS_BLOGS_SUBSCRIPTIONS} ("user_id", "blog_id")
-    VALUES ($1, $2)
+    INSERT INTO ${USERS_BLOGS_SUBSCRIPTIONS} ("user_id", "blog_id","user_sub_status")
+    VALUES ($1, $2, $3)
     `,
-      [userId, blogId],
+      [userId, blogId, BlogSub.Subscribed],
+    );
+  }
+
+  async blogUnsubscription(userId: string, blogId: string) {
+    await this.dataSource.query(
+      `
+   update ${USERS_BLOGS_SUBSCRIPTIONS}
+   set user_sub_status = $3
+   where user_id = $1 and blog_id = $2
+    `,
+      [userId, blogId, BlogSub.Unsubscribed],
     );
   }
 

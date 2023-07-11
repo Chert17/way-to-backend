@@ -6,7 +6,7 @@ import { BlogViewWithImagesDto } from '../dto/blog.view.dto';
 import { BlogsQueryRepo } from '../repositories/blogs.query.repo';
 
 export class GetBlogByIdCommand {
-  constructor(public blogId: string) {}
+  constructor(public userId: string, public blogId: string) {}
 }
 
 @CommandHandler(GetBlogByIdCommand)
@@ -17,9 +17,10 @@ export class GetBlogByIdUseCase implements ICommandHandler<GetBlogByIdCommand> {
   ) {}
 
   async execute({
+    userId,
     blogId,
   }: GetBlogByIdCommand): Promise<BlogViewWithImagesDto> {
-    const blog = await this.blogsQueryRepo.getBlogById(blogId);
+    const blog = await this.blogsQueryRepo.getBlogById(userId, blogId);
 
     if (!blog) throw new NotFoundException();
 
