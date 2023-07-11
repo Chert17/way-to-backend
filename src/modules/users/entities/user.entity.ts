@@ -32,6 +32,9 @@ export class User {
   @Column({ type: 'int', nullable: true, default: null })
   telegram_id: number;
 
+  @Column({ type: 'int', nullable: true, default: null })
+  chat_id: number;
+
   @OneToMany(() => Device, devices => devices.user)
   devices: Device[];
 

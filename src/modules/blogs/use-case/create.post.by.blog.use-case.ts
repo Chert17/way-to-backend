@@ -1,6 +1,8 @@
 import { ForbiddenException, NotFoundException } from '@nestjs/common';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 
+import { NEW_POST_TELEGRAM_NOTIFICATION_EVENT } from '../../../utils/events/events';
 import { PostsQueryRepo } from '../../posts/repositories/post.query.repo';
 import { PostsRepo } from '../../posts/repositories/post.repo';
 import { CreatePostByBlogServiceDto } from '../dto/create.post.by.blog.dto';
@@ -18,6 +20,7 @@ export class CreatePostByBlogUseCase
     private postsRepo: PostsRepo,
     private postsQueryRepo: PostsQueryRepo,
     private blogsRepo: BlogsRepo,
+    private eventEmitter: EventEmitter2,
   ) {}
 
   async execute({ dto }: CreatePostByBlogCommand) {
@@ -38,6 +41,12 @@ export class CreatePostByBlogUseCase
     });
 
     const post = await this.postsQueryRepo.getPostById(userId, postId);
+
+    this.eventEmitter.emit(
+      NEW_POST_TELEGRAM_NOTIFICATION_EVENT,
+      userId,
+      blogId,
+    );
 
     return { ...post, images: { main: [] } };
   }

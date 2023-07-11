@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { CqrsModule } from '@nestjs/cqrs';
+import { EventEmitterModule } from '@nestjs/event-emitter';
 
 import { JwtService } from '../auth/jwt.service';
 import { UsersRepo } from '../users/repositories/users.repo';
@@ -19,6 +20,6 @@ import { SetAuthTelegramBotUseCase } from './use-case/set.auth.bot.use-case';
     AuthTelegramBotUseCase,
     SetAuthTelegramBotUseCase,
   ],
-  imports: [CqrsModule],
+  imports: [CqrsModule, EventEmitterModule.forRoot()],
 })
 export class TelegramModule {}
