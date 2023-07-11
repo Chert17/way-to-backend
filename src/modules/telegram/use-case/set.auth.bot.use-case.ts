@@ -20,6 +20,7 @@ export class SetAuthTelegramBotUseCase
       message: {
         from: { id },
         text,
+        chat,
       },
     } = payload;
 
@@ -37,6 +38,6 @@ export class SetAuthTelegramBotUseCase
 
     if (telegramInfo.confirm_code !== code) return;
 
-    return this.usersRepo.setTelegramConfirmInfo(id);
+    return this.usersRepo.setTelegramConfirmInfo(id, chat.id);
   }
 }

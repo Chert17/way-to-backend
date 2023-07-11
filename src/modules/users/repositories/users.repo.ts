@@ -3,6 +3,7 @@ import { DataSource } from 'typeorm';
 import { Injectable } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
 
+import { BlogSqlTables } from '../../../utils/tables/blogs.sql.tables';
 import { UsersSqlTables } from '../../../utils/tables/users.sql.tables';
 import { EmailResendingDbDto } from '../../auth/dto/input/email.resending.dto';
 import { RecoveyPassowrdDbDto } from '../../auth/dto/input/recovery.password.dto';
@@ -20,7 +21,10 @@ const {
   USERS_CONFIRM_EMAIL_TABLE,
   USERS_RECOVERY_PASS_TABLE,
   USERS_CONFIRM_TELEGRAM_TABLE,
+  USERS_BLOGS_SUBSCRIPTIONS,
 } = UsersSqlTables;
+
+const { BLOGS_TABLE } = BlogSqlTables;
 
 @Injectable()
 export class UsersRepo {
@@ -189,7 +193,7 @@ export class UsersRepo {
     return result[0];
   }
 
-  async setTelegramConfirmInfo(telegramId: number) {
+  async setTelegramConfirmInfo(telegramId: number, chatId: number) {
     const queryRunner = this.dataSource.createQueryRunner();
 
     await queryRunner.startTransaction();
@@ -198,13 +202,13 @@ export class UsersRepo {
       await queryRunner.query(
         `
       UPDATE ${USERS_TABLE}
-      SET telegram_id = $1
+      SET telegram_id = $1, chat_id = $2
       WHERE id IN (
         SELECT user_id
         FROM ${USERS_CONFIRM_TELEGRAM_TABLE}
       )
       `,
-        [telegramId],
+        [telegramId, chatId],
       );
 
       await queryRunner.query(
@@ -225,6 +229,22 @@ export class UsersRepo {
     } finally {
       await queryRunner.release();
     }
+  }
+
+  async getUsersSubscribedBlog(
+    userId: string,
+    blogId: string,
+  ): Promise<{ telegram_id: number; chat_id: number; title: string }[]> {
+    return await this.dataSource.query(
+      `
+    SELECT u.telegram_id, u.chat_id, b.title
+    FROM ${USERS_TABLE} u
+    LEFT JOIN ${USERS_BLOGS_SUBSCRIPTIONS} s ON s.user_id = $1 AND s.blog_id = $2
+    LEFT JOIN ${BLOGS_TABLE} b ON b.id = $2
+    WHERE u.id = $1 AND u.telegram_id IS NOT NULL
+    `,
+      [userId, blogId],
+    );
   }
 
   async checkUserById(userId: string): Promise<User> {
