@@ -8,7 +8,8 @@ import { CommentsSqlTables } from '../../utils/tables/comments.sql.tables';
 import { PostSqlTables } from '../../utils/tables/posts.sql.tables';
 import { UsersSqlTables } from '../../utils/tables/users.sql.tables';
 
-const { USERS_TABLE } = UsersSqlTables;
+const { USERS_TABLE, USERS_BLOGS_SUBSCRIPTIONS, USERS_CONFIRM_TELEGRAM_TABLE } =
+  UsersSqlTables;
 const { BLOGS_TABLE } = BlogSqlTables;
 const { POSTS_TABLE } = PostSqlTables;
 const { COMMENTS_TABLE } = CommentsSqlTables;
@@ -21,7 +22,9 @@ export class TestingController {
   @HttpCode(HttpStatus.NO_CONTENT)
   delete() {
     return this.dataSource.query(
-      `TRUNCATE ${USERS_TABLE}, ${BLOGS_TABLE}, ${POSTS_TABLE}, ${COMMENTS_TABLE} CASCADE`,
+      `TRUNCATE ${USERS_TABLE}, ${BLOGS_TABLE}, ${POSTS_TABLE},
+       ${COMMENTS_TABLE}, ${USERS_BLOGS_SUBSCRIPTIONS}, ${USERS_CONFIRM_TELEGRAM_TABLE}
+        CASCADE`,
     );
   }
 }

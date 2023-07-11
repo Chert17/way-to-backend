@@ -54,7 +54,13 @@ export class BlogQueryPagination extends DefaultPagination {
   searchNameTerm = '';
 }
 
-export class PostQueryPagination extends DefaultPagination {}
+export class PostQueryPagination extends DefaultPagination {
+  @Transform(({ value }) =>
+    value === 'onlyFromSubscribedBlogs' ? 'blogSub' : '',
+  )
+  @IsOptional()
+  subscriptionStatus: '' | 'blogSub' = '';
+}
 
 export class CommentQueryPagination extends DefaultPagination {}
 
