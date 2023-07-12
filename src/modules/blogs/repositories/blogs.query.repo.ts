@@ -87,14 +87,37 @@ WHERE
 
     const blogs = await this.dataSource.query(
       `
-    SELECT
-      id,
-      title AS "name",
-      descr AS "description",
-      web_url AS "websiteUrl",
-      created_at AS "createdAt",
-      is_membership AS "isMembership"
-    FROM ${BLOGS_TABLE}
+    SELECT 
+  b.id, 
+  b.title AS "name", 
+  b.descr AS "description", 
+  b.web_url AS "websiteUrl", 
+  b.created_at AS "createdAt", 
+  b.is_membership AS "isMembership",
+    coalesce(
+    (
+      select 
+        s.user_sub_status 
+      from 
+        ${USERS_BLOGS_SUBSCRIPTIONS} s 
+      where 
+        s.user_id = $2 
+        and s.blog_id = b.id
+    ), 
+    '${BlogSub.None}'
+  ) AS "currentUserSubscriptionStatus",  
+  (
+    SELECT 
+      COUNT(*) 
+    FROM 
+      ${USERS_BLOGS_SUBSCRIPTIONS} s 
+    WHERE 
+      s.blog_id = b.id
+      AND s.user_sub_status = '${BlogSub.Subscribed}'
+  ):: int AS "subscribersCount" 
+    FROM ${BLOGS_TABLE} b
+    LEFT JOIN ${USERS_BLOGS_SUBSCRIPTIONS} s ON s.blog_id = b.id 
+    AND s.user_id = $1
     WHERE user_id = $1 AND title ILIKE $2
     ORDER BY ${sortBy} ${sortDirection}
     LIMIT ${pageSize} OFFSET ${pagination.skip()}
