@@ -108,6 +108,15 @@ export class BlogsRepo {
     );
   }
 
+  async blogUnsubscription(userId: string, blogId: string) {
+    await this.dataSource.query(
+      `
+   delete from ${USERS_BLOGS_SUBSCRIPTIONS} where user_id = $1 and blog_id = $2
+    `,
+      [userId, blogId],
+    );
+  }
+
   async checkBlogById(blogId: string): Promise<BlogDb> {
     const result = await this.dataSource.query(
       `
