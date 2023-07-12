@@ -1,7 +1,6 @@
 import { NotFoundException } from '@nestjs/common';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 
-import { UsersRepo } from '../../users/repositories/users.repo';
 import { BlogsRepo } from '../repositories/blogs.repo';
 import { BlogSub } from '../types/blog.types';
 
@@ -13,7 +12,7 @@ export class BlogSubscriptionCommand {
 export class BlogSubscriptionUseCase
   implements ICommandHandler<BlogSubscriptionCommand>
 {
-  constructor(private blogsRepo: BlogsRepo, private usersRepo: UsersRepo) {}
+  constructor(private blogsRepo: BlogsRepo) {}
 
   async execute({ userId, blogId }: BlogSubscriptionCommand) {
     const blog = await this.blogsRepo.checkBlogById(blogId);

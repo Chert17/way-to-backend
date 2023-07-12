@@ -3,10 +3,9 @@ import { isUUID } from 'class-validator';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 
 import { UsersRepo } from '../../users/repositories/users.repo';
-import { TelegramUpdateMessage } from '../dto/update.message.dto';
 
 export class SetAuthTelegramBotCommand {
-  constructor(public payload: TelegramUpdateMessage) {}
+  constructor(public payload: any) {}
 }
 
 @CommandHandler(SetAuthTelegramBotCommand)
@@ -16,28 +15,28 @@ export class SetAuthTelegramBotUseCase
   constructor(private usersRepo: UsersRepo) {}
 
   async execute({ payload }: SetAuthTelegramBotCommand) {
-    const {
-      message: {
-        from: { id },
-        text,
-        chat,
-      },
-    } = payload;
+    const pay: any = {};
 
-    const code = text.split('=')[1];
+    pay['id'] = payload?.message?.from?.id ?? payload?.my_chat_member?.from?.id;
+    pay['text'] = payload?.message?.text ?? payload?.my_chat_member?.text;
+    pay['chat'] = payload?.message?.chat ?? payload?.my_chat_member?.chat;
 
-    const telegramInfo = await this.usersRepo.getTelegramConfirmInfoByCode(
-      code,
-    );
+    if (pay.text && pay.text.startsWith('/start')) {
+      const code = pay.text.split('=')[1];
 
-    if (!telegramInfo) return; //? maybe return throw badRequest
+      const telegramInfo = await this.usersRepo.getTelegramConfirmInfoByCode(
+        code,
+      );
 
-    if (telegramInfo.is_confirmed) return;
+      if (!telegramInfo) return; //? maybe return throw badRequest
 
-    if (!code || !isUUID(code)) return;
+      if (telegramInfo.is_confirmed) return;
 
-    if (telegramInfo.confirm_code !== code) return;
+      if (!code || !isUUID(code)) return;
 
-    return this.usersRepo.setTelegramConfirmInfo(id, chat.id);
+      if (telegramInfo.confirm_code !== code) return;
+
+      return this.usersRepo.setTelegramConfirmInfo(pay.id, pay.chat.id);
+    }
   }
 }
