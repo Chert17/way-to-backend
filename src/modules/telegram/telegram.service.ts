@@ -32,6 +32,8 @@ export class TelegramService {
       await fetch(url, {
         method: 'POST',
       });
+
+      console.log(res.status);
     } catch (error) {
       console.log(error);
     }
