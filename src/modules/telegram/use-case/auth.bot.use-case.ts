@@ -15,7 +15,7 @@ export class AuthTelegramBotUseCase
   constructor(private usersRepo: UsersRepo) {}
 
   async execute({ userId }: AuthTelegramBotCommand) {
-    const TELEGRAM_BOT_NAME = 'social-hw';
+    const TELEGRAM_BOT_NAME = 'socialHwBot';
     const code = randomUUID();
 
     await this.usersRepo.addTelegramConfirmCode(userId, code);
