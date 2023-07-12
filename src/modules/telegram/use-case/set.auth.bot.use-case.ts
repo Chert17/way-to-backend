@@ -36,7 +36,7 @@ export class SetAuthTelegramBotUseCase
 
       if (telegramInfo.confirm_code !== code) return;
 
-      return this.usersRepo.setTelegramConfirmInfo(pay.id, pay.chat.id);
+      return this.usersRepo.setTelegramConfirmInfo(code, pay.id, pay.chat.id);
     }
   }
 }

@@ -26,10 +26,14 @@ export class TelegramService {
   async setWebhook() {
     const webhookUrl = `${this._serveoUrl}/api/integrations/telegram/webhook`;
 
+    const url = `${this._telegramUrl}/setWebhook?url=${webhookUrl}`;
+
     try {
-      await fetch(`${this._telegramUrl}/setWebhook?url=${webhookUrl}`, {
+      const res = await fetch(url, {
         method: 'POST',
       });
+
+      console.log(res.status);
     } catch (error) {
       console.log(error);
     }

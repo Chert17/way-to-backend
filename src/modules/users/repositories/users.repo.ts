@@ -10,6 +10,7 @@ import { RecoveyPassowrdDbDto } from '../../auth/dto/input/recovery.password.dto
 import { RegisterDbDto } from '../../auth/dto/input/register.dto';
 import { RecoveryPassDb } from '../../auth/types/recovery.pass.types';
 import { UserWithEmailInfoAndBanInfo } from '../../auth/types/user.types';
+import { BlogSub } from '../../blogs/types/blog.types';
 import { BanUserDbDto } from '../dto/ban.user.dto';
 import { CreateUserDbDto } from '../dto/create-user.dto';
 import { User } from '../entities/user.entity';
@@ -193,34 +194,33 @@ export class UsersRepo {
     return result[0];
   }
 
-  async setTelegramConfirmInfo(telegramId: number, chatId: number) {
+  async setTelegramConfirmInfo(
+    code: string,
+    telegramId: number,
+    chatId: number,
+  ) {
     const queryRunner = this.dataSource.createQueryRunner();
 
     await queryRunner.startTransaction();
 
     try {
-      await queryRunner.query(
-        `
+      const updateUsersQuery = `
       UPDATE ${USERS_TABLE}
       SET telegram_id = $1, chat_id = $2
       WHERE id IN (
         SELECT user_id
         FROM ${USERS_CONFIRM_TELEGRAM_TABLE}
+        WHERE confirm_code = $3
       )
-      `,
-        [telegramId, chatId],
-      );
+    `;
+      await queryRunner.query(updateUsersQuery, [telegramId, chatId, code]);
 
-      await queryRunner.query(
-        `
+      const updateConfirmTableQuery = `
       UPDATE ${USERS_CONFIRM_TELEGRAM_TABLE}
       SET is_confirmed = true
-      WHERE user_id IN (
-        SELECT id
-        FROM ${USERS_TABLE}
-      )
-      `,
-      );
+      WHERE confirm_code = $1
+    `;
+      await queryRunner.query(updateConfirmTableQuery, [code]);
 
       await queryRunner.commitTransaction();
     } catch (error) {
@@ -239,11 +239,11 @@ export class UsersRepo {
       `
     SELECT u.telegram_id, u.chat_id, b.title
     FROM ${USERS_TABLE} u
-    LEFT JOIN ${USERS_BLOGS_SUBSCRIPTIONS} s ON s.user_id = $1 AND s.blog_id = $2
-    LEFT JOIN ${BLOGS_TABLE} b ON b.id = $2
-    WHERE u.id = $1 AND u.telegram_id IS NOT NULL
+    LEFT JOIN ${USERS_BLOGS_SUBSCRIPTIONS} s ON s.blog_id = $1 AND s.user_sub_status = $2
+    LEFT JOIN ${BLOGS_TABLE} b ON b.id = $1
+    WHERE u.id = s.user_id AND u.telegram_id IS NOT NULL
     `,
-      [userId, blogId],
+      [blogId, BlogSub.Subscribed],
     );
   }
 
