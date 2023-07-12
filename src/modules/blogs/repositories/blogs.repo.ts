@@ -10,7 +10,7 @@ import { BanBlogDbDto } from '../dto/ban.blog.dto';
 import { BanUserByBloggerBlogDbDto } from '../dto/ban.user.by.blogger.blog.dto';
 import { CreateBlogDbDto } from '../dto/create.blog.dto';
 import { UpdateBlogDbDto } from '../dto/update.blog.dto';
-import { BlogDb, BlogSub } from '../types/blog.types';
+import { BlogDb, BlogSub, BlogSubDb } from '../types/blog.types';
 
 const { BLOGS_TABLE, BANNED_BLOG_USERS } = BlogSqlTables;
 const { POSTS_TABLE } = PostSqlTables;
@@ -108,15 +108,6 @@ export class BlogsRepo {
     );
   }
 
-  async blogUnsubscription(userId: string, blogId: string) {
-    await this.dataSource.query(
-      `
-   delete from ${USERS_BLOGS_SUBSCRIPTIONS} where user_id = $1 and blog_id = $2
-    `,
-      [userId, blogId],
-    );
-  }
-
   async checkBlogById(blogId: string): Promise<BlogDb> {
     const result = await this.dataSource.query(
       `
@@ -153,5 +144,21 @@ export class BlogsRepo {
     );
 
     return { is_banned: result[0]?.ban_user_id === userId };
+  }
+
+  async checkBlogSubByUser(
+    userId: string,
+    blogId: string,
+    status: BlogSub,
+  ): Promise<BlogSubDb> {
+    const result = await this.dataSource.query(
+      `
+    select * from ${USERS_BLOGS_SUBSCRIPTIONS}
+    where user_id = $1 and blog_id = $2 and user_sub_status = $3
+    `,
+      [userId, blogId, status],
+    );
+
+    return result[0];
   }
 }

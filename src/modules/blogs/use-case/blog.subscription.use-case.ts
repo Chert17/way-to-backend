@@ -3,6 +3,7 @@ import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 
 import { UsersRepo } from '../../users/repositories/users.repo';
 import { BlogsRepo } from '../repositories/blogs.repo';
+import { BlogSub } from '../types/blog.types';
 
 export class BlogSubscriptionCommand {
   constructor(public userId: string, public blogId: string) {}
@@ -19,9 +20,13 @@ export class BlogSubscriptionUseCase
 
     if (!blog) throw new NotFoundException();
 
-    const user = await this.usersRepo.checkUserById(userId);
+    const isSub = await this.blogsRepo.checkBlogSubByUser(
+      userId,
+      blogId,
+      BlogSub.Subscribed,
+    );
 
-    if (!user.telegram_id) return;
+    if (isSub) return;
 
     return this.blogsRepo.blogSubscription(userId, blogId);
   }
