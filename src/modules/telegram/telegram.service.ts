@@ -29,11 +29,9 @@ export class TelegramService {
     const url = `${this._telegramUrl}/setWebhook?url=${webhookUrl}`;
 
     try {
-      const res = await fetch(url, {
+      await fetch(url, {
         method: 'POST',
       });
-
-      console.log(res.status);
     } catch (error) {
       console.log(error);
     }
@@ -45,7 +43,7 @@ export class TelegramService {
 
     for (const item of result) {
       try {
-        const text = `New post published for blog ${item.title.toUpperCase()}`;
+        const text = `New post published for blog ${item.title}`;
 
         await fetch(
           `${this._telegramUrl}/sendMessage?chat_id=${item.chat_id}&text=${text}`,
